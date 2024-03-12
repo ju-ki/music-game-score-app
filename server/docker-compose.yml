@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: 'music_user'
+      POSTGRES_PASSWORD: 'music_admin'
+      POSTGRES_DB: 'music_game_score_db'
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+volumes:
+  postgres-data:
