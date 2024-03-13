@@ -12,3 +12,69 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+
+model User {
+  id String @id @unique @default(uuid())
+  name String
+  imageUrl String @db.Text
+  email String @db.Text
+  scores Scores[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Music {
+  id Int @id @unique @default(autoincrement())
+  name String @unique
+  genereId Int
+  genre Genre @relation(fields: [genereId], references: [id])
+  releasedAt DateTime
+  metaMusic MetaMusic[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Scores {
+  id String @id @unique @default(uuid())
+  musicId String
+  difficultyLevel Int
+  totalNoteCount Int
+  perfectPlusCount Int?
+  perfectCount Int?
+  greatCount Int?
+  goodCount Int?
+  badCount Int?
+  missCount Int
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  metaMusicId String
+  metaMusic MetaMusic @relation(fields: [metaMusicId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Genre {
+  id Int @id @unique @default(autoincrement())
+  name String
+  music Music[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MetaMusic {
+  id String @id @unique @default(uuid())
+  musicId Int
+  music Music @relation(fields: [musicId], references: [id])
+  musicDifficulty String
+  scores Scores[]
+  playLevel String
+  totalNoteCount Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
