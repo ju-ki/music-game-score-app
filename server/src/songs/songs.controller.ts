@@ -1,18 +1,19 @@
-import { HttpService } from '@nestjs/axios';
-import { Controller, Get } from '@nestjs/common';
-import { map, Observable } from 'rxjs';
+import { Controller, Get, Query } from '@nestjs/common';
+import { SongsService } from './songs.service';
 
 @Controller('songs')
 export class SongsController {
-  constructor(private httpService: HttpService) {}
+  constructor(private songsService: SongsService) {}
+  //定期的に実行するようにする
   @Get()
-  findAllSongs(): Observable<any> {
-    try {
-      return this.httpService
-        .get('https://sekai-world.github.io/sekai-master-db-diff/musics.json')
-        .pipe(map((response) => response.data));
-    } catch (err) {
-      console.log(err);
-    }
+  findAllSongs(): void {
+    this.songsService.fetchAllSongs();
+  }
+
+  @Get('/detail')
+  getDetailMusic(@Query() query) {
+    console.log(query);
+    // return query;
+    return this.songsService.getDetailMusic(query.genreId, query.musicId);
   }
 }

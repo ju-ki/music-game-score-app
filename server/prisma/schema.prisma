@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,68 +7,65 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id String @id @unique @default(uuid())
-  name String
-  imageUrl String @db.Text
-  email String @db.Text
-  scores Scores[]
+  id        String   @id @unique @default(uuid())
+  name      String
+  imageUrl  String
+  email     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  scores    Scores[]
 }
-
 
 model Music {
-  id Int @id @unique @default(autoincrement())
-  name String @unique
-  genereId Int
-  genre Genre @relation(fields: [genereId], references: [id])
+  id         Int
+  name       String
+  genreId    Int
+  genre      Genre       @relation(fields: [genreId], references: [id])
   releasedAt DateTime
-  metaMusic MetaMusic[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  metaMusic  MetaMusic[]
 
+  @@id([id, genreId])
+}
 
 model Scores {
-  id String @id @unique @default(uuid())
-  musicId String
-  difficultyLevel Int
-  totalNoteCount Int
+  id               String    @id @unique @default(uuid())
+  musicId          String
+  difficultyLevel  Int
+  totalNoteCount   Int
   perfectPlusCount Int?
-  perfectCount Int?
-  greatCount Int?
-  goodCount Int?
-  badCount Int?
-  missCount Int
-
-  userId String
-  user User @relation(fields: [userId], references: [id])
-  metaMusicId String
-  metaMusic MetaMusic @relation(fields: [metaMusicId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  perfectCount     Int?
+  greatCount       Int?
+  goodCount        Int?
+  badCount         Int?
+  missCount        Int
+  userId           String
+  metaMusicId      String
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  metaMusic        MetaMusic @relation(fields: [metaMusicId], references: [id])
+  user             User      @relation(fields: [userId], references: [id])
 }
 
-
 model Genre {
-  id Int @id @unique @default(autoincrement())
-  name String
-  music Music[]
+  id        Int      @id @unique @default(autoincrement())
+  name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  music     Music[]
 }
 
 model MetaMusic {
-  id String @id @unique @default(uuid())
-  musicId Int
-  music Music @relation(fields: [musicId], references: [id])
+  id              String   @id @unique @default(uuid())
+  musicId         Int
+  genreId         Int
   musicDifficulty String
-  scores Scores[]
-  playLevel String
-  totalNoteCount Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  playLevel       String
+  totalNoteCount  Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  music           Music    @relation(fields: [musicId, genreId], references: [id, genreId])
+  scores          Scores[]
 }
