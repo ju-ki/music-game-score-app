@@ -1,5 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { SongsService } from './songs.service';
+import { searchWords } from './dto';
 
 @Controller('songs')
 export class SongsController {
@@ -12,8 +13,12 @@ export class SongsController {
 
   @Get('/detail')
   getDetailMusic(@Query() query) {
-    console.log(query);
-    // return query;
     return this.songsService.getDetailMusic(query.genreId, query.musicId);
+  }
+
+  //検索処理
+  @Get('/search')
+  searchMusic(@Query() dto: searchWords) {
+    return this.songsService.searchMusic(dto);
   }
 }

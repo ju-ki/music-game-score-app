@@ -20,6 +20,7 @@ model User {
 model Music {
   id         Int
   name       String
+  assetBundleName String?
   genreId    Int
   genre      Genre       @relation(fields: [genreId], references: [id])
   releasedAt DateTime

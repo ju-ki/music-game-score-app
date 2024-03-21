@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { map } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
 import { MetaMusicService } from 'meta-music/meta-music.service';
+import { searchWords } from './dto';
 
 @Injectable({})
 export class SongsService {
@@ -13,7 +14,7 @@ export class SongsService {
     private prisma: PrismaService,
     private metaMusicService: MetaMusicService,
   ) {}
-
+  //これを定期的に実行できるようにした(DBが更新されたらみたいな感じ)
   fetchAllSongs(): void {
     try {
       this.httpService
@@ -32,12 +33,14 @@ export class SongsService {
               create: {
                 id: song.id,
                 name: song.title,
+                assetBundleName: song.assetbundleName,
                 genreId: 1,
                 releasedAt: new Date(song.releasedAt),
               },
             });
           });
         });
+      //非同期通信になっていない
       this.metaMusicService.fetchMusicDifficulties();
     } catch (err) {
       console.log(err);
@@ -58,5 +61,26 @@ export class SongsService {
     });
 
     return music;
+  }
+
+  //楽曲の検索
+  async searchMusic(query: searchWords) {
+    const searchedMusicList = await this.prisma.music.findMany({
+      where: {
+        name: {
+          contains: query.title,
+        },
+        metaMusic: {
+          some: {
+            musicDifficulty: query.musicDifficulty,
+            playLevel: query.playLevel,
+          },
+        },
+      },
+      include: {
+        metaMusic: true,
+      },
+    });
+    return searchedMusicList;
   }
 }
