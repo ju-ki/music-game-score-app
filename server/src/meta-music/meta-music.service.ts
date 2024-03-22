@@ -35,4 +35,27 @@ export class MetaMusicService {
         }),
       );
   }
+
+  fetchMusicTag(): void {
+    this.httpService
+      .get(this.config.get('MUSIC_TAG_URL'))
+      .pipe(map((response) => response.data))
+      .subscribe((metaData) =>
+        metaData.forEach(async (tag) => {
+          await this.prisma.musicTag.upsert({
+            where: {
+              id: tag.id,
+            },
+            update: {},
+            create: {
+              id: tag.id,
+              genreId: 1,
+              musicId: tag.musicId as number,
+              tagName: tag.musicTag,
+              tagId: tag.seq,
+            },
+          });
+        }),
+      );
+  }
 }

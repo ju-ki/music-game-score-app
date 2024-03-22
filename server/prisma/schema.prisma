@@ -27,6 +27,7 @@ model Music {
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
   metaMusic  MetaMusic[]
+  musicTag MusicTag[]
 
   @@id([id, genreId])
 }
@@ -69,4 +70,15 @@ model MetaMusic {
   updatedAt       DateTime @updatedAt
   music           Music    @relation(fields: [musicId, genreId], references: [id, genreId])
   scores          Scores[]
+}
+
+model MusicTag {
+  id Int @id @unique
+  musicId Int
+  genreId Int
+  tagName String
+  tagId Int
+  music Music @relation(fields: [musicId, genreId], references: [id, genreId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

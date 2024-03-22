@@ -20,28 +20,30 @@ export class SongsService {
       this.httpService
         .get(this.config.get('MUSIC_URL'))
         .pipe(map((response) => response.data))
-        .subscribe((songs) => {
-          songs.forEach(async (song) => {
-            await this.prisma.music.upsert({
-              where: {
-                id_genreId: {
-                  id: song.id,
-                  genreId: 1,
+        .subscribe(async (songs) => {
+          await Promise.all(
+            songs.map(async (song) => {
+              await this.prisma.music.upsert({
+                where: {
+                  id_genreId: {
+                    id: song.id,
+                    genreId: 1,
+                  },
                 },
-              },
-              update: {},
-              create: {
-                id: song.id,
-                name: song.title,
-                assetBundleName: song.assetbundleName,
-                genreId: 1,
-                releasedAt: new Date(song.releasedAt),
-              },
-            });
-          });
+                update: {},
+                create: {
+                  id: song.id,
+                  name: song.title,
+                  assetBundleName: song.assetbundleName,
+                  genreId: 1,
+                  releasedAt: new Date(song.releasedAt),
+                },
+              });
+            }),
+          );
+          this.metaMusicService.fetchMusicDifficulties();
+          this.metaMusicService.fetchMusicTag();
         });
-      //非同期通信になっていない
-      this.metaMusicService.fetchMusicDifficulties();
     } catch (err) {
       console.log(err);
     }
@@ -74,6 +76,12 @@ export class SongsService {
           some: {
             musicDifficulty: query.musicDifficulty,
             playLevel: query.playLevel,
+          },
+        },
+        musicTag: {
+          some: {
+            // tagId: parseInt(query.musicTag.toString()),
+            tagId: query.musicTag,
           },
         },
       },
