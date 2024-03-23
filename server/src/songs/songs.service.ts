@@ -67,6 +67,11 @@ export class SongsService {
 
   //楽曲の検索
   async searchMusic(query: searchWords) {
+    let tagId: number = query.musicTag;
+    if (typeof tagId !== 'number') {
+      console.log('stringです');
+      tagId = parseInt(tagId);
+    }
     const searchedMusicList = await this.prisma.music.findMany({
       where: {
         name: {
@@ -80,8 +85,7 @@ export class SongsService {
         },
         musicTag: {
           some: {
-            // tagId: parseInt(query.musicTag.toString()),
-            tagId: query.musicTag,
+            tagId: tagId,
           },
         },
       },

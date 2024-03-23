@@ -35,6 +35,7 @@ model Music {
 model Scores {
   id               String    @id @unique @default(uuid())
   musicId          String
+  genreId Int
   difficultyLevel  Int
   totalNoteCount   Int
   perfectPlusCount Int?

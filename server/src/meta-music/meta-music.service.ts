@@ -58,4 +58,19 @@ export class MetaMusicService {
         }),
       );
   }
+
+  async getMetaMusic(musicId: number, genreId: number, musicDifficulty: string) {
+    const metaMusic = await this.prisma.metaMusic.findFirst({
+      where: {
+        musicId: musicId,
+        genreId: genreId,
+        musicDifficulty: musicDifficulty,
+      },
+      include: {
+        music: true,
+      },
+    });
+
+    return metaMusic;
+  }
 }

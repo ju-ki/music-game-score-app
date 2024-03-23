@@ -9,6 +9,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { MetaMusicService } from './meta-music/meta-music.service';
 import { MetaMusicController } from './meta-music/meta-music.controller';
+import { ScoresController } from './scores/scores.controller';
+import { ScoresService } from './scores/scores.service';
 
 @Module({
   imports: [
@@ -18,7 +20,7 @@ import { MetaMusicController } from './meta-music/meta-music.controller';
       isGlobal: true,
     }),
   ],
-  controllers: [AppController, SongsController, MetaMusicController],
-  providers: [AppService, SongsService, PrismaService, MetaMusicService],
+  controllers: [AppController, SongsController, MetaMusicController, ScoresController],
+  providers: [AppService, SongsService, PrismaService, MetaMusicService, ScoresService],
 })
 export class AppModule {}
