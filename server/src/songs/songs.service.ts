@@ -69,7 +69,6 @@ export class SongsService {
   async searchMusic(query: searchWords) {
     let tagId: number = query.musicTag;
     if (typeof tagId !== 'number') {
-      console.log('stringです');
       tagId = parseInt(tagId);
     }
     const searchedMusicList = await this.prisma.music.findMany({
