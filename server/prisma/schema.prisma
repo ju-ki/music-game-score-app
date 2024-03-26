@@ -84,3 +84,11 @@ model MusicTag {
 }
 
 //マイリストも追加予定
+model MusicList {
+  id String @id @unique @default(uuid())
+  name String
+  userId String
+  musicId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

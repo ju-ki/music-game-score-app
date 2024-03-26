@@ -26,6 +26,6 @@ export class ScoresController {
   //スコア削除(複数)
   @Delete()
   deleteScore(@Query() params) {
-    return 'Delete Score';
+    return this.scoresService.deleteScore(params);
   }
 }

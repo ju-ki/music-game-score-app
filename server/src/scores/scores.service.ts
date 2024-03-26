@@ -84,4 +84,15 @@ export class ScoresService {
 
     return newScore;
   }
+
+  async deleteScore(param) {
+    const deletedScore = await this.prisma.scores.delete({
+      where: {
+        id: param.id,
+        userId: param.userId,
+      },
+    });
+
+    return deletedScore;
+  }
 }
