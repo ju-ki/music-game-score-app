@@ -11,6 +11,8 @@ import { MetaMusicService } from './meta-music/meta-music.service';
 import { MetaMusicController } from './meta-music/meta-music.controller';
 import { ScoresController } from './scores/scores.controller';
 import { ScoresService } from './scores/scores.service';
+import { MusicListController } from './music-list/music-list.controller';
+import { MusicListService } from './music-list/music-list.service';
 
 @Module({
   imports: [
@@ -20,7 +22,7 @@ import { ScoresService } from './scores/scores.service';
       isGlobal: true,
     }),
   ],
-  controllers: [AppController, SongsController, MetaMusicController, ScoresController],
-  providers: [AppService, SongsService, PrismaService, MetaMusicService, ScoresService],
+  controllers: [AppController, SongsController, MetaMusicController, ScoresController, MusicListController],
+  providers: [AppService, SongsService, PrismaService, MetaMusicService, ScoresService, MusicListService],
 })
 export class AppModule {}

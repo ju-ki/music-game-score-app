@@ -84,11 +84,18 @@ model MusicTag {
 }
 
 //マイリストも追加予定
+model ReationMusicToMusicList {
+  id Int @id @default(autoincrement())
+  musicId Int
+  musicListId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model MusicList {
   id String @id @unique @default(uuid())
   name String
   userId String
-  musicId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
