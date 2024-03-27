@@ -18,16 +18,17 @@ model User {
 }
 
 model Music {
-  id         Int
-  name       String
+  id              Int
+  name            String
   assetBundleName String?
-  genreId    Int
-  genre      Genre       @relation(fields: [genreId], references: [id])
-  releasedAt DateTime
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  metaMusic  MetaMusic[]
-  musicTag MusicTag[]
+  genreId         Int
+  genre           Genre            @relation(fields: [genreId], references: [id])
+  releasedAt      DateTime
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  metaMusic       MetaMusic[]
+  musicTag        MusicTag[]
+  musicLists      MusicMusicList[]
 
   @@id([id, genreId])
 }
@@ -73,29 +74,32 @@ model MetaMusic {
 }
 
 model MusicTag {
-  id Int @id @unique
-  musicId Int
-  genreId Int
-  tagName String
-  tagId Int
-  music Music @relation(fields: [musicId, genreId], references: [id, genreId])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-//マイリストも追加予定
-model ReationMusicToMusicList {
-  id Int @id @default(autoincrement())
-  musicId Int
-  musicListId String
+  id        Int      @id @unique
+  musicId   Int
+  genreId   Int
+  tagName   String
+  tagId     Int
+  music     Music    @relation(fields: [musicId, genreId], references: [id, genreId])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model MusicList {
-  id String @id @unique @default(uuid())
-  name String
-  userId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String           @id @default(uuid())
+  genreId   Int
+  name      String
+  userId    String
+  musics    MusicMusicList[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+model MusicMusicList {
+  musicId      Int
+  musicGenreId Int
+  musicListId  String
+  music        Music     @relation(fields: [musicId, musicGenreId], references: [id, genreId])
+  musicList    MusicList @relation(fields: [musicListId], references: [id])
+
+  @@id([musicId, musicGenreId, musicListId])
 }
