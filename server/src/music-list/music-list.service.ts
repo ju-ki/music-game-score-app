@@ -5,7 +5,14 @@ import { PrismaService } from 'prisma/prisma.service';
 export class MusicListService {
   constructor(private prisma: PrismaService) {}
   async getMusicList(param) {
-    console.log(param);
+    const myMusicLists = await this.prisma.musicList.findMany({
+      where: {
+        userId: param.userId,
+        genreId: param.genreId,
+      },
+    });
+
+    return myMusicLists;
   }
 
   async createMusicList(request) {
@@ -30,5 +37,45 @@ export class MusicListService {
         musicGenreId: request.musicGenreId,
       },
     });
+  }
+
+  async removeMusicFromList(request) {
+    let musicId: number = request.musicId;
+    let musicGenreId: number = request.musicGenreId;
+    if (typeof musicId !== 'number') {
+      musicId = parseInt(musicId);
+    }
+
+    if (typeof musicGenreId !== 'number') {
+      musicGenreId = parseInt(musicGenreId);
+    }
+    await this.prisma.musicMusicList.delete({
+      where: {
+        musicId_musicGenreId_musicListId: {
+          musicId: musicId,
+          musicGenreId: musicGenreId,
+          musicListId: request.musicListId,
+        },
+      },
+    });
+    return request;
+  }
+
+  async getMusicFromList(request) {
+    const music = await this.prisma.musicList.findMany({
+      where: {
+        id: request.musicListId,
+        userId: request.userId,
+      },
+      include: {
+        musics: {
+          include: {
+            music: true,
+          },
+        },
+      },
+    });
+
+    return music;
   }
 }

@@ -13,6 +13,7 @@ import { ScoresController } from './scores/scores.controller';
 import { ScoresService } from './scores/scores.service';
 import { MusicListController } from './music-list/music-list.controller';
 import { MusicListService } from './music-list/music-list.service';
+import { GoogleModule } from './google/google.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { MusicListService } from './music-list/music-list.service';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    GoogleModule,
   ],
   controllers: [AppController, SongsController, MetaMusicController, ScoresController, MusicListController],
   providers: [AppService, SongsService, PrismaService, MetaMusicService, ScoresService, MusicListService],
