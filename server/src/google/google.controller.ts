@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Response, HttpStatus } from '@nestjs/common';
 import { GoogleService } from './google.service';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -12,11 +12,24 @@ export class GoogleController {
     console.log(req);
   }
 
+  @Get('is_login')
+  async isLogin(@Request() req) {
+    const isLogin = await this.googleService.isTokenExpired(req.accessToken);
+    return isLogin;
+  }
+
   @Get('redirect')
   @UseGuards(AuthGuard('google'))
-  googleAuthRedirect(@Request() req) {
-    // この時点でreq.userに上のほうで定義したvalidateで抜き出した認証情報が入っている(名前、メールアドレス、画像など)
-    // 具体的な処理はserviceにやらせる
-    return this.googleService.googleLogin(req);
+  async googleAuthRedirect(@Request() req, @Response() res) {
+    const token = await this.googleService.googleLogin(req);
+
+    await res.cookie('access_token', token.token, {
+      maxAge: 5000,
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: false,
+    });
+
+    res.redirect(process.env.TOP_PAGE);
   }
 }

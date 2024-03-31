@@ -13,7 +13,10 @@ import { ScoresController } from './scores/scores.controller';
 import { ScoresService } from './scores/scores.service';
 import { MusicListController } from './music-list/music-list.controller';
 import { MusicListService } from './music-list/music-list.service';
-import { GoogleModule } from './google/google.module';
+import { UserService } from './user/user.service';
+import { GoogleController } from 'google/google.controller';
+import { GoogleService } from 'google/google.service';
+import { GoogleStrategy } from 'google/strategy/google.strategy';
 
 @Module({
   imports: [
@@ -22,9 +25,25 @@ import { GoogleModule } from './google/google.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    GoogleModule,
   ],
-  controllers: [AppController, SongsController, MetaMusicController, ScoresController, MusicListController],
-  providers: [AppService, SongsService, PrismaService, MetaMusicService, ScoresService, MusicListService],
+  controllers: [
+    AppController,
+    SongsController,
+    MetaMusicController,
+    ScoresController,
+    MusicListController,
+    GoogleController,
+  ],
+  providers: [
+    AppService,
+    SongsService,
+    PrismaService,
+    MetaMusicService,
+    ScoresService,
+    MusicListService,
+    UserService,
+    GoogleService,
+    GoogleStrategy,
+  ],
 })
 export class AppModule {}
