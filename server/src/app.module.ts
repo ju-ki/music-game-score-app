@@ -14,9 +14,13 @@ import { ScoresService } from './scores/scores.service';
 import { MusicListController } from './music-list/music-list.controller';
 import { MusicListService } from './music-list/music-list.service';
 import { UserService } from './user/user.service';
-import { GoogleController } from 'google/google.controller';
-import { GoogleService } from 'google/google.service';
+// import { GoogleController } from 'google/google.controller';
+// import { GoogleService } from 'google/google.service';
 import { GoogleStrategy } from 'google/strategy/google.strategy';
+import { AuthService } from './auth/auth.service';
+import { AuthController } from './auth/auth.controller';
+// import { AuthModule } from './auth/auth.module';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -32,7 +36,7 @@ import { GoogleStrategy } from 'google/strategy/google.strategy';
     MetaMusicController,
     ScoresController,
     MusicListController,
-    GoogleController,
+    AuthController,
   ],
   providers: [
     AppService,
@@ -42,8 +46,9 @@ import { GoogleStrategy } from 'google/strategy/google.strategy';
     ScoresService,
     MusicListService,
     UserService,
-    GoogleService,
     GoogleStrategy,
+    AuthService,
+    JwtService,
   ],
 })
 export class AppModule {}

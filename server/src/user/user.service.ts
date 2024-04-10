@@ -8,8 +8,8 @@ export class UserService {
   async registerUser(request) {
     const user = await this.prisma.user.create({
       data: {
-        name: request.lastName + request.firstName,
-        imageUrl: request.picture,
+        name: request.name,
+        imageUrl: request.imageUrl,
         email: request.email,
       },
     });
@@ -17,10 +17,10 @@ export class UserService {
     return user;
   }
 
-  async findUser(param) {
+  async findUser(email) {
     const user = await this.prisma.user.findUnique({
       where: {
-        email: param.email,
+        email: email,
       },
     });
 

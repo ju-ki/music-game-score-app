@@ -7,6 +7,7 @@ async function bootstrap() {
     origin: 'http://localhost:5173', // フロントエンドのオリジンを指定
     allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization', // 'Authorization' ヘッダーを追加
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // 許可されたメソッド
+    credentials: true,
   });
   await app.listen(3000);
 }
