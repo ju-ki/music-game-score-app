@@ -4,7 +4,6 @@ import axios from 'axios';
 import { config } from 'dotenv';
 import { UserService } from 'user/user.service';
 import * as qs from 'querystring';
-import { error } from 'console';
 config();
 
 @Injectable()
