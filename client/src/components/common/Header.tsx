@@ -2,18 +2,10 @@ import { useGoogleLogin } from '@react-oauth/google';
 import axiosClient from '../../utils/axios';
 import { Google } from '@mui/icons-material';
 import { Button } from '@mui/material';
-import { useState } from 'react';
-// import { useAuthStore } from '../hooks/useAuth';
-// import { useEffect } from 'react';
+import { useUserStore } from '../store/userStore';
 
 const Header = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<{
-    id: string;
-    name: string;
-    email: string;
-    imageUrl: string;
-  }>();
+  const { user, isLoggedIn } = useUserStore();
   const login = useGoogleLogin({
     onSuccess: (codeResponse) => handleGoogleLoginSuccess(codeResponse),
     flow: 'auth-code',
@@ -27,8 +19,8 @@ const Header = () => {
       const user = await axiosClient.post(`${import.meta.env.VITE_APP_URL}auth/google/login`, {
         code: response.code,
       });
-      setIsLoggedIn(true);
-      setUser(user.data);
+
+      useUserStore.getState().setUser(user.data);
     } catch (err) {
       console.log(err);
     }
@@ -36,6 +28,10 @@ const Header = () => {
 
   const handleGoogleLoginFailure = (error) => {
     console.error('Google login error:', error);
+  };
+
+  const handleLogout = () => {
+    useUserStore.getState().logout();
   };
   return (
     <>
@@ -47,9 +43,8 @@ const Header = () => {
           {isLoggedIn ? (
             <>
               <div>
-                <p>Welcome, {user?.name}!</p>
-                <img src={user?.imageUrl} alt='Profile' />
-                <button>Logout</button>
+                <img className='h-10 w-10 rounded-full mx-10' src={user?.imageUrl} alt='Profile' />
+                <button onClick={() => handleLogout()}>ログアウト</button>
               </div>
             </>
           ) : (
