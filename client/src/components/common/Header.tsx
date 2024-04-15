@@ -3,9 +3,14 @@ import axiosClient from '../../utils/axios';
 import { Google } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import { useUserStore } from '../store/userStore';
+import { useEffect } from 'react';
 
 const Header = () => {
   const { user, isLoggedIn } = useUserStore();
+
+  useEffect(() => {
+    checkLoginStatus();
+  }, []);
   const login = useGoogleLogin({
     onSuccess: (codeResponse) => handleGoogleLoginSuccess(codeResponse),
     flow: 'auth-code',
@@ -15,12 +20,11 @@ const Header = () => {
 
   const handleGoogleLoginSuccess = async (response) => {
     try {
-      console.log(response);
-      const user = await axiosClient.post(`${import.meta.env.VITE_APP_URL}auth/google/login`, {
+      const data = await axiosClient.post(`${import.meta.env.VITE_APP_URL}auth/google/login`, {
         code: response.code,
       });
-
-      useUserStore.getState().setUser(user.data);
+      useUserStore.getState().setAccessToken(data.data.accessToken);
+      useUserStore.getState().setUser(data.data);
     } catch (err) {
       console.log(err);
     }
@@ -33,6 +37,34 @@ const Header = () => {
   const handleLogout = () => {
     useUserStore.getState().logout();
   };
+
+  async function checkLoginStatus() {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+      console.log('No access token found');
+      return false;
+    }
+
+    const user = useUserStore.getState().user;
+
+    try {
+      const isValid = await axiosClient.get(`${import.meta.env.VITE_APP_URL}auth/verify`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        params: {
+          userId: user?.id || null,
+        },
+      });
+      useUserStore.getState().setIsLoggedIn(isValid.data);
+
+      return true;
+    } catch (error) {
+      console.log('Token validation failed:', error);
+      return false;
+    }
+  }
+
   return (
     <>
       <div className='bg-blue-500'>
@@ -42,9 +74,11 @@ const Header = () => {
           </div>
           {isLoggedIn ? (
             <>
-              <div>
-                <img className='h-10 w-10 rounded-full mx-10' src={user?.imageUrl} alt='Profile' />
-                <button onClick={() => handleLogout()}>ログアウト</button>
+              <div className='flex mx-4'>
+                <img className='h-10 w-10 rounded-full mx-5' src={user?.imageUrl} alt='Profile' />
+                <Button variant='contained' onClick={() => handleLogout()}>
+                  ログアウト
+                </Button>
               </div>
             </>
           ) : (

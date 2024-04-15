@@ -8,13 +8,18 @@ datasource db {
 }
 
 model User {
-  id        String   @id @unique @default(uuid())
-  name      String
-  imageUrl  String
-  email     String @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  scores    Scores[]
+  id             String         @id @default(uuid())
+  name           String
+  imageUrl       String
+  email          String         @unique
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  scores         Scores[]
+  // refreshToken   RefreshToken? @relation(fields: [refreshTokenId], references: [id])
+  refreshTokenId Int?           @unique
+  RefreshToken   RefreshToken[]
+
+  @@map("users")
 }
 
 model Music {
@@ -102,4 +107,17 @@ model MusicMusicList {
   musicList    MusicList @relation(fields: [musicListId], references: [id])
 
   @@id([musicId, musicGenreId, musicListId])
+}
+
+model RefreshToken {
+  id           Int      @id @default(autoincrement())
+  userId       String   @map("user_id") @unique
+  refreshToken String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("refresh_tokens")
 }

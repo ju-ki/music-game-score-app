@@ -1,10 +1,8 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Post, Request, Response, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { config } from 'dotenv';
-// import { OAuth2Client } from 'google-auth-library';
 config();
-// const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET);
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -14,8 +12,20 @@ export class AuthController {
   async googleAuth() {}
 
   @Get('google/redirect')
-  // @UseGuards(AuthGuard('google'))
   async googleAuthRedirect() {}
+
+  @Get('verify')
+  async verifyUser(@Req() request, @Query() query): Promise<boolean> {
+    const accessToken = request.headers?.authorization?.split(' ')[1];
+    if (!accessToken) {
+      return false;
+    }
+    const userId = query.userId;
+
+    const isValid = await this.authService.verifyToken(accessToken, userId);
+
+    return isValid;
+  }
 
   @Post('/google/login')
   async googleLogin(@Body('code') code: string): Promise<any> {
