@@ -7,8 +7,8 @@ export class SongsController {
   constructor(private songsService: SongsService) {}
   //定期的に実行するようにする
   @Get()
-  findAllSongs(): void {
-    this.songsService.fetchAllSongs();
+  findAllSongs() {
+    return this.songsService.fetchAllSongs();
   }
 
   @Get('/detail')

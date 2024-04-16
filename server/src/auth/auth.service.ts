@@ -25,20 +25,26 @@ export class AuthService {
   async verifyToken(accessToken: string, userId: string): Promise<boolean> {
     try {
       const response = await axios.get(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${accessToken}`);
+
       if (response.data && response.data.email) {
         return true;
       } else {
         const refreshToken = await this.getRefreshToken(userId);
         if (refreshToken) {
-          const { accessToken: newAccessToken } = await this.refreshToken(refreshToken);
+          const { accessToken: newAccessToken } = await this.refreshToken(refreshToken, userId);
           return await this.verifyToken(newAccessToken, userId);
         } else {
           return false;
         }
       }
     } catch (error) {
-      console.error('Token verification failed:', error);
-      return false;
+      const refreshToken = await this.getRefreshToken(userId);
+      if (refreshToken) {
+        const { accessToken: newAccessToken } = await this.refreshToken(refreshToken, userId);
+        return await this.verifyToken(newAccessToken, userId);
+      } else {
+        return false;
+      }
     }
   }
 
@@ -68,6 +74,9 @@ export class AuthService {
         imageUrl: userinfo.data.picture,
       });
 
+      const expiresAt = new Date(Date.now() + 3600 * 1000 * 24 * 30);
+      await this.saveRefreshToken(user.id, refreshToken, expiresAt);
+
       const response = {
         ...user,
         accessToken,
@@ -93,7 +102,7 @@ export class AuthService {
     return null;
   }
 
-  async refreshToken(refreshToken: string): Promise<any> {
+  async refreshToken(refreshToken: string, userId: string): Promise<any> {
     const params = qs.stringify({
       refresh_token: refreshToken,
       client_id: process.env.GOOGLE_CLIENT_ID,
@@ -111,7 +120,7 @@ export class AuthService {
 
       const newAccessToken = response.data.access_token;
       const newRefreshToken = response.data.refresh_token || refreshToken;
-      const userId = 'test';
+      // const userId = 'test';
       const expiresAt = new Date(Date.now() + 3600 * 1000 * 24 * 30);
       // 新しいリフレッシュトークンをストレージに保存する
       await this.saveRefreshToken(userId, newRefreshToken, expiresAt);
