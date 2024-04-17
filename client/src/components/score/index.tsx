@@ -1,7 +1,7 @@
-import Header from '../common/Header';
 import Sidebar from '../common/Sidebar';
+import Header from '../common/Header';
 
-const Home = () => {
+const ScoresList = () => {
   return (
     <div className='flex h-screen'>
       <div className='flex-initial w-1/5'>
@@ -11,11 +11,11 @@ const Home = () => {
       <div className='flex-auto w-4/5'>
         <Header />
         <main className='p-4'>
-          <h1>Welcome to My App</h1>
+          <h1>スコア一覧</h1>
         </main>
       </div>
     </div>
   );
 };
 
-export default Home;
+export default ScoresList;

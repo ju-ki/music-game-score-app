@@ -1,7 +1,7 @@
 import { useGoogleLogin } from '@react-oauth/google';
 import axiosClient from '../../utils/axios';
 import { Google } from '@mui/icons-material';
-import { Button } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 import { useUserStore } from '../store/userStore';
 import { useEffect } from 'react';
 
@@ -66,29 +66,25 @@ const Header = () => {
   }
 
   return (
-    <>
-      <div className='bg-blue-500'>
-        <div className='flex justify-between items-center'>
-          <div className='py-4 px-6 font-medium'>
-            <p className='text-white text-xl'>音ゲースコア管理アプリ</p>
-          </div>
-          {isLoggedIn ? (
-            <>
-              <div className='flex mx-4'>
-                <img className='h-10 w-10 rounded-full mx-5' src={user?.imageUrl} alt='Profile' />
-                <Button variant='contained' onClick={() => handleLogout()}>
-                  ログアウト
-                </Button>
-              </div>
-            </>
-          ) : (
-            <Button variant='contained' color='inherit' startIcon={<Google />} onClick={login}>
-              Googleでログイン
-            </Button>
-          )}
+    <div className=' text-white p-4 flex justify-between items-center'>
+      <Typography variant='h5' component='div'>
+        アプリケーションのヘッダー
+      </Typography>
+
+      {/* ログイン状態に応じた表示 */}
+      {isLoggedIn ? (
+        <div className='flex mx-4'>
+          <img className='h-10 w-10 rounded-full mx-5' src={user?.imageUrl} alt='Profile' />
+          <Button variant='contained' onClick={handleLogout}>
+            ログアウト
+          </Button>
         </div>
-      </div>
-    </>
+      ) : (
+        <Button variant='contained' color='inherit' startIcon={<Google />} onClick={login}>
+          Googleでログイン
+        </Button>
+      )}
+    </div>
   );
 };
 
