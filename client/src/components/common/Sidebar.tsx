@@ -9,41 +9,42 @@ const Sidebar = () => {
           音ゲースコア管理アプリ
         </Typography>
       </div>
-      <List component='nav'>
-        <ListItem
-          disablePadding
-          component={NavLink}
+      <List>
+        <NavLink
           to='/music'
+          style={{ display: 'block' }}
           className={({ isActive }) => (isActive ? 'bg-gray-400 text-blue-500' : '')}
         >
-          <ListItemButton>
-            <ListItemText primary='楽曲一覧' />
-          </ListItemButton>
-        </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton>
+              <ListItemText primary='楽曲一覧' />
+            </ListItemButton>
+          </ListItem>
+        </NavLink>
         <Divider />
-        <ListItem
-          disablePadding
-          component={NavLink}
+        <NavLink
           to='/scores'
-          end
+          style={{ display: 'block' }}
           className={({ isActive }) => (isActive ? 'bg-gray-400 text-blue-500' : '')}
         >
-          <ListItemButton>
-            <ListItemText primary='スコア一覧' />
-          </ListItemButton>
-        </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton>
+              <ListItemText primary='スコア一覧' />
+            </ListItemButton>
+          </ListItem>
+        </NavLink>
         <Divider />
-        <ListItem
-          disablePadding
-          component={NavLink}
+        <NavLink
           to='/my-list'
-          end
+          style={{ display: 'block' }}
           className={({ isActive }) => (isActive ? 'bg-gray-400 text-blue-500' : '')}
         >
-          <ListItemButton>
-            <ListItemText primary='マイリスト' />
-          </ListItemButton>
-        </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton>
+              <ListItemText primary='マイリスト' />
+            </ListItemButton>
+          </ListItem>
+        </NavLink>
       </List>
     </div>
   );

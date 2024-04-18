@@ -91,6 +91,9 @@ export class SongsService {
       include: {
         metaMusic: true,
       },
+      orderBy: {
+        id: 'asc',
+      },
     });
     return searchedMusicList;
   }
