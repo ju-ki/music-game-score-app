@@ -67,10 +67,16 @@ export class SongsService {
 
   //楽曲の検索
   async searchMusic(query: searchWords) {
+    const pageSize = 21;
     let tagId: number = query.musicTag;
     if (typeof tagId !== 'number') {
       tagId = parseInt(tagId);
     }
+    let page = query.page;
+    if (typeof page !== 'number') {
+      page = parseInt(page);
+    }
+    const skipAmount = query.page * pageSize;
     const searchedMusicList = await this.prisma.music.findMany({
       where: {
         name: {
@@ -94,7 +100,36 @@ export class SongsService {
       orderBy: {
         id: 'asc',
       },
+      skip: skipAmount, // どこからデータを取得するか
+      take: pageSize,
     });
-    return searchedMusicList;
+
+    searchedMusicList.forEach((music) => {
+      music.metaMusic.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+    });
+
+    const totalCount = await this.prisma.music.count({
+      where: {
+        name: {
+          contains: query.title,
+        },
+        metaMusic: {
+          some: {
+            musicDifficulty: query.musicDifficulty,
+            playLevel: query.playLevel,
+          },
+        },
+        musicTag: {
+          some: {
+            tagId: tagId,
+          },
+        },
+      },
+    });
+
+    return {
+      items: searchedMusicList,
+      nextPage: skipAmount + pageSize > totalCount ? null : page + 1,
+    };
   }
 }

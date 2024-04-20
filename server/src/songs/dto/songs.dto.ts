@@ -4,4 +4,5 @@ export class searchWords {
   musicTag?: number;
   playLevel?: string;
   genreId?: number;
+  page?: number;
 }

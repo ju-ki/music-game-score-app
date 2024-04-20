@@ -111,7 +111,7 @@ model MusicMusicList {
 
 model RefreshToken {
   id           Int      @id @default(autoincrement())
-  userId       String   @map("user_id") @unique
+  userId       String   @unique @map("user_id")
   refreshToken String
   expiresAt    DateTime
   createdAt    DateTime @default(now())
@@ -120,4 +120,14 @@ model RefreshToken {
   user User? @relation(fields: [userId], references: [id])
 
   @@map("refresh_tokens")
+}
+
+model UnitProfile {
+  id              Int    @id @default(autoincrement())
+  genreId         Int
+  unitName        String
+  unitProfileName String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

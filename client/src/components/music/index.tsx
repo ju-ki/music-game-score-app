@@ -1,34 +1,30 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import Header from '../common/Header';
 import axiosClient from '../../utils/axios';
 import Sidebar from '../common/Sidebar';
+import { useQuery } from '@tanstack/react-query';
+import { useMusicQuery } from '../hooks/useMusicQuery';
 
 const MusicList = () => {
-  const [musicList, setMusicList] = useState<
-    {
-      id: number;
-      name: string;
-      assetBundleName: string;
-    }[]
-  >([]);
-  useEffect(() => {
-    getMusicList();
-  }, []);
+  const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage, status, error } = useMusicQuery();
 
-  async function getMusicList() {
-    try {
-      const myMusicLists = await axiosClient.get(`${import.meta.env.VITE_APP_URL}songs/search`, {
-        params: {
-          musicTag: 0,
-          genreId: 1,
-        },
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastMusicElementRef = useCallback(
+    (node) => {
+      if (isFetchingNextPage) return; // 既に次のページを取得中なら何もしない
+      if (observer.current) observer.current.disconnect(); // 既存のObserverを切断
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage(); // 要素が見えるようになったら次のページを取得
+        }
       });
-      setMusicList(myMusicLists.data);
-      console.log(myMusicLists);
-    } catch (err) {
-      console.log(err);
-    }
-  }
+      if (node) observer.current.observe(node); // 新しい要素を監視
+    },
+    [isFetchingNextPage, fetchNextPage, hasNextPage],
+  );
+
+  if (status === 'pending') return <div>Loading...</div>;
+  if (status === 'error') return <div>Error: {error.message}</div>;
   return (
     <div className='flex h-screen'>
       <div className='flex-initial w-1/5'>
@@ -38,12 +34,7 @@ const MusicList = () => {
       <div className='flex-auto w-4/5'>
         <Header />
         <main className='p-4'>
-          <input
-            type='text'
-            placeholder='楽曲を検索'
-            className='mb-4 mt-2 p-2 w-3/4 rounded border border-gray-300'
-            // onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <input type='text' placeholder='楽曲を検索' className='mb-4 mt-2 p-2 w-3/4 rounded border border-gray-300' />
           <div className='flex mb-2'>
             {Array.from({ length: 6 }).map((_, index) => (
               <div key={index} className='flex items-center mr-4'>
@@ -64,27 +55,48 @@ const MusicList = () => {
             ))}
           </div>
           <h1>楽曲一覧</h1>
-          <div className='grid grid-cols-3 gap-4'>
-            {musicList.map((music) => (
-              <div key={music.id} className='bg-white shadow-md rounded-lg p-4'>
-                <p className='text-lg font-semibold'>{music.name}</p>
+          <>
+            {data.pages.map((music, index) => (
+              <div className='grid grid-cols-3 gap-4'>
+                <Fragment key={index}>
+                  {music.items.map((group, i) => (
+                    <div key={i} ref={lastMusicElementRef} className='bg-white shadow-md rounded-lg p-4 my-2'>
+                      <p className='text-lg font-semibold'>{group.name}</p>
+                      <div className='my-2 flex justify-around items-center'>
+                        {group?.metaMusic.map((meta, index) => (
+                          <div key={index} className='flex items-center'>
+                            <div
+                              className={`w-6 h-6 flex items-center justify-center rounded-full text-white font-semibold ${
+                                meta.musicDifficulty === 'easy'
+                                  ? 'bg-green-500'
+                                  : meta.musicDifficulty === 'normal'
+                                    ? 'bg-blue-300'
+                                    : meta.musicDifficulty === 'hard'
+                                      ? 'bg-yellow-500'
+                                      : meta.musicDifficulty === 'expert'
+                                        ? 'bg-red-500'
+                                        : meta.musicDifficulty === 'master'
+                                          ? 'bg-purple-500'
+                                          : meta.musicDifficulty === 'append'
+                                            ? 'bg-pink-500'
+                                            : ''
+                              }`}
+                            >
+                              {meta.playLevel}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </Fragment>
               </div>
             ))}
-          </div>
+            <div>{isFetching && !isFetchingNextPage ? 'Fetching...' : null}</div>
+          </>
         </main>
       </div>
     </div>
-    // <div>
-    //   <Header />
-    //   MusicList
-    //   {musicList.map((music) => {
-    //     return (
-    //       <div key={music.id}>
-    //         <p>{music.name}</p>
-    //       </div>
-    //     );
-    //   })}
-    // </div>
   );
 };
 
