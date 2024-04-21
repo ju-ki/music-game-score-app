@@ -59,6 +59,30 @@ export class MetaMusicService {
       );
   }
 
+  async fetchUnitProfile() {
+    this.httpService
+      .get(this.config.get('MUSIC_UNIT_PROFILE_URL'))
+      .pipe(map((response) => response.data))
+      .subscribe((metaData) =>
+        metaData.forEach(async (profile) => {
+          await this.prisma.unitProfile.upsert({
+            where: {
+              id: profile.id || 0,
+              genreId: 1,
+              unitName: profile.unit,
+            },
+            update: {},
+            create: {
+              genreId: 1,
+              seq: profile.seq,
+              unitName: profile.unit,
+              unitProfileName: profile.unitName,
+            },
+          });
+        }),
+      );
+  }
+
   async getMetaMusic(musicId: number, genreId: number, musicDifficulty: string) {
     const metaMusic = await this.prisma.metaMusic.findFirst({
       where: {
@@ -72,5 +96,18 @@ export class MetaMusicService {
     });
 
     return metaMusic;
+  }
+
+  async getUnitProfile() {
+    const unitProfile = await this.prisma.unitProfile.findMany({
+      where: {
+        genreId: 1,
+      },
+      orderBy: {
+        seq: 'asc',
+      },
+    });
+
+    return unitProfile;
   }
 }

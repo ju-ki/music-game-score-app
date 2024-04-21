@@ -43,6 +43,7 @@ export class SongsService {
           );
           this.metaMusicService.fetchMusicDifficulties();
           this.metaMusicService.fetchMusicTag();
+          this.metaMusicService.fetchUnitProfile();
         });
     } catch (err) {
       console.log(err);
@@ -96,6 +97,7 @@ export class SongsService {
       },
       include: {
         metaMusic: true,
+        musicTag: true,
       },
       orderBy: {
         id: 'asc',
@@ -126,6 +128,15 @@ export class SongsService {
         },
       },
     });
+
+    if (page === 0) {
+      const unitProfile = await this.metaMusicService.getUnitProfile();
+      return {
+        unitProfile: unitProfile,
+        items: searchedMusicList,
+        nextPage: skipAmount + pageSize > totalCount ? null : page + 1,
+      };
+    }
 
     return {
       items: searchedMusicList,
