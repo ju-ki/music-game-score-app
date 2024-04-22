@@ -3,8 +3,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Home from './components/home';
 import './index.css';
 import MusicList from './components/music';
-import ScoresList from './components/score';
+import ScoresList from './components/score/view';
 import MyList from './components/my-list';
+import RegisterMusicScore from './components/score/register';
 
 const queryClient = new QueryClient();
 
@@ -18,6 +19,7 @@ function App() {
             <Route path='/music/' element={<MusicList />} />
             <Route path='/scores/' element={<ScoresList />} />
             <Route path='/my-list/' element={<MyList />} />
+            <Route path='/register-music-score/' element={<RegisterMusicScore />} />
           </Routes>
         </Router>
       </QueryClientProvider>

@@ -68,7 +68,6 @@ export class SongsService {
 
   //楽曲の検索
   async searchMusic(query: searchWords) {
-    const pageSize = 21;
     let tagId: number = query.musicTag;
     if (typeof tagId !== 'number') {
       tagId = parseInt(tagId);
@@ -77,7 +76,12 @@ export class SongsService {
     if (typeof page !== 'number') {
       page = parseInt(page);
     }
-    const skipAmount = query.page * pageSize;
+
+    let skipAmount = 0;
+    const pageSize = page ? 21 : 9999;
+    if (page) {
+      skipAmount = query.page * pageSize;
+    }
     const searchedMusicList = await this.prisma.music.findMany({
       where: {
         name: {

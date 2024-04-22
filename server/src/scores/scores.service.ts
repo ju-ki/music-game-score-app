@@ -77,9 +77,9 @@ export class ScoresService {
         userId: post.userId,
         metaMusicId: metaMusic.id,
       },
-      include: {
-        metaMusic: true,
-      },
+      // include: {
+      //   metaMusic: true,
+      // },
     });
 
     return newScore;

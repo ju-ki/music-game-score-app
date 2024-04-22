@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import axiosClient from '../../utils/axios';
 
-const fetchMusicList = async (page: number) => {
+export const fetchMusicList = async (page: number) => {
   const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}songs/search`, {
     params: {
       musicTag: 0,

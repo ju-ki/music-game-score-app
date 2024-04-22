@@ -35,6 +35,18 @@ const Sidebar = () => {
         </NavLink>
         <Divider />
         <NavLink
+          to='/register-music-score'
+          style={{ display: 'block' }}
+          className={({ isActive }) => (isActive ? 'bg-gray-400 text-blue-500' : '')}
+        >
+          <ListItem disablePadding>
+            <ListItemButton>
+              <ListItemText primary='スコア登録' />
+            </ListItemButton>
+          </ListItem>
+        </NavLink>
+        <Divider />
+        <NavLink
           to='/my-list'
           style={{ display: 'block' }}
           className={({ isActive }) => (isActive ? 'bg-gray-400 text-blue-500' : '')}
