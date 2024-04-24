@@ -34,6 +34,7 @@ model Music {
   metaMusic       MetaMusic[]
   musicTag        MusicTag[]
   musicLists      MusicMusicList[]
+  scores          Scores[]
 
   @@id([id, genreId])
 }
@@ -48,11 +49,13 @@ model Scores {
   greatCount       Int?
   goodCount        Int?
   badCount         Int?
+  musicDifficulty  String?
   missCount        Int
   userId           String
   metaMusicId      String
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  music            Music     @relation(fields: [musicId, genreId], references: [id, genreId])
   metaMusic        MetaMusic @relation(fields: [metaMusicId], references: [id])
   user             User      @relation(fields: [userId], references: [id])
 }

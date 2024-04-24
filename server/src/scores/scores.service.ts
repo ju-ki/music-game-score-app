@@ -2,13 +2,38 @@ import { Injectable } from '@nestjs/common';
 import { MetaMusicService } from 'meta-music/meta-music.service';
 import { PrismaService } from 'prisma/prisma.service';
 import { postScoreType, scoreListParams } from './dto';
+import { SongsService } from 'songs/songs.service';
 
 @Injectable()
 export class ScoresService {
   constructor(
     private prisma: PrismaService,
+    private songService: SongsService,
     private metaMusicService: MetaMusicService,
   ) {}
+
+  async getList(param) {
+    let genreId: number = param.genreId;
+    if (typeof genreId !== 'number') {
+      genreId = parseInt(genreId);
+    }
+
+    const musicList = await this.prisma.scores.findMany({
+      where: {
+        userId: param.userId,
+        genreId: genreId,
+      },
+      include: {
+        music: {
+          include: {
+            metaMusic: true,
+          },
+        },
+      },
+    });
+
+    return musicList;
+  }
 
   async getDetailList(searchParams: scoreListParams) {
     let genreId: number = searchParams.genreId;
@@ -30,9 +55,28 @@ export class ScoresService {
           musicDifficulty: searchParams.musicDifficulty,
         },
       },
+      orderBy: [
+        {
+          missCount: 'asc',
+        },
+        {
+          badCount: 'asc',
+        },
+        {
+          goodCount: 'asc',
+        },
+        {
+          greatCount: 'asc',
+        },
+      ],
     });
 
-    return scoreList;
+    const musicInfo = await this.songService.getDetailMusic(genreId, musicId);
+
+    return {
+      music: musicInfo,
+      scoreList,
+    };
   }
 
   async getDetailScore(param) {
@@ -64,6 +108,7 @@ export class ScoresService {
         goodCount: post.goodCount,
         badCount: post.badCount,
         missCount: post.missCount,
+        musicDifficulty: post.musicDifficulty,
       },
       create: {
         musicId: post.musicId,
@@ -76,10 +121,8 @@ export class ScoresService {
         missCount: post.missCount,
         userId: post.userId,
         metaMusicId: metaMusic.id,
+        musicDifficulty: post.musicDifficulty,
       },
-      // include: {
-      //   metaMusic: true,
-      // },
     });
 
     return newScore;

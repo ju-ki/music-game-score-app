@@ -5,6 +5,11 @@ import { postScoreType, scoreListParams } from './dto';
 @Controller('scores')
 export class ScoresController {
   constructor(private scoresService: ScoresService) {}
+  //スコアが登録されている楽曲一覧を表示
+  @Get('/list')
+  getList(@Query() param) {
+    return this.scoresService.getList(param);
+  }
   //曲のスコア一覧を取得する
   @Get('/detailList')
   getDetailList(@Query() searchParams: scoreListParams) {

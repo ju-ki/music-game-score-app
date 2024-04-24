@@ -14,18 +14,18 @@ const RegisterMusicScore = () => {
     .object({
       musicId: z.number(),
       musicDifficulty: z.string().nonempty(),
-      perfectCount: z.number().min(0, 'Perfect must be a positive number'),
-      greatCount: z.number().min(0, 'Great must be a positive number'),
-      goodCount: z.number().min(0, 'Good must be a positive number'),
-      badCount: z.number().min(0, 'Bad must be a positive number'),
-      missCount: z.number().min(0, 'Miss must be a positive number'),
+      perfectCount: z.number({ message: 'Perfectは数値を入力してください' }).min(0, '無効な数値です'),
+      greatCount: z.number({ message: 'Greatは数値を入力してください' }).min(0, '無効な数値です'),
+      goodCount: z.number({ message: 'Goodは数値を入力してください' }).min(0, '無効な数値です'),
+      badCount: z.number({ message: 'Badは数値を入力してください' }).min(0, '無効な数値です'),
+      missCount: z.number({ message: 'Missは数値を入力してください' }).min(0, '無効な数値です'),
       totalNoteCount: z.number(),
     })
     .refine(
       (data) =>
         data.totalNoteCount === data.perfectCount + data.greatCount + data.goodCount + data.badCount + data.missCount,
       {
-        message: 'Total note count does not match',
+        message: '総ノーツ数と数が合っていません',
         path: ['totalNoteCount'],
       },
     );
@@ -90,7 +90,8 @@ const RegisterMusicScore = () => {
         const numericValue = Number(currentValue);
         return accumulator + (isNaN(numericValue) ? 0 : numericValue);
       }, 0);
-      console.log(watchedScores);
+      // console.log(watchedScores);
+      //TODO:: やり直しする際に不便
 
       const remainNoteCount = watchedTotalNoteCount - count;
       watchedScores.forEach((score, idx) => {
@@ -143,16 +144,17 @@ const RegisterMusicScore = () => {
 
   return (
     <div className='flex h-screen'>
-      <div className='flex-initial w-1/5'>{/* <Sidebar /> */}</div>
-
+      <div className='flex-initial w-1/5'>
+        <Sidebar />
+      </div>
       <div className='flex-auto w-4/5'>
         <Header />
         <main className='p-4'>
-          <h1>スコア登録</h1>
-          <form onSubmit={handleSubmit(onSubmit)} className='p-4'>
+          <h1 className='text-2xl font-bold mb-4'>スコア登録</h1>
+          <form onSubmit={handleSubmit(onSubmit)} className='p-4 bg-white shadow-md rounded-md'>
             <select
               {...register('musicId', { required: true, valueAsNumber: true })}
-              className='mb-4 p-2 rounded border border-gray-300'
+              className='mb-4 p-2 rounded border border-gray-300 w-full'
             >
               {musicList.map((music) => (
                 <option key={music.id} value={music.id}>
@@ -160,10 +162,9 @@ const RegisterMusicScore = () => {
                 </option>
               ))}
             </select>
-
             <select
               {...register('musicDifficulty', { required: true })}
-              className='mb-4 p-2 rounded border border-gray-300'
+              className='mb-4 p-2 rounded border border-gray-300 w-full'
             >
               {difficultyList.map((difficulty) => (
                 <option key={difficulty} value={difficulty}>
@@ -175,52 +176,50 @@ const RegisterMusicScore = () => {
               {...register('totalNoteCount')}
               type='number'
               disabled
-              className='mb-4 p-2 rounded border border-gray-300'
+              className='mb-4 p-2 rounded border border-gray-300 w-full'
             />
-            {errors.totalNoteCount && <span>{errors.totalNoteCount.message}</span>}
-
+            {errors.totalNoteCount && <span className='text-red-500 mb-2 block'>{errors.totalNoteCount.message}</span>}
             <input
               {...register('perfectCount', { required: true, valueAsNumber: true })}
               type='number'
               placeholder='Perfect'
               min={0}
-              className='mb-4 p-2 rounded border border-gray-300'
+              className='mb-4 p-2 rounded border border-gray-300 w-full'
             />
-            {errors.perfectCount && <span>{errors.perfectCount.message}</span>}
+            {errors.perfectCount && <span className='text-red-500 mb-2 block'>{errors.perfectCount.message}</span>}
             <input
               {...register('greatCount', { required: true, valueAsNumber: true })}
               type='number'
               placeholder='Great'
               min={0}
-              className='mb-4 p-2 rounded border border-gray-300'
+              className='mb-4 p-2 rounded border border-gray-300 w-full'
             />
-            {errors.greatCount && <span>{errors.greatCount.message}</span>}
+            {errors.greatCount && <span className='text-red-500 mb-2 block'>{errors.greatCount.message}</span>}
             <input
               {...register('goodCount', { required: true, valueAsNumber: true })}
               type='number'
               placeholder='Good'
               min={0}
-              className='mb-4 p-2 rounded border border-gray-300'
+              className='mb-4 p-2 rounded border border-gray-300 w-full'
             />
-            {errors.goodCount && <span>{errors.goodCount.message}</span>}
+            {errors.goodCount && <span className='text-red-500 mb-2 block'>{errors.goodCount.message}</span>}
             <input
               {...register('badCount', { required: true, valueAsNumber: true })}
               type='number'
               placeholder='Bad'
               min={0}
-              className='mb-4 p-2 rounded border border-gray-300'
+              className='mb-4 p-2 rounded border border-gray-300 w-full'
             />
-            {errors.badCount && <span>{errors.badCount.message}</span>}
+            {errors.badCount && <span className='text-red-500 mb-2 block'>{errors.badCount.message}</span>}
             <input
               {...register('missCount', { required: true, valueAsNumber: true })}
               type='number'
               placeholder='Miss'
               min={0}
-              className='mb-4 p-2 rounded border border-gray-300'
+              className='mb-4 p-2 rounded border border-gray-300 w-full'
             />
-            {errors.missCount && <span>{errors.missCount.message}</span>}
-
-            <button type='submit' className='bg-blue-500 text-white p-2 rounded'>
+            {errors.missCount && <span className='text-red-500 mb-2 block'>{errors.missCount.message}</span>}
+            <button type='submit' className='bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600'>
               Register Score
             </button>
           </form>
