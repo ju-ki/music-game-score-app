@@ -45,7 +45,7 @@ const RegisterMusicScore = () => {
 
   const getAllMusic = async () => {
     try {
-      const response = await fetchMusicList(0);
+      const response = await fetchMusicList(0, false);
       setMusicList(response.items);
     } catch (err) {
       console.log(err);

@@ -30,6 +30,9 @@ export class ScoresService {
           },
         },
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
 
     return musicList;

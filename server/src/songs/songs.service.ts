@@ -77,11 +77,16 @@ export class SongsService {
       page = parseInt(page);
     }
 
+    const isInfinityScroll = query.isInfinityScroll.toLowerCase() !== 'false';
+
     let skipAmount = 0;
-    const pageSize = page ? 21 : 9999;
-    if (page) {
+
+    const pageSize = isInfinityScroll === true ? 21 : 9999;
+
+    if (isInfinityScroll) {
       skipAmount = query.page * pageSize;
     }
+
     const searchedMusicList = await this.prisma.music.findMany({
       where: {
         name: {

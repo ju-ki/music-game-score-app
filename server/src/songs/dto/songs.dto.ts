@@ -5,4 +5,5 @@ export class searchWords {
   playLevel?: string;
   genreId?: number;
   page?: number;
+  isInfinityScroll: string;
 }
