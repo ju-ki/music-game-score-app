@@ -2,15 +2,18 @@ import Sidebar from '../common/Sidebar';
 import Header from '../common/Header';
 import { Box, Button, Modal, TextField, Typography } from '@mui/material';
 import { useMusicQuery } from '../hooks/useMusicQuery';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import axiosClient from '../../utils/axios';
+import { useUserStore } from '../store/userStore';
+import { Link } from 'react-router-dom';
 
 const MyList = () => {
   const schema = z.object({
     myListName: z.string().min(1, { message: 'マイリスト名は必須です' }),
-    selectedMusic: z.number().array().nonempty({ message: '一つ以上曲を選択してください' }),
+    selectedMusic: z.array(z.union([z.number(), z.string()])).nonempty({ message: '一つ以上曲を選択してください' }),
   });
   type FormData = z.infer<typeof schema>;
   const {
@@ -25,10 +28,31 @@ const MyList = () => {
     },
     resolver: zodResolver(schema),
   });
+  const { user } = useUserStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [musicList, setMusicList] = useState([]);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useMusicQuery();
+
+  useEffect(() => {
+    getMusicList();
+  }, []);
+
+  const getMusicList = async () => {
+    try {
+      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}music-list`, {
+        params: {
+          userId: user?.id,
+          genreId: 1,
+        },
+      });
+      setMusicList(response.data);
+      console.log(response);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const getFilteredMusicIds = () => {
     return data?.pages
@@ -65,8 +89,19 @@ const MyList = () => {
     }
   };
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     console.log(data);
+
+    try {
+      const response = await axiosClient.post(`${import.meta.env.VITE_APP_URL}music-list`, {
+        ...data,
+        genreId: 1,
+        userId: user?.id,
+      });
+      console.log(response);
+    } catch (err) {
+      console.log(err);
+    }
   };
   return (
     <div className='flex h-screen'>
@@ -139,7 +174,11 @@ const MyList = () => {
                     filteredMusicList.map((music) => (
                       <div key={music.id}>
                         <label>
-                          <input type='checkbox' value={music.id} {...register('selectedMusic')} />
+                          <input
+                            type='checkbox'
+                            value={typeof music.id !== 'number' ? parseInt(music.id, 10) : music.id}
+                            {...register('selectedMusic', { valueAsNumber: true })}
+                          />
                           {music.name}
                         </label>
                       </div>
@@ -151,6 +190,24 @@ const MyList = () => {
               </form>
             </Box>
           </Modal>
+
+          <div className='bg-gray-100 p-4 rounded-lg'>
+            <h2 className='text-xl font-semibold mb-4'>マイリスト一覧</h2>
+            {musicList.length ? (
+              <ul className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
+                {musicList.map((music) => (
+                  <Link key={music.id} to={`/my-list/${music.id}`}>
+                    <li className='bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer'>
+                      <h3 className='text-lg font-semibold mb-2'>{music.name}</h3>
+                      <p className='text-gray-500'>{music.musics.length || 0} 曲</p>
+                    </li>
+                  </Link>
+                ))}
+              </ul>
+            ) : (
+              <p className='text-gray-500'>マイリストがありません。</p>
+            )}
+          </div>
         </main>
       </div>
     </div>

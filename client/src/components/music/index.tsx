@@ -2,6 +2,7 @@ import { Fragment, useCallback, useRef, useState } from 'react';
 import Header from '../common/Header';
 import Sidebar from '../common/Sidebar';
 import { useMusicQuery } from '../hooks/useMusicQuery';
+import { Link } from 'react-router-dom';
 
 const MusicList = () => {
   const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage, status, error } = useMusicQuery();
@@ -128,7 +129,8 @@ const MusicList = () => {
                     <div className='my-2 flex justify-around items-center'>
                       {group?.metaMusic.map((meta, index) => (
                         <div key={index} className='flex items-center'>
-                          <div
+                          <Link
+                            to={`/register-music-score/${group.id}/${meta.musicDifficulty}`}
                             className={`w-6 h-6 flex items-center justify-center rounded-full text-white font-semibold ${
                               meta.musicDifficulty === 'easy'
                                 ? 'bg-green-500'
@@ -146,7 +148,7 @@ const MusicList = () => {
                             }`}
                           >
                             {meta.playLevel}
-                          </div>
+                          </Link>
                         </div>
                       ))}
                     </div>
@@ -165,7 +167,8 @@ const MusicList = () => {
                         <div className='my-2 flex justify-around items-center'>
                           {group?.metaMusic.map((meta, index) => (
                             <div key={index} className='flex items-center'>
-                              <div
+                              <Link
+                                to={`/register-music-score/${group.id}/${meta.musicDifficulty}`}
                                 className={`w-6 h-6 flex items-center justify-center rounded-full text-white font-semibold ${
                                   meta.musicDifficulty === 'easy'
                                     ? 'bg-green-500'
@@ -183,7 +186,7 @@ const MusicList = () => {
                                 }`}
                               >
                                 {meta.playLevel}
-                              </div>
+                              </Link>
                             </div>
                           ))}
                         </div>

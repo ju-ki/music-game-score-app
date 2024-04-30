@@ -7,6 +7,7 @@ import ScoresList from './components/score/view';
 import MyList from './components/my-list';
 import RegisterMusicScore from './components/score/register';
 import MusicScoreList from './components/score/detail';
+import MyListDetail from './components/my-list/detail';
 
 const queryClient = new QueryClient();
 
@@ -21,7 +22,10 @@ function App() {
             <Route path='/scores/' element={<ScoresList />} />
             <Route path='/my-list/' element={<MyList />} />
             <Route path='/register-music-score/' element={<RegisterMusicScore />} />
+            <Route path='/register-music-score/:musicId' element={<RegisterMusicScore />} />
+            <Route path='/register-music-score/:musicId/:musicDifficulty' element={<RegisterMusicScore />} />
             <Route path='/score/:musicId/:musicDifficulty' element={<MusicScoreList />} />
+            <Route path='/my-list/:myListId' element={<MyListDetail />} />
           </Routes>
         </Router>
       </QueryClientProvider>

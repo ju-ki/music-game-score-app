@@ -1,28 +1,57 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
+import { postMusicListType } from './dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class MusicListService {
   constructor(private prisma: PrismaService) {}
   async getMusicList(param) {
+    let genreId = param.genreId;
+    if (typeof genreId !== 'number') {
+      genreId = parseInt(genreId);
+    }
     const myMusicLists = await this.prisma.musicList.findMany({
       where: {
         userId: param.userId,
-        genreId: param.genreId,
+        genreId: genreId,
+      },
+      include: {
+        musics: {
+          include: {
+            music: true,
+          },
+        },
       },
     });
 
     return myMusicLists;
   }
 
-  async createMusicList(request) {
-    console.log('createMusicList');
+  async createMusicList(request: postMusicListType) {
+    let genreId = request.genreId;
+    if (typeof genreId !== 'number') {
+      genreId = parseInt(genreId);
+    }
     const newMusicList = await this.prisma.musicList.create({
       data: {
-        genreId: request.genreId,
-        name: request.name,
         userId: request.userId,
+        name: request.myListName,
+        genreId: genreId,
       },
+    });
+
+    await this.prisma.musicMusicList.createMany({
+      data: request.selectedMusic.map((musicId) => {
+        if (typeof musicId !== 'number') {
+          musicId = parseInt(musicId);
+        }
+        return {
+          musicId: musicId,
+          musicGenreId: genreId,
+          musicListId: newMusicList.id,
+        };
+      }),
     });
 
     return newMusicList;
@@ -62,10 +91,15 @@ export class MusicListService {
   }
 
   async getMusicFromList(request) {
-    const music = await this.prisma.musicList.findMany({
+    let genreId = request.genreId;
+    if (typeof genreId !== 'number') {
+      genreId = parseInt(genreId);
+    }
+    const music = await this.prisma.musicList.findFirst({
       where: {
         id: request.musicListId,
         userId: request.userId,
+        genreId: genreId,
       },
       include: {
         musics: {

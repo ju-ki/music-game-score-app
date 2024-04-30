@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import { MusicListService } from './music-list.service';
+import { postMusicListType } from './dto';
 
 @Controller('music-list')
 export class MusicListController {
@@ -11,7 +12,7 @@ export class MusicListController {
   }
 
   @Post()
-  createMusicList(@Body() request) {
+  createMusicList(@Body() request: postMusicListType) {
     return this.musicListService.createMusicList(request);
   }
 

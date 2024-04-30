@@ -7,9 +7,11 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axiosClient from '../../../utils/axios';
 import { useUserStore } from '../../store/userStore';
+import { useParams } from 'react-router-dom';
 
 const RegisterMusicScore = () => {
   const { user } = useUserStore();
+  const { musicId, musicDifficulty } = useParams();
   const schema = z
     .object({
       musicId: z.number(),
@@ -47,6 +49,12 @@ const RegisterMusicScore = () => {
     try {
       const response = await fetchMusicList(0, false);
       setMusicList(response.items);
+      if (musicId) {
+        setValue('musicId', parseInt(musicId));
+      }
+      if (musicDifficulty) {
+        setValue('musicDifficulty', musicDifficulty);
+      }
     } catch (err) {
       console.log(err);
     }
