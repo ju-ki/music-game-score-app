@@ -6,6 +6,7 @@ import { useUserStore } from '../../store/userStore';
 import { useParams } from 'react-router-dom';
 import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
 import { EmojiEmotions, EmojiEventsTwoTone, InsertEmoticon, Whatshot } from '@mui/icons-material';
+import { ScoreType } from '../../../types/score';
 
 const MusicScoreList = () => {
   const { musicId, musicDifficulty } = useParams();
@@ -25,7 +26,6 @@ const MusicScoreList = () => {
           musicDifficulty: musicDifficulty,
         },
       });
-      console.log(response);
       setMusic(response.data.music.name);
       setScoreList(response.data.scoreList);
     } catch (err) {
@@ -47,7 +47,7 @@ const MusicScoreList = () => {
           </h1>
           <Grid container spacing={2}>
             {scoreList.length > 0 ? (
-              scoreList.map((score, index) => (
+              scoreList.map((score: ScoreType, index) => (
                 <Grid item xs={12} sm={6} md={4} key={index}>
                   {score.goodCount === 0 && score.badCount === 0 && score.missCount === 0 ? (
                     <Card variant='outlined' sx={{ backgroundColor: '#ffd700' }}>

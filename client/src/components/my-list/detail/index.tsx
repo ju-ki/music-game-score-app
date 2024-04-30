@@ -4,11 +4,12 @@ import Sidebar from '../../common/Sidebar';
 import { Link, useParams } from 'react-router-dom';
 import axiosClient from '../../../utils/axios';
 import { useUserStore } from '../../store/userStore';
+import { MyListType, RelationMyListType } from '../../../types/score';
 
 const MyListDetail = () => {
   const { myListId } = useParams();
   const { user } = useUserStore();
-  const [musicDetail, setMusicDetail] = useState();
+  const [musicDetail, setMusicDetail] = useState<MyListType>();
 
   useEffect(() => {
     if (myListId) {
@@ -26,8 +27,6 @@ const MyListDetail = () => {
         },
       });
       setMusicDetail(response.data);
-
-      console.log(response.data);
     } catch (err) {
       console.log(err);
     }
@@ -44,7 +43,7 @@ const MyListDetail = () => {
           <div className='bg-white rounded-lg shadow-md p-6'>
             <h1 className='text-2xl font-semibold mb-4'>{musicDetail?.name}</h1>
             <ul className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
-              {musicDetail?.musics.map((music) => (
+              {musicDetail?.musics.map((music: RelationMyListType) => (
                 <Link
                   key={music.musicId}
                   to={`/register-music-score/${music.musicId}`}

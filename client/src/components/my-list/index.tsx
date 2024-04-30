@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import axiosClient from '../../utils/axios';
 import { useUserStore } from '../store/userStore';
 import { Link } from 'react-router-dom';
+import { MyListType, TagType } from '../../types/score';
 
 const MyList = () => {
   const schema = z.object({
@@ -48,7 +49,6 @@ const MyList = () => {
         },
       });
       setMusicList(response.data);
-      console.log(response);
     } catch (err) {
       console.log(err);
     }
@@ -58,7 +58,7 @@ const MyList = () => {
     return data?.pages
       .flatMap((page) => page.items)
       .flatMap(
-        (musicData) => musicData.musicTag.map((tag) => tag.musicId), // Convert matching tags to an array of musicIds
+        (musicData) => musicData.musicTag.map((tag: TagType) => tag.musicId), // Convert matching tags to an array of musicIds
       );
   };
 
@@ -78,7 +78,7 @@ const MyList = () => {
     setIsModalOpen(false);
   };
 
-  const handleScroll = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const scrollHeight = e.currentTarget.scrollHeight;
     const scrollTop = e.currentTarget.scrollTop;
     const clientHeight = e.currentTarget.clientHeight;
@@ -169,7 +169,11 @@ const MyList = () => {
                 {errors.selectedMusic && (
                   <span className='text-red-500 mb-2 block'>{errors.selectedMusic.message}</span>
                 )}
-                <Box sx={{ maxHeight: '40vh', overflow: 'auto' }} onScroll={handleScroll}>
+                <Box
+                  component='div' // Specify the component type explicitly
+                  sx={{ maxHeight: '40vh', overflow: 'auto' }}
+                  onScroll={(e: React.UIEvent<HTMLDivElement>) => handleScroll(e)} // Correct the event type
+                >
                   {filteredMusicList?.length &&
                     filteredMusicList.map((music) => (
                       <div key={music.id}>
@@ -195,7 +199,7 @@ const MyList = () => {
             <h2 className='text-xl font-semibold mb-4'>マイリスト一覧</h2>
             {musicList.length ? (
               <ul className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
-                {musicList.map((music) => (
+                {musicList.map((music: MyListType) => (
                   <Link key={music.id} to={`/my-list/${music.id}`}>
                     <li className='bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer'>
                       <h3 className='text-lg font-semibold mb-2'>{music.name}</h3>

@@ -1,8 +1,9 @@
-import { Fragment, useCallback, useRef, useState } from 'react';
+import React, { Fragment, useCallback, useRef, useState } from 'react';
 import Header from '../common/Header';
 import Sidebar from '../common/Sidebar';
 import { useMusicQuery } from '../hooks/useMusicQuery';
 import { Link } from 'react-router-dom';
+import { MetaMusicType, MusicType, TagType, UnitType } from '../../types/score';
 
 const MusicList = () => {
   const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage, status, error } = useMusicQuery();
@@ -23,7 +24,7 @@ const MusicList = () => {
   };
   const observer = useRef<IntersectionObserver | null>(null);
   const lastMusicElementRef = useCallback(
-    (node) => {
+    (node: Element | null) => {
       if (isFetchingNextPage) return; // 既に次のページを取得中なら何もしない
       if (observer.current) observer.current.disconnect(); // 既存のObserverを切断
       observer.current = new IntersectionObserver((entries) => {
@@ -36,7 +37,7 @@ const MusicList = () => {
     [isFetchingNextPage, fetchNextPage, hasNextPage],
   );
 
-  const handleSearchChange = (event) => {
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value.toLowerCase());
   };
 
@@ -46,10 +47,10 @@ const MusicList = () => {
       .flatMap(
         (musicData) =>
           musicData.musicTag
-            .filter((tag) =>
+            .filter((tag: TagType) =>
               Object.entries(filterUnit).some(([unitName, isChecked]) => isChecked && tag.tagName === unitName),
             )
-            .map((tag) => tag.musicId), // Convert matching tags to an array of musicIds
+            .map((tag: TagType) => tag.musicId), // Convert matching tags to an array of musicIds
       );
   };
 
@@ -80,7 +81,7 @@ const MusicList = () => {
             onChange={handleSearchChange}
           />
           <div className='flex flex-wrap items-center mb-2 gap-2'>
-            {data.pages?.[0].unitProfile?.map((unit, idx) => (
+            {data.pages?.[0].unitProfile?.map((unit: UnitType, idx: number) => (
               <div key={idx} className='flex items-center gap-2'>
                 <input
                   type='checkbox'
@@ -98,8 +99,8 @@ const MusicList = () => {
                   <img
                     className='w-5 h-5 mr-2'
                     src={`./logo_mini/unit_ts_${unit.seq}_penlight.png`}
-                    onError={(e) => {
-                      e.target.style.display = 'none';
+                    onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
                     }}
                   />
                   {unit.unitProfileName}
@@ -127,7 +128,7 @@ const MusicList = () => {
                   <div key={i} ref={lastMusicElementRef} className='bg-white shadow-md rounded-lg p-4 my-2'>
                     <p className='text-lg font-semibold'>{group.name}</p>
                     <div className='my-2 flex justify-around items-center'>
-                      {group?.metaMusic.map((meta, index) => (
+                      {group?.metaMusic.map((meta: MetaMusicType, index: number) => (
                         <div key={index} className='flex items-center'>
                           <Link
                             to={`/register-music-score/${group.id}/${meta.musicDifficulty}`}
@@ -161,11 +162,11 @@ const MusicList = () => {
               {data.pages.map((music, index) => (
                 <div className='grid grid-cols-3 gap-4'>
                   <Fragment key={index}>
-                    {music.items.map((group, i) => (
+                    {music.items.map((group: MusicType, i: number) => (
                       <div key={i} ref={lastMusicElementRef} className='bg-white shadow-md rounded-lg p-4 my-2'>
                         <p className='text-lg font-semibold'>{group.name}</p>
                         <div className='my-2 flex justify-around items-center'>
-                          {group?.metaMusic.map((meta, index) => (
+                          {group?.metaMusic.map((meta: MetaMusicType, index: number) => (
                             <div key={index} className='flex items-center'>
                               <Link
                                 to={`/register-music-score/${group.id}/${meta.musicDifficulty}`}

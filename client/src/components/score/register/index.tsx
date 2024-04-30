@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import axiosClient from '../../../utils/axios';
 import { useUserStore } from '../../store/userStore';
 import { useParams } from 'react-router-dom';
+import { MetaMusicType, MusicType } from '../../../types/score';
 
 const RegisterMusicScore = () => {
   const { user } = useUserStore();
@@ -66,7 +67,7 @@ const RegisterMusicScore = () => {
 
   const [musicList, setMusicList] = useState([]);
 
-  const [difficultyList, setDifficultyList] = useState(['easy', 'normal', 'hard', 'expert', 'master', 'append']);
+  const [difficultyList] = useState(['easy', 'normal', 'hard', 'expert', 'master', 'append']);
 
   const watchMusic = watch(['musicId', 'musicDifficulty']);
 
@@ -75,8 +76,8 @@ const RegisterMusicScore = () => {
       const musicId = watchMusic[0];
       const musicDifficulty = watchMusic[1];
       const data = musicList
-        .flatMap((music) => music.metaMusic)
-        .filter((meta) => musicId == meta.musicId && musicDifficulty == meta.musicDifficulty);
+        .flatMap((music: MusicType) => music.metaMusic as unknown as MetaMusicType[])
+        .filter((meta: MetaMusicType) => musicId == meta.musicId && musicDifficulty == meta.musicDifficulty);
       if (data[0]) {
         setValue('totalNoteCount', data[0].totalNoteCount);
       }
@@ -164,7 +165,7 @@ const RegisterMusicScore = () => {
               {...register('musicId', { required: true, valueAsNumber: true })}
               className='mb-4 p-2 rounded border border-gray-300 w-full'
             >
-              {musicList.map((music) => (
+              {musicList.map((music: MusicType) => (
                 <option key={music.id} value={music.id}>
                   {music.name}
                 </option>

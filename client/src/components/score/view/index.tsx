@@ -4,6 +4,7 @@ import axiosClient from '../../../utils/axios';
 import { useUserStore } from '../../store/userStore';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ScoreType } from '../../../types/score';
 
 const ScoresList = () => {
   const { user } = useUserStore();
@@ -19,7 +20,7 @@ const ScoresList = () => {
           genreId: 1,
         },
       });
-      console.log(response);
+      console.log(response.data);
       setScoreList(response.data);
     } catch (err) {
       console.log(err);
@@ -37,7 +38,7 @@ const ScoresList = () => {
           <h1>スコア一覧</h1>
           {scoreList.length ? (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-              {scoreList.map((score) => (
+              {scoreList.map((score: ScoreType) => (
                 <Link to={`/score/${score.musicId}/${score.musicDifficulty}`} className='text-lg font-semibold mb-2'>
                   <div key={score.id} className='bg-white shadow-md rounded-lg p-4'>
                     <h2 className='text-lg font-semibold mb-2'>

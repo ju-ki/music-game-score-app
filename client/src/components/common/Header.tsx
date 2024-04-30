@@ -1,4 +1,4 @@
-import { useGoogleLogin } from '@react-oauth/google';
+import { CodeResponse, useGoogleLogin } from '@react-oauth/google';
 import axiosClient from '../../utils/axios';
 import { Google } from '@mui/icons-material';
 import { Button, Typography } from '@mui/material';
@@ -18,7 +18,9 @@ const Header = () => {
     onError: (error) => handleGoogleLoginFailure(error),
   });
 
-  const handleGoogleLoginSuccess = async (response) => {
+  const handleGoogleLoginSuccess = async (
+    response: Omit<CodeResponse, 'error' | 'error_description' | 'error_uri'>,
+  ) => {
     try {
       const data = await axiosClient.post(`${import.meta.env.VITE_APP_URL}auth/google/login`, {
         code: response.code,
@@ -30,7 +32,7 @@ const Header = () => {
     }
   };
 
-  const handleGoogleLoginFailure = (error) => {
+  const handleGoogleLoginFailure = (error: Pick<CodeResponse, 'error' | 'error_description' | 'error_uri'>) => {
     console.error('Google login error:', error);
   };
 
