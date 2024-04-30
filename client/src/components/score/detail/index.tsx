@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Sidebar from '../../common/Sidebar';
 import Header from '../../common/Header';
 import axiosClient from '../../../utils/axios';

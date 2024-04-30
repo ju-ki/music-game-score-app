@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Header from '../../common/Header';
 import Sidebar from '../../common/Sidebar';
 import { Link, useParams } from 'react-router-dom';
