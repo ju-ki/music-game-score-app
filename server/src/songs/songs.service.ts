@@ -42,7 +42,7 @@ export class SongsService {
             }),
           );
           this.metaMusicService.fetchMusicDifficulties();
-          this.metaMusicService.fetchMusicTag();
+          // this.metaMusicService.fetchMusicTag();
           this.metaMusicService.fetchUnitProfile();
         });
     } catch (err) {
