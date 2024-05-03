@@ -84,7 +84,9 @@ export class AuthService {
       };
       return response;
     } catch (error) {
-      throw new Error('Failed to retrieve access token');
+      console.log(error);
+      throw new Error(error.response.data);
+      // throw new Error('Failed to retrieve access token');
     }
   }
 
@@ -120,7 +122,6 @@ export class AuthService {
 
       const newAccessToken = response.data.access_token;
       const newRefreshToken = response.data.refresh_token || refreshToken;
-      // const userId = 'test';
       const expiresAt = new Date(Date.now() + 3600 * 1000 * 24 * 30);
       // 新しいリフレッシュトークンをストレージに保存する
       await this.saveRefreshToken(userId, newRefreshToken, expiresAt);

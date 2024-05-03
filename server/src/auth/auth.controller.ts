@@ -38,7 +38,7 @@ export class AuthController {
       // ここで得たトークンを使ってユーザー情報を取得するなどの追加処理を行う
       return user;
     } catch (error) {
-      console.log(error);
+      console.error(error);
       throw new HttpException('Failed to exchange code for token', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
