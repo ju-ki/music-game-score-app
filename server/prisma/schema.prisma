@@ -135,5 +135,5 @@ model UnitProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([seq, genreId])
+  @@id([seq, genreId])
 }
