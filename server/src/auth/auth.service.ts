@@ -15,6 +15,7 @@ export class AuthService {
 
   async login({ email, name, imageUrl }) {
     let user = await this.userService.findUser(email);
+    console.log(user);
     if (!user) {
       user = await this.userService.registerUser({ name, imageUrl, email });
     }
@@ -23,12 +24,22 @@ export class AuthService {
   }
 
   async verifyToken(accessToken: string, userId: string): Promise<boolean> {
-    try {
-      const response = await axios.get(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${accessToken}`);
+    if (userId) {
+      try {
+        const response = await axios.get(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${accessToken}`);
 
-      if (response.data && response.data.email) {
-        return true;
-      } else {
+        if (response.data && response.data.email) {
+          return true;
+        } else {
+          const refreshToken = await this.getRefreshToken(userId);
+          if (refreshToken) {
+            const { accessToken: newAccessToken } = await this.refreshToken(refreshToken, userId);
+            return await this.verifyToken(newAccessToken, userId);
+          } else {
+            return false;
+          }
+        }
+      } catch (error) {
         const refreshToken = await this.getRefreshToken(userId);
         if (refreshToken) {
           const { accessToken: newAccessToken } = await this.refreshToken(refreshToken, userId);
@@ -36,14 +47,6 @@ export class AuthService {
         } else {
           return false;
         }
-      }
-    } catch (error) {
-      const refreshToken = await this.getRefreshToken(userId);
-      if (refreshToken) {
-        const { accessToken: newAccessToken } = await this.refreshToken(refreshToken, userId);
-        return await this.verifyToken(newAccessToken, userId);
-      } else {
-        return false;
       }
     }
   }
@@ -93,7 +96,7 @@ export class AuthService {
   async getRefreshToken(userId: string): Promise<string | null> {
     const token = await this.prisma.refreshToken.findUnique({
       where: {
-        userId,
+        userId: userId,
       },
     });
 

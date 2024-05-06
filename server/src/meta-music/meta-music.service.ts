@@ -67,9 +67,10 @@ export class MetaMusicService {
         metaData.forEach(async (profile) => {
           await this.prisma.unitProfile.upsert({
             where: {
-              id: profile.id || 0,
-              genreId: 1,
-              unitName: profile.unit,
+              seq_genreId: {
+                seq: profile.seq as number,
+                genreId: 1,
+              },
             },
             update: {},
             create: {

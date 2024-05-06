@@ -126,8 +126,8 @@ model RefreshToken {
 }
 
 model UnitProfile {
-  id              Int    @id @default(autoincrement())
-  seq             Int?
+  id              Int @default(autoincrement())
+  seq             Int
   genreId         Int
   unitName        String
   unitProfileName String
@@ -135,5 +135,5 @@ model UnitProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([genreId, unitName])
+  @@unique([seq, genreId])
 }
