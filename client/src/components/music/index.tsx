@@ -160,7 +160,7 @@ const MusicList = () => {
           ) : (
             <>
               {data.pages.map((music, index) => (
-                <div className='grid grid-cols-3 gap-4'>
+                <div key={index} className='grid grid-cols-3 gap-4'>
                   <Fragment key={index}>
                     {music.items.map((group: MusicType, i: number) => (
                       <div key={i} ref={lastMusicElementRef} className='bg-white shadow-md rounded-lg p-4 my-2'>

@@ -10,7 +10,7 @@ export class AppController {
   @Get('/*')
   root(@Req() req: Request, @Res() res: Response, @Next() next: NextFunction): void {
     if (process.env.NODE_ENV === 'production') {
-      res.sendFile('index.html', { root: join(__dirname, '../../', 'client/dist') });
+      res.sendFile(join(__dirname, '..', 'client', 'dist', 'index.html'));
     } else {
       next();
     }

@@ -20,7 +20,6 @@ const ScoresList = () => {
           genreId: 1,
         },
       });
-      console.log(response.data);
       setScoreList(response.data);
     } catch (err) {
       console.log(err);
@@ -39,7 +38,11 @@ const ScoresList = () => {
           {scoreList.length ? (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
               {scoreList.map((score: ScoreType) => (
-                <Link to={`/score/${score.musicId}/${score.musicDifficulty}`} className='text-lg font-semibold mb-2'>
+                <Link
+                  key={score.id}
+                  to={`/score/${score.musicId}/${score.musicDifficulty}`}
+                  className='text-lg font-semibold mb-2'
+                >
                   <div key={score.id} className='bg-white shadow-md rounded-lg p-4'>
                     <h2 className='text-lg font-semibold mb-2'>
                       {score.music.name} ({score.musicDifficulty})
