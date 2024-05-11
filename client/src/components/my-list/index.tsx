@@ -1,15 +1,27 @@
 import Sidebar from '../common/Sidebar';
 import Header from '../common/Header';
-import { Box, Button, FormControlLabel, FormGroup, Modal, Switch, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Divider,
+  FormControlLabel,
+  FormGroup,
+  IconButton,
+  Modal,
+  Switch,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useMusicQuery } from '../hooks/useMusicQuery';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axiosClient from '../../utils/axios';
 import { useUserStore } from '../store/userStore';
 import { Link } from 'react-router-dom';
-import { MyListType, TagType } from '../../types/score';
+import { MusicType, MyListType, TagType } from '../../types/score';
+import { Close } from '@mui/icons-material';
 
 const MyList = () => {
   const schema = z.object({
@@ -21,6 +33,8 @@ const MyList = () => {
     register,
     handleSubmit,
     getValues,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
@@ -33,9 +47,19 @@ const MyList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [musicList, setMusicList] = useState([]);
+  const [allMusicList, setAllMusicList] = useState<MusicType[]>([]);
+  const [pageCounter, setPageCounter] = useState(0);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useMusicQuery();
 
+  useEffect(() => {
+    if (data && data.pages[pageCounter] && data.pages[pageCounter].items) {
+      setAllMusicList((prevAllMusicList) => [...prevAllMusicList, ...(data?.pages[pageCounter]?.items || [])]);
+      setPageCounter((prevPageCounter) => prevPageCounter + 1);
+    }
+  }, [data]);
+
+  const selectedMusic = watch('selectedMusic') as number[];
   useEffect(() => {
     getMusicList();
   }, []);
@@ -57,9 +81,7 @@ const MyList = () => {
   const getFilteredMusicIds = () => {
     return data?.pages
       .flatMap((page) => page.items)
-      .flatMap(
-        (musicData) => musicData.musicTag.map((tag: TagType) => tag.musicId), // Convert matching tags to an array of musicIds
-      );
+      .flatMap((musicData) => musicData.musicTag.map((tag: TagType) => tag.musicId));
   };
 
   const filteredMusicList = data?.pages
@@ -70,6 +92,7 @@ const MyList = () => {
       const isMusicIdMatched = !filteredMusicIds?.length || filteredMusicIds.includes(musicData.id);
       return matchName && isMusicIdMatched;
     });
+
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
@@ -96,7 +119,7 @@ const MyList = () => {
         genreId: 1,
         userId: user?.id,
       });
-      console.log(response);
+      setMusicList((prev) => [...prev, response.data]);
       setIsModalOpen(false);
     } catch (err) {
       console.log(err);
@@ -125,7 +148,7 @@ const MyList = () => {
                 p: 4,
                 maxHeight: '90vh', // 最大高さを設定
                 overflow: 'auto', // スクロールを有効にする
-                width: '40%',
+                width: '50%',
               }}
             >
               <form onSubmit={handleSubmit(onSubmit)} className='p-4 bg-white shadow-md rounded-md'>
@@ -152,46 +175,90 @@ const MyList = () => {
                   曲を選択してください
                 </Typography>
                 {/* 選択中の曲を表示する */}
-                {getValues('selectedMusic').length > 0 && (
+                {selectedMusic.length > 0 && (
                   <div>
                     <Typography variant='h6' gutterBottom>
                       選択中の曲
                     </Typography>
-                    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2 }}>
-                      {getValues('selectedMusic').map((musicId) => (
-                        <Typography key={musicId} sx={{ border: '1px solid #ccc', p: 1, borderRadius: 1 }}>
-                          {filteredMusicList?.find((music) => music.id == musicId)?.name}
-                        </Typography>
+                    {errors.selectedMusic && (
+                      <span className='text-red-500 mb-2 block'>{errors.selectedMusic.message}</span>
+                    )}
+                    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
+                      {selectedMusic.map((musicId) => (
+                        <Box
+                          key={musicId}
+                          sx={{
+                            border: '1px solid #ccc',
+                            p: 1,
+                            borderRadius: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                          }}
+                        >
+                          <Typography noWrap gutterBottom variant='body2'>
+                            {allMusicList?.find((music) => music.id === musicId)?.name}
+                          </Typography>
+                          <IconButton
+                            color='error'
+                            size='small'
+                            onClick={() => {
+                              const newSelectedMusic = getValues('selectedMusic').filter(
+                                (id) => id !== musicId,
+                              ) as number[];
+                              setValue('selectedMusic', newSelectedMusic);
+                            }}
+                          >
+                            <Close />
+                          </IconButton>
+                        </Box>
                       ))}
                     </Box>
                   </div>
                 )}
-                {errors.selectedMusic && (
-                  <span className='text-red-500 mb-2 block'>{errors.selectedMusic.message}</span>
-                )}
+                <Divider className='py-2' />
                 <Box
-                  component='div' // Specify the component type explicitly
+                  component='div'
                   sx={{ maxHeight: '40vh', overflow: 'auto' }}
                   onScroll={(e: React.UIEvent<HTMLDivElement>) => handleScroll(e)} // Correct the event type
                 >
                   <FormGroup>
-                    {filteredMusicList?.length &&
+                    {filteredMusicList?.length ? (
                       filteredMusicList.map((music) => (
-                        <FormControlLabel
-                          key={music.id}
-                          className='justify-between px-5'
-                          control={
-                            <Switch
-                              {...register('selectedMusic', {
-                                onChange: (e) => console.log(e.target.defaultValue),
-                              })}
-                            />
-                          }
-                          label={music.name}
-                          value={music.id}
-                          labelPlacement='start'
-                        />
-                      ))}
+                        <Fragment key={music.id}>
+                          <FormControlLabel
+                            key={music.id}
+                            className='justify-between px-5'
+                            control={
+                              <Switch
+                                checked={selectedMusic.includes(parseInt(music.id))}
+                                onChange={(e) => {
+                                  const selectedMusicIds = getValues('selectedMusic') as number[];
+                                  const musicId = parseInt(music.id);
+                                  if (e.target.checked) {
+                                    setValue('selectedMusic', [...selectedMusicIds, musicId]);
+                                  } else {
+                                    setValue(
+                                      'selectedMusic',
+                                      selectedMusicIds.filter((id) => id !== musicId) as [number, ...number[]],
+                                    );
+                                  }
+                                  console.log(selectedMusic);
+                                }}
+                              />
+                            }
+                            label={music.name}
+                            value={music.id}
+                            labelPlacement='start'
+                          />
+                          <Divider />
+                        </Fragment>
+                      ))
+                    ) : (
+                      <Typography gutterBottom align='center' className='py-5'>
+                        検索ワードに一致する曲がありません
+                      </Typography>
+                    )}
                   </FormGroup>
                 </Box>
                 <Button variant='contained' color='primary' type='submit' fullWidth>

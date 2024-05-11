@@ -53,7 +53,13 @@ export class MusicListService {
       }),
     });
 
-    return newMusicList;
+    const musicList = await this.getMusicFromList({
+      userId: request.userId,
+      genreId: genreId,
+      myListId: newMusicList.id,
+    });
+
+    return musicList;
   }
 
   async addMusicToList(request) {
