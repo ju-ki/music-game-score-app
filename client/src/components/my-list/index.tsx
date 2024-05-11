@@ -1,6 +1,6 @@
 import Sidebar from '../common/Sidebar';
 import Header from '../common/Header';
-import { Box, Button, Modal, TextField, Typography } from '@mui/material';
+import { Box, Button, FormControlLabel, FormGroup, Modal, Switch, TextField, Typography } from '@mui/material';
 import { useMusicQuery } from '../hooks/useMusicQuery';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -90,8 +90,6 @@ const MyList = () => {
   };
 
   const onSubmit = async (data: FormData) => {
-    console.log(data);
-
     try {
       const response = await axiosClient.post(`${import.meta.env.VITE_APP_URL}music-list`, {
         ...data,
@@ -99,6 +97,7 @@ const MyList = () => {
         userId: user?.id,
       });
       console.log(response);
+      setIsModalOpen(false);
     } catch (err) {
       console.log(err);
     }
@@ -126,6 +125,7 @@ const MyList = () => {
                 p: 4,
                 maxHeight: '90vh', // 最大高さを設定
                 overflow: 'auto', // スクロールを有効にする
+                width: '40%',
               }}
             >
               <form onSubmit={handleSubmit(onSubmit)} className='p-4 bg-white shadow-md rounded-md'>
@@ -174,19 +174,25 @@ const MyList = () => {
                   sx={{ maxHeight: '40vh', overflow: 'auto' }}
                   onScroll={(e: React.UIEvent<HTMLDivElement>) => handleScroll(e)} // Correct the event type
                 >
-                  {filteredMusicList?.length &&
-                    filteredMusicList.map((music) => (
-                      <div key={music.id}>
-                        <label>
-                          <input
-                            type='checkbox'
-                            value={typeof music.id !== 'number' ? parseInt(music.id, 10) : music.id}
-                            {...register('selectedMusic', { valueAsNumber: true })}
-                          />
-                          {music.name}
-                        </label>
-                      </div>
-                    ))}
+                  <FormGroup>
+                    {filteredMusicList?.length &&
+                      filteredMusicList.map((music) => (
+                        <FormControlLabel
+                          key={music.id}
+                          className='justify-between px-5'
+                          control={
+                            <Switch
+                              {...register('selectedMusic', {
+                                onChange: (e) => console.log(e.target.defaultValue),
+                              })}
+                            />
+                          }
+                          label={music.name}
+                          value={music.id}
+                          labelPlacement='start'
+                        />
+                      ))}
+                  </FormGroup>
                 </Box>
                 <Button variant='contained' color='primary' type='submit' fullWidth>
                   作成する

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
-import { postMusicListType } from './dto';
-import { Prisma } from '@prisma/client';
+import { getMyListDetailType, postMusicListType } from './dto';
 
 @Injectable()
 export class MusicListService {
@@ -90,14 +89,15 @@ export class MusicListService {
     return request;
   }
 
-  async getMusicFromList(request) {
+  async getMusicFromList(request: getMyListDetailType) {
     let genreId = request.genreId;
     if (typeof genreId !== 'number') {
       genreId = parseInt(genreId);
     }
+
     const music = await this.prisma.musicList.findFirst({
       where: {
-        id: request.musicListId,
+        id: request.myListId,
         userId: request.userId,
         genreId: genreId,
       },

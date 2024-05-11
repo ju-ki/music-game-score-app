@@ -50,8 +50,6 @@ const RegisterMusicScore = () => {
     try {
       const response = await fetchMusicList(0, false);
       setMusicList(response.items);
-      console.log(musicId);
-      console.log(musicList);
 
       if (musicId) {
         setValue('musicId', parseInt(musicId));

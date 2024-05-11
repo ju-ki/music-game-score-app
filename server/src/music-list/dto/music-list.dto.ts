@@ -4,3 +4,9 @@ export class postMusicListType {
   selectedMusic: number[];
   genreId: number;
 }
+
+export class getMyListDetailType {
+  userId: string;
+  genreId: number;
+  myListId: string;
+}
