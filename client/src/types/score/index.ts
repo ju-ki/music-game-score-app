@@ -50,3 +50,7 @@ export type MyListType = {
   userId: string;
   musics: RelationMyListType[];
 };
+
+export type SelectedMusicType = {
+  id: number;
+};

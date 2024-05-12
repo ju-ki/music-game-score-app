@@ -14,27 +14,33 @@ import {
 } from '@mui/material';
 import { useMusicQuery } from '../hooks/useMusicQuery';
 import { Fragment, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axiosClient from '../../utils/axios';
 import { useUserStore } from '../store/userStore';
 import { Link } from 'react-router-dom';
-import { MusicType, MyListType, TagType } from '../../types/score';
+import { MusicType, MyListType, SelectedMusicType, TagType } from '../../types/score';
 import { Close } from '@mui/icons-material';
 
 const MyList = () => {
   const schema = z.object({
     myListName: z.string().min(1, { message: 'マイリスト名は必須です' }),
-    selectedMusic: z.array(z.union([z.number(), z.string()])).nonempty({ message: '一つ以上曲を選択してください' }),
+    selectedMusic: z
+      .array(
+        z.object({
+          id: z.number(),
+        }),
+      )
+      .nonempty({ message: '一つ以上の曲を選択してください' }),
+    // selectedMusic: z.array(z.number()).nonempty({ message: '一つ以上曲を選択してください' }),
   });
   type FormData = z.infer<typeof schema>;
   const {
     register,
     handleSubmit,
-    getValues,
-    setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
@@ -43,10 +49,15 @@ const MyList = () => {
     },
     resolver: zodResolver(schema),
   });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'selectedMusic',
+  });
   const { user } = useUserStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [musicList, setMusicList] = useState([]);
+  const [musicList, setMusicList] = useState<MyListType[]>([]);
   const [allMusicList, setAllMusicList] = useState<MusicType[]>([]);
   const [pageCounter, setPageCounter] = useState(0);
 
@@ -59,7 +70,7 @@ const MyList = () => {
     }
   }, [data]);
 
-  const selectedMusic = watch('selectedMusic') as number[];
+  const selectedMusicList: SelectedMusicType[] = watch('selectedMusic');
   useEffect(() => {
     getMusicList();
   }, []);
@@ -72,6 +83,7 @@ const MyList = () => {
           genreId: 1,
         },
       });
+
       setMusicList(response.data);
     } catch (err) {
       console.log(err);
@@ -113,9 +125,11 @@ const MyList = () => {
   };
 
   const onSubmit = async (data: FormData) => {
+    const musicIdList = data.selectedMusic.map((item) => item.id);
     try {
       const response = await axiosClient.post(`${import.meta.env.VITE_APP_URL}music-list`, {
-        ...data,
+        myListName: data.myListName,
+        selectedMusic: musicIdList,
         genreId: 1,
         userId: user?.id,
       });
@@ -175,7 +189,7 @@ const MyList = () => {
                   曲を選択してください
                 </Typography>
                 {/* 選択中の曲を表示する */}
-                {selectedMusic.length > 0 && (
+                {selectedMusicList.length > 0 && (
                   <div>
                     <Typography variant='h6' gutterBottom>
                       選択中の曲
@@ -184,9 +198,9 @@ const MyList = () => {
                       <span className='text-red-500 mb-2 block'>{errors.selectedMusic.message}</span>
                     )}
                     <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
-                      {selectedMusic.map((musicId) => (
+                      {selectedMusicList.map((selectedMusic) => (
                         <Box
-                          key={musicId}
+                          key={selectedMusic.id}
                           sx={{
                             border: '1px solid #ccc',
                             p: 1,
@@ -197,16 +211,17 @@ const MyList = () => {
                           }}
                         >
                           <Typography noWrap gutterBottom variant='body2'>
-                            {allMusicList?.find((music) => music.id === musicId)?.name}
+                            {allMusicList?.find((music) => music.id === selectedMusic.id)?.name}
                           </Typography>
                           <IconButton
                             color='error'
                             size='small'
                             onClick={() => {
-                              const newSelectedMusic = getValues('selectedMusic').filter(
-                                (id) => id !== musicId,
-                              ) as number[];
-                              setValue('selectedMusic', newSelectedMusic);
+                              const musicId = selectedMusic.id;
+                              const index = selectedMusicList.findIndex((field) => field.id === musicId);
+                              if (index !== -1) {
+                                remove(index);
+                              }
                             }}
                           >
                             <Close />
@@ -231,19 +246,17 @@ const MyList = () => {
                             className='justify-between px-5'
                             control={
                               <Switch
-                                checked={selectedMusic.includes(parseInt(music.id))}
+                                checked={selectedMusicList.some((field) => field.id === parseInt(music.id))}
                                 onChange={(e) => {
-                                  const selectedMusicIds = getValues('selectedMusic') as number[];
                                   const musicId = parseInt(music.id);
                                   if (e.target.checked) {
-                                    setValue('selectedMusic', [...selectedMusicIds, musicId]);
+                                    append({ id: musicId });
                                   } else {
-                                    setValue(
-                                      'selectedMusic',
-                                      selectedMusicIds.filter((id) => id !== musicId) as [number, ...number[]],
-                                    );
+                                    const index = fields.findIndex((field) => field.id === musicId);
+                                    if (index !== -1) {
+                                      remove(index);
+                                    }
                                   }
-                                  console.log(selectedMusic);
                                 }}
                               />
                             }
