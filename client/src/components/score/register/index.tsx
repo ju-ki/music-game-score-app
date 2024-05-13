@@ -13,6 +13,7 @@ import { MetaMusicType, MusicType } from '../../../types/score';
 const RegisterMusicScore = () => {
   const { user } = useUserStore();
   const { musicId, musicDifficulty } = useParams();
+
   const schema = z
     .object({
       musicId: z.number(),
@@ -93,17 +94,23 @@ const RegisterMusicScore = () => {
   const watchedMissCount = watch('missCount');
   const watchedTotalNoteCount = getValues('totalNoteCount');
 
-  useEffect(() => {
-    const filledFields = Object.values(watchedScores).filter((val) => isNaN(val)).length;
-    if (filledFields == 1) {
-      const count = watchedScores.reduce((accumulator, currentValue) => {
-        const numericValue = Number(currentValue);
-        return accumulator + (isNaN(numericValue) ? 0 : numericValue);
-      }, 0);
-      // console.log(watchedScores);
-      //TODO:: やり直しする際に不便
+  //テキストフィールドからフォーカスが外れた際にスコア補完機能が働く
+  const onBlurScoreCompletion = () => {
+    const filledFields = Object.values([
+      watchedPerfectCount,
+      watchedGreatCount,
+      watchedGoodCount,
+      watchedBadCount,
+      watchedMissCount,
+    ]).filter((val) => isNaN(val)).length;
+    const count = watchedScores.reduce((accumulator, currentValue) => {
+      const numericValue = Number(currentValue);
+      return accumulator + (isNaN(numericValue) ? 0 : numericValue);
+    }, 0);
 
-      const remainNoteCount = watchedTotalNoteCount - count;
+    //TODO:: やり直しする際に不便
+    const remainNoteCount = watchedTotalNoteCount - count;
+    if (filledFields == 1) {
       watchedScores.forEach((score, idx) => {
         if (isNaN(score) && idx == 0) {
           setValue('perfectCount', remainNoteCount);
@@ -122,15 +129,27 @@ const RegisterMusicScore = () => {
         }
       });
     }
-  }, [
-    watchedTotalNoteCount,
-    getValues,
-    watchedPerfectCount,
-    watchedGreatCount,
-    watchedGoodCount,
-    watchedBadCount,
-    watchedMissCount,
-  ]);
+    //フルコンボまたはAP用のスコア補完機能
+    else if (remainNoteCount === 0) {
+      watchedScores.forEach((score, idx) => {
+        if (isNaN(score) && idx == 0) {
+          setValue('perfectCount', 0);
+        }
+        if (isNaN(score) && idx == 1) {
+          setValue('greatCount', 0);
+        }
+        if (isNaN(score) && idx == 2) {
+          setValue('goodCount', 0);
+        }
+        if (isNaN(score) && idx == 3) {
+          setValue('badCount', 0);
+        }
+        if (isNaN(score) && idx == 4) {
+          setValue('missCount', 0);
+        }
+      });
+    }
+  };
 
   const onSubmit = async (values: FormData) => {
     console.log(values);
@@ -194,6 +213,7 @@ const RegisterMusicScore = () => {
               type='number'
               placeholder='Perfect'
               min={0}
+              onBlur={onBlurScoreCompletion}
               className='mb-4 p-2 rounded border border-gray-300 w-full'
             />
             {errors.perfectCount && <span className='text-red-500 mb-2 block'>{errors.perfectCount.message}</span>}
@@ -202,6 +222,7 @@ const RegisterMusicScore = () => {
               type='number'
               placeholder='Great'
               min={0}
+              onBlur={onBlurScoreCompletion}
               className='mb-4 p-2 rounded border border-gray-300 w-full'
             />
             {errors.greatCount && <span className='text-red-500 mb-2 block'>{errors.greatCount.message}</span>}
@@ -210,6 +231,7 @@ const RegisterMusicScore = () => {
               type='number'
               placeholder='Good'
               min={0}
+              onBlur={onBlurScoreCompletion}
               className='mb-4 p-2 rounded border border-gray-300 w-full'
             />
             {errors.goodCount && <span className='text-red-500 mb-2 block'>{errors.goodCount.message}</span>}
@@ -218,6 +240,7 @@ const RegisterMusicScore = () => {
               type='number'
               placeholder='Bad'
               min={0}
+              onBlur={onBlurScoreCompletion}
               className='mb-4 p-2 rounded border border-gray-300 w-full'
             />
             {errors.badCount && <span className='text-red-500 mb-2 block'>{errors.badCount.message}</span>}
@@ -226,6 +249,7 @@ const RegisterMusicScore = () => {
               type='number'
               placeholder='Miss'
               min={0}
+              onBlur={onBlurScoreCompletion}
               className='mb-4 p-2 rounded border border-gray-300 w-full'
             />
             {errors.missCount && <span className='text-red-500 mb-2 block'>{errors.missCount.message}</span>}

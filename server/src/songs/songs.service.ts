@@ -41,9 +41,9 @@ export class SongsService {
               });
             }),
           );
-          // this.metaMusicService.fetchMusicDifficulties();
-          // this.metaMusicService.fetchMusicTag();
-          // this.metaMusicService.fetchUnitProfile();
+          this.metaMusicService.fetchMusicDifficulties();
+          this.metaMusicService.fetchMusicTag();
+          this.metaMusicService.fetchUnitProfile();
         });
     } catch (err) {
       console.log(err);
