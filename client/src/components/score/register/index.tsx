@@ -9,21 +9,23 @@ import axiosClient from '../../../utils/axios';
 import { useUserStore } from '../../store/userStore';
 import { useParams } from 'react-router-dom';
 import { MetaMusicType, MusicType } from '../../../types/score';
+import { Button, Checkbox, FormControlLabel, FormGroup } from '@mui/material';
 
 const RegisterMusicScore = () => {
   const { user } = useUserStore();
   const { musicId, musicDifficulty } = useParams();
+  const [registerConsecutively, setRegisterConsecutively] = useState<boolean>(true);
 
   const schema = z
     .object({
-      musicId: z.number(),
+      musicId: z.number().min(1, '曲を選択してください'),
       musicDifficulty: z.string().nonempty(),
       perfectCount: z.number({ message: 'Perfectは数値を入力してください' }).min(0, '無効な数値です'),
       greatCount: z.number({ message: 'Greatは数値を入力してください' }).min(0, '無効な数値です'),
       goodCount: z.number({ message: 'Goodは数値を入力してください' }).min(0, '無効な数値です'),
       badCount: z.number({ message: 'Badは数値を入力してください' }).min(0, '無効な数値です'),
       missCount: z.number({ message: 'Missは数値を入力してください' }).min(0, '無効な数値です'),
-      totalNoteCount: z.number(),
+      totalNoteCount: z.number({ message: '存在しない難易度です' }),
     })
     .refine(
       (data) =>
@@ -52,7 +54,7 @@ const RegisterMusicScore = () => {
       const response = await fetchMusicList(0, false);
       setMusicList(response.items);
 
-      if (musicId) {
+      if (musicId && response.items.find((item: MusicType) => item.id === parseInt(musicId))) {
         setValue('musicId', parseInt(musicId));
       }
       if (musicDifficulty) {
@@ -82,6 +84,8 @@ const RegisterMusicScore = () => {
         .filter((meta: MetaMusicType) => musicId == meta.musicId && musicDifficulty == meta.musicDifficulty);
       if (data[0]) {
         setValue('totalNoteCount', data[0].totalNoteCount);
+      } else {
+        setValue('totalNoteCount', NaN);
       }
     }
   }, [watchMusic, musicList, setValue]);
@@ -160,6 +164,8 @@ const RegisterMusicScore = () => {
         userId: user?.id,
       });
       reset({
+        musicId: registerConsecutively ? values.musicId : 0,
+        totalNoteCount: registerConsecutively ? values.totalNoteCount : NaN,
         perfectCount: NaN,
         greatCount: NaN,
         goodCount: NaN,
@@ -185,12 +191,16 @@ const RegisterMusicScore = () => {
               {...register('musicId', { required: true, valueAsNumber: true })}
               className='mb-4 p-2 rounded border border-gray-300 w-full'
             >
+              <option key={0} value={0}>
+                曲を選択してください
+              </option>
               {musicList.map((music: MusicType) => (
                 <option key={music.id} value={music.id}>
                   {music.name}
                 </option>
               ))}
             </select>
+            {errors.musicId && <span className='text-red-500 mb-2 block'>{errors.musicId.message}</span>}
             <select
               {...register('musicDifficulty', { required: true })}
               className='mb-4 p-2 rounded border border-gray-300 w-full'
@@ -201,13 +211,13 @@ const RegisterMusicScore = () => {
                 </option>
               ))}
             </select>
+            {errors.totalNoteCount && <span className='text-red-500 mb-2 block'>{errors.totalNoteCount.message}</span>}
             <input
               {...register('totalNoteCount')}
               type='number'
               disabled
               className='mb-4 p-2 rounded border border-gray-300 w-full'
             />
-            {errors.totalNoteCount && <span className='text-red-500 mb-2 block'>{errors.totalNoteCount.message}</span>}
             <input
               {...register('perfectCount', { required: true, valueAsNumber: true })}
               type='number'
@@ -253,9 +263,22 @@ const RegisterMusicScore = () => {
               className='mb-4 p-2 rounded border border-gray-300 w-full'
             />
             {errors.missCount && <span className='text-red-500 mb-2 block'>{errors.missCount.message}</span>}
-            <button type='submit' className='bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600'>
-              Register Score
-            </button>
+            <div className='flex items-center'>
+              <Button variant='contained' type='submit'>
+                スコアを登録する
+              </Button>
+              <FormGroup className='mx-5'>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={registerConsecutively}
+                      onChange={() => setRegisterConsecutively((prev) => !prev)}
+                    />
+                  }
+                  label='同じ曲を連続で登録する'
+                />
+              </FormGroup>
+            </div>
           </form>
         </main>
       </div>
