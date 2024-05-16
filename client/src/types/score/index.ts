@@ -15,6 +15,7 @@ export type ScoreType = {
 export type MusicType = {
   id: number;
   name: string;
+  musicTag: TagType[];
   metaMusic: MetaMusicType[];
 };
 

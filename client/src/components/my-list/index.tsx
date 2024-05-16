@@ -12,7 +12,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useMusicQuery } from '../hooks/useMusicQuery';
+import { fetchMusicList } from '../hooks/useMusicQuery';
 import { Fragment, useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -20,7 +20,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import axiosClient from '../../utils/axios';
 import { useUserStore } from '../store/userStore';
 import { Link } from 'react-router-dom';
-import { MusicType, MyListType, SelectedMusicType, TagType } from '../../types/score';
+import { MusicType, MyListType, SelectedMusicType } from '../../types/score';
 import { Close } from '@mui/icons-material';
 
 const MyList = () => {
@@ -33,7 +33,6 @@ const MyList = () => {
         }),
       )
       .nonempty({ message: '一つ以上の曲を選択してください' }),
-    // selectedMusic: z.array(z.number()).nonempty({ message: '一つ以上曲を選択してください' }),
   });
   type FormData = z.infer<typeof schema>;
   const {
@@ -50,7 +49,7 @@ const MyList = () => {
     resolver: zodResolver(schema),
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { append, remove } = useFieldArray({
     control,
     name: 'selectedMusic',
   });
@@ -59,19 +58,21 @@ const MyList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [musicList, setMusicList] = useState<MyListType[]>([]);
   const [allMusicList, setAllMusicList] = useState<MusicType[]>([]);
-  const [pageCounter, setPageCounter] = useState(0);
+  const [filteredMusicList, setFilteredMusicList] = useState<MusicType[]>([]);
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useMusicQuery();
+  const getAllMusic = async () => {
+    try {
+      const response = await fetchMusicList(0, false);
 
-  useEffect(() => {
-    if (data && data.pages[pageCounter] && data.pages[pageCounter].items) {
-      setAllMusicList((prevAllMusicList) => [...prevAllMusicList, ...(data?.pages[pageCounter]?.items || [])]);
-      setPageCounter((prevPageCounter) => prevPageCounter + 1);
+      setAllMusicList(response.items);
+    } catch (err) {
+      console.log(err);
     }
-  }, [data]);
+  };
 
   const selectedMusicList: SelectedMusicType[] = watch('selectedMusic');
   useEffect(() => {
+    getAllMusic();
     getMusicList();
   }, []);
 
@@ -90,20 +91,18 @@ const MyList = () => {
     }
   };
 
-  const getFilteredMusicIds = () => {
-    return data?.pages
-      .flatMap((page) => page.items)
-      .flatMap((musicData) => musicData.musicTag.map((tag: TagType) => tag.musicId));
-  };
-
-  const filteredMusicList = data?.pages
-    .flatMap((page) => page.items)
-    .filter((musicData) => {
-      const matchName = musicData.name.toLowerCase().includes(searchQuery);
-      const filteredMusicIds = getFilteredMusicIds();
-      const isMusicIdMatched = !filteredMusicIds?.length || filteredMusicIds.includes(musicData.id);
-      return matchName && isMusicIdMatched;
-    });
+  useEffect(() => {
+    if (searchQuery) {
+      setFilteredMusicList(
+        allMusicList.filter((musicData: MusicType) => {
+          const matchName = musicData.name.toLowerCase().includes(searchQuery);
+          return matchName;
+        }),
+      );
+    } else {
+      setFilteredMusicList(allMusicList);
+    }
+  }, [searchQuery, allMusicList]);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -111,17 +110,6 @@ const MyList = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-  };
-
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const scrollHeight = e.currentTarget.scrollHeight;
-    const scrollTop = e.currentTarget.scrollTop;
-    const clientHeight = e.currentTarget.clientHeight;
-    const bottom = scrollHeight - scrollTop + 0.5 === clientHeight;
-
-    if (bottom && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
   };
 
   const onSubmit = async (data: FormData) => {
@@ -232,27 +220,23 @@ const MyList = () => {
                   </div>
                 )}
                 <Divider className='py-2' />
-                <Box
-                  component='div'
-                  sx={{ maxHeight: '40vh', overflow: 'auto' }}
-                  onScroll={(e: React.UIEvent<HTMLDivElement>) => handleScroll(e)} // Correct the event type
-                >
+                <Box component='div' sx={{ maxHeight: '40vh', overflow: 'auto' }}>
                   <FormGroup>
                     {filteredMusicList?.length ? (
-                      filteredMusicList.map((music) => (
+                      filteredMusicList.map((music: MusicType) => (
                         <Fragment key={music.id}>
                           <FormControlLabel
                             key={music.id}
                             className='justify-between px-5'
                             control={
                               <Switch
-                                checked={selectedMusicList.some((field) => field.id === parseInt(music.id))}
+                                checked={selectedMusicList.some((field) => field.id === music.id)}
                                 onChange={(e) => {
-                                  const musicId = parseInt(music.id);
+                                  const musicId = music.id;
                                   if (e.target.checked) {
                                     append({ id: musicId });
                                   } else {
-                                    const index = fields.findIndex((field) => field.id === musicId);
+                                    const index = selectedMusicList.findIndex((field) => field.id === musicId);
                                     if (index !== -1) {
                                       remove(index);
                                     }

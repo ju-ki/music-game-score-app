@@ -55,6 +55,7 @@ const RegisterMusicScore = () => {
       setMusicList(response.items);
 
       if (musicId && response.items.find((item: MusicType) => item.id === parseInt(musicId))) {
+        console.log(musicId);
         setValue('musicId', parseInt(musicId));
       }
       if (musicDifficulty) {
