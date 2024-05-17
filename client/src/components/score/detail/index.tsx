@@ -3,8 +3,8 @@ import Sidebar from '../../common/Sidebar';
 import Header from '../../common/Header';
 import axiosClient from '../../../utils/axios';
 import { useUserStore } from '../../store/userStore';
-import { useParams } from 'react-router-dom';
-import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
+import { NavLink, useParams } from 'react-router-dom';
+import { Box, Button, Card, CardContent, Grid, Typography } from '@mui/material';
 import { EmojiEmotions, EmojiEventsTwoTone, InsertEmoticon, Whatshot } from '@mui/icons-material';
 import { ScoreType } from '../../../types/score';
 
@@ -41,10 +41,18 @@ const MusicScoreList = () => {
       <div className='flex-auto w-4/5'>
         <Header />
         <main className='p-4'>
-          <h1>
-            {music}
-            {musicDifficulty}スコア一覧
-          </h1>
+          <div className='flex items-center justify-between my-10'>
+            <h1 className='text-2xl'>
+              {music}({musicDifficulty})<span className='mx-3'>スコア一覧</span>
+            </h1>
+            <div className='px-5'>
+              <NavLink to={`/register-music-score/${musicId}/${musicDifficulty}`} style={{ display: 'block' }}>
+                <Button color='primary' variant='contained'>
+                  スコアを登録する
+                </Button>
+              </NavLink>
+            </div>
+          </div>
           <Grid container spacing={2}>
             {scoreList.length > 0 ? (
               scoreList.map((score: ScoreType, index) => (

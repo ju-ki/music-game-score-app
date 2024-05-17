@@ -55,7 +55,6 @@ const RegisterMusicScore = () => {
       setMusicList(response.items);
 
       if (musicId && response.items.find((item: MusicType) => item.id === parseInt(musicId))) {
-        console.log(musicId);
         setValue('musicId', parseInt(musicId));
       }
       if (musicDifficulty) {
@@ -75,6 +74,13 @@ const RegisterMusicScore = () => {
   const [difficultyList] = useState(['easy', 'normal', 'hard', 'expert', 'master', 'append']);
 
   const watchMusic = watch(['musicId', 'musicDifficulty']);
+
+  useEffect(() => {
+    if (musicId) {
+      console.log(musicId);
+      setValue('musicId', parseInt(musicId));
+    }
+  }, [musicList, musicId, setValue]);
 
   useEffect(() => {
     if (watchMusic[0] && watchMusic[1]) {
