@@ -12,7 +12,6 @@ export class UserController {
 
   @Patch('/change-authority')
   async changeAuthority(@Body() body) {
-    console.log(body);
     return await this.userService.changeAuthority(body);
   }
 }

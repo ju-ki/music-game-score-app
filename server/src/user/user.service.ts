@@ -41,16 +41,18 @@ export class UserService {
   }
 
   async changeAuthority(request) {
-    request.users.map(async (user) => {
-      await this.prisma.user.update({
-        where: {
-          id: user.id,
-        },
-        data: {
-          authority: user.authority,
-        },
-      });
-    });
+    await Promise.all(
+      request.users.map(async (user) => {
+        await this.prisma.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            authority: user.authority,
+          },
+        });
+      }),
+    );
     const userList = await this.prisma.user.findMany({
       select: {
         id: true,
