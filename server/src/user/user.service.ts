@@ -26,4 +26,40 @@ export class UserService {
 
     return user;
   }
+
+  async getUserList() {
+    const userList = await this.prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        imageUrl: true,
+        email: true,
+        authority: true,
+      },
+    });
+    return userList;
+  }
+
+  async changeAuthority(request) {
+    request.users.map(async (user) => {
+      await this.prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          authority: user.authority,
+        },
+      });
+    });
+    const userList = await this.prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        imageUrl: true,
+        email: true,
+        authority: true,
+      },
+    });
+    return userList;
+  }
 }

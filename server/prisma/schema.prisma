@@ -6,12 +6,16 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
+enum AuthorityType {
+  ADMIN
+  GUEST
+}
 model User {
   id             String         @id @default(uuid())
   name           String
   imageUrl       String
   email          String         @unique
+  authority      AuthorityType @default(GUEST)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   scores         Scores[]
