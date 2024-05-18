@@ -69,9 +69,8 @@ const Header = () => {
 
   return (
     <div className=' text-white p-4 flex justify-between items-center'>
-      <Typography variant='h5' component='div'>
-        アプリケーションのヘッダー
-      </Typography>
+      {/* TODO:ここはいらないので後々削除予定 */}
+      <Typography variant='h5' component='div'></Typography>
 
       {/* ログイン状態に応じた表示 */}
       {isLoggedIn ? (

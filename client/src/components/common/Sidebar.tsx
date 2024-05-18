@@ -5,9 +5,11 @@ const Sidebar = () => {
   return (
     <div className='w-64 h-full shadow-md bg-white absolute'>
       <div className='p-4 bg-blue-500 text-white'>
-        <Typography variant='h6' component='div'>
-          音ゲースコア管理アプリ
-        </Typography>
+        <NavLink to={'/'}>
+          <Typography variant='h6' component='div' color={'white'}>
+            音ゲースコア管理アプリ
+          </Typography>
+        </NavLink>
       </div>
       <List>
         <NavLink
