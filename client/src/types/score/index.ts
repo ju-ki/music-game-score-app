@@ -55,3 +55,18 @@ export type MyListType = {
 export type SelectedMusicType = {
   id: number;
 };
+
+export type UserType = {
+  id: string;
+  email: string;
+  name: string;
+  imageUrl: string;
+  authority: string;
+};
+
+export type UpdateUserAuthorityData = {
+  users: {
+    id: string;
+    authority: string;
+  }[];
+};
