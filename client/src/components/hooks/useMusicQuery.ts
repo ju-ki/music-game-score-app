@@ -1,6 +1,12 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import axiosClient from '../../utils/axios';
 
+/**
+ *
+ * @param page ページ
+ * @param isInfinityScroll 無限スクロールの実装するか(falseの場合は全権取得)
+ * @returns 楽曲リスト
+ */
 export const fetchMusicList = async (page: number, isInfinityScroll: boolean) => {
   const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}songs/search`, {
     params: {
