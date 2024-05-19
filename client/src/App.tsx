@@ -10,7 +10,7 @@ import MusicScoreList from './components/score/detail';
 import MyListDetail from './components/my-list/detail';
 import AdminTop from './components/admin/top';
 import AdminUser from './components/admin/users';
-import AdminMusic from './components/admin/muscis';
+import AdminMusic from './components/admin/musics';
 
 const queryClient = new QueryClient();
 
