@@ -20,6 +20,7 @@ export type MusicType = {
 };
 
 export type MetaMusicType = {
+  id: number;
   musicId: number;
   musicDifficulty: string;
   totalNoteCount: number;
@@ -33,6 +34,7 @@ export type UnitType = {
 };
 
 export type TagType = {
+  id: number;
   musicId: number;
   tagName: string;
 };
