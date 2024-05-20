@@ -11,7 +11,7 @@ const Home = () => {
       <div className='flex-auto w-4/5'>
         <Header />
         <main className='p-4'>
-          <h1>Welcome to My App</h1>
+          <h1>ようこそスコア管理アプリへ</h1>
         </main>
       </div>
     </div>

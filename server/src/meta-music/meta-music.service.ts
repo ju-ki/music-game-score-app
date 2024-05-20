@@ -18,7 +18,6 @@ export class MetaMusicService {
       .pipe(map((response) => response.data))
       .subscribe((metaData) =>
         metaData.forEach(async (meta) => {
-          console.log(meta);
           await this.prisma.metaMusic.upsert({
             where: {
               id: meta.id.toString(),

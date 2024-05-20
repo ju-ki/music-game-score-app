@@ -15,7 +15,7 @@ export class SongsService {
     private metaMusicService: MetaMusicService,
   ) {}
   //これを定期的に実行できるようにした(DBが更新されたらみたいな感じ)
-  fetchAllSongs(): void {
+  async fetchAllSongs() {
     try {
       this.httpService
         .get(this.config.get('MUSIC_URL'))
@@ -45,6 +45,9 @@ export class SongsService {
           this.metaMusicService.fetchMusicTag();
           this.metaMusicService.fetchUnitProfile();
         });
+
+      const musicList = await this.searchMusic({ genreId: 1, isInfinityScroll: 'false', page: 0, musicTag: 0 });
+      return musicList;
     } catch (err) {
       console.log(err);
     }

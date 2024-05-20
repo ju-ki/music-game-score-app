@@ -110,7 +110,7 @@ const MusicList = () => {
           </div>
 
           {/* TODO:難易度は一旦置いておく */}
-          <div className='flex mb-4'>
+          {/* <div className='flex mb-4'>
             {Array.from({ length: 6 }).map((_, index) => (
               <select key={index} className='mr-4 p-2 rounded border border-gray-300'>
                 <option value=''>Select</option>
@@ -119,7 +119,7 @@ const MusicList = () => {
                 <option value='option3'>Option 3</option>
               </select>
             ))}
-          </div>
+          </div> */}
           <h1>楽曲一覧</h1>
           {searchTerm != '' || Object.keys(filterUnit).length > 0 ? (
             <>

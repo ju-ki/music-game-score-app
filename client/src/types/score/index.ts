@@ -20,6 +20,7 @@ export type MusicType = {
 };
 
 export type MetaMusicType = {
+  id: number;
   musicId: number;
   musicDifficulty: string;
   totalNoteCount: number;
@@ -33,6 +34,7 @@ export type UnitType = {
 };
 
 export type TagType = {
+  id: number;
   musicId: number;
   tagName: string;
 };
@@ -54,4 +56,19 @@ export type MyListType = {
 
 export type SelectedMusicType = {
   id: number;
+};
+
+export type UserType = {
+  id: string;
+  email: string;
+  name: string;
+  imageUrl: string;
+  authority: string;
+};
+
+export type UpdateUserAuthorityData = {
+  users: {
+    id: string;
+    authority: string;
+  }[];
 };

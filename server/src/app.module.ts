@@ -21,6 +21,7 @@ import { AuthService } from './auth/auth.service';
 import { AuthController } from './auth/auth.controller';
 // import { AuthModule } from './auth/auth.module';
 import { JwtService } from '@nestjs/jwt';
+import { UserController } from './user/user.controller';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { JwtService } from '@nestjs/jwt';
     ScoresController,
     MusicListController,
     AuthController,
+    UserController,
   ],
   providers: [
     AppService,
