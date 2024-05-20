@@ -1,9 +1,20 @@
 import { NavLink } from 'react-router-dom';
 import Header from '../../common/Header';
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import {
+  Button,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material';
 import { fetchMusicList } from '../../hooks/useMusicQuery';
 import { useEffect, useState } from 'react';
 import { MusicType, UnitType } from '../../../types/score';
+import axiosClient from '../../../utils/axios';
 
 const AdminMusic = () => {
   const [musicList, setMusicList] = useState<MusicType[]>([]);
@@ -17,6 +28,16 @@ const AdminMusic = () => {
       const response = await fetchMusicList(0, false);
       setMusicList(response.items);
       setUnitList(response.unitProfile);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const updateMusic = async () => {
+    try {
+      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}songs`);
+      console.log(response.data);
+      setMusicList(response.data.items);
     } catch (err) {
       console.log(err);
     }
@@ -37,6 +58,9 @@ const AdminMusic = () => {
                 管理者トップページへ
               </Typography>
             </NavLink>
+            <Button variant='contained' onClick={updateMusic}>
+              楽曲の更新を行う
+            </Button>
           </div>
 
           <form>
