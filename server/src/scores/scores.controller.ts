@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import { ScoresService } from './scores.service';
-import { postScoreType, scoreListParams } from './dto';
+import { deleteScoreParams, postScoreType, scoreListParams } from './dto';
 
 @Controller('scores')
 export class ScoresController {
@@ -30,7 +30,7 @@ export class ScoresController {
 
   //スコア削除(複数)
   @Delete()
-  deleteScore(@Query() params) {
+  deleteScore(@Query() params: deleteScoreParams) {
     return this.scoresService.deleteScore(params);
   }
 }

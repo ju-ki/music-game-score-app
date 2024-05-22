@@ -5,7 +5,7 @@ import axiosClient from '../../../utils/axios';
 import { useUserStore } from '../../store/userStore';
 import { NavLink, useParams } from 'react-router-dom';
 import { Box, Button, Card, CardContent, Grid, Typography } from '@mui/material';
-import { EmojiEmotions, EmojiEventsTwoTone, InsertEmoticon, Whatshot } from '@mui/icons-material';
+import { Delete, EmojiEmotions, EmojiEventsTwoTone, InsertEmoticon, Whatshot } from '@mui/icons-material';
 import { ScoreType } from '../../../types/score';
 
 const MusicScoreList = () => {
@@ -32,6 +32,25 @@ const MusicScoreList = () => {
       console.log(err);
     }
   }
+
+  const DeleteScore = async (scoreId: string) => {
+    if (confirm('削除してもよろしいですか?')) {
+      try {
+        await axiosClient.delete(`${import.meta.env.VITE_APP_URL}scores`, {
+          params: {
+            userId: user?.id,
+            scoreId: scoreId,
+          },
+        });
+
+        alert('削除に成功しました');
+      } catch (err) {
+        console.log(err);
+        //後にエラー文言の出し方を修正する
+        alert('削除に失敗しました');
+      }
+    }
+  };
   return (
     <div className='flex h-screen'>
       <div className='flex-initial w-1/5'>
@@ -60,11 +79,14 @@ const MusicScoreList = () => {
                   {score.goodCount === 0 && score.badCount === 0 && score.missCount === 0 ? (
                     <Card variant='outlined' sx={{ backgroundColor: '#ffd700' }}>
                       <CardContent>
-                        <Box display='flex' alignItems='center' mb={1}>
-                          <Whatshot color='error' />
-                          <Typography variant='h6' component='div' ml={1}>
-                            Full Combo!
-                          </Typography>
+                        <Box display='flex' alignItems='center' mb={1} justifyContent={'space-between'}>
+                          <div className='flex items-center'>
+                            <Whatshot color='error' />
+                            <Typography variant='h6' component='div' ml={1}>
+                              Full Combo!
+                            </Typography>
+                          </div>
+                          <Delete color='error' onClick={() => DeleteScore(score.id)} />
                         </Box>
                         <Typography variant='body2' component='div' mb={1}>
                           Total Note Count: {score.totalNoteCount}
@@ -80,13 +102,16 @@ const MusicScoreList = () => {
                   ) : (
                     <Card>
                       <CardContent>
-                        <Box display='flex' alignItems='center' mb={1}>
-                          {index === 0 && <EmojiEventsTwoTone color='primary' />}
-                          {index === 1 && <EmojiEmotions color='secondary' />}
-                          {index === 2 && <InsertEmoticon color='action' />}
-                          <Typography variant='h6' component='div' ml={1}>
-                            Rank {index + 1}
-                          </Typography>
+                        <Box display='flex' alignItems='center' justifyContent={'space-between'} mb={1}>
+                          <div className='flex items-center'>
+                            {index === 0 && <EmojiEventsTwoTone color='primary' />}
+                            {index === 1 && <EmojiEmotions color='secondary' />}
+                            {index === 2 && <InsertEmoticon color='action' />}
+                            <Typography variant='h6' component='div' ml={1}>
+                              Rank {index + 1}
+                            </Typography>
+                          </div>
+                          <Delete color='error' onClick={() => DeleteScore(score.id)} />
                         </Box>
                         <Typography variant='body2' component='div' mb={1}>
                           Total Note Count: {score.totalNoteCount}

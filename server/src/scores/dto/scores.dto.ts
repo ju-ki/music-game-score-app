@@ -18,3 +18,8 @@ export class scoreListParams {
   musicId: number;
   musicDifficulty: string;
 }
+
+export class deleteScoreParams {
+  userId: string;
+  scoreId: string;
+}
