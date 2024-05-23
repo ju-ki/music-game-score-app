@@ -10,3 +10,10 @@ export class getMyListDetailType {
   genreId: number;
   myListId: string;
 }
+
+export class addMusicToListType {
+  musicListId: string;
+  musicGenreId: number;
+  userId: string;
+  selectedMusic: number[];
+}

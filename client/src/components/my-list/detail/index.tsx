@@ -5,11 +5,26 @@ import { Link, useParams } from 'react-router-dom';
 import axiosClient from '../../../utils/axios';
 import { useUserStore } from '../../store/userStore';
 import { MyListType, RelationMyListType } from '../../../types/score';
+import MusicMyListModal from '../../modal';
+import { Button } from '@mui/material';
+import { z } from 'zod';
 
 const MyListDetail = () => {
+  const schema = z.object({
+    myListName: z.string().min(1, { message: 'マイリスト名は必須です' }),
+    selectedMusic: z
+      .array(
+        z.object({
+          id: z.number(),
+        }),
+      )
+      .nonempty({ message: '一つ以上の曲を選択してください' }),
+  });
+  type FormData = z.infer<typeof schema>;
   const { myListId } = useParams();
   const { user } = useUserStore();
   const [musicDetail, setMusicDetail] = useState<MyListType>();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (myListId) {
@@ -26,10 +41,38 @@ const MyListDetail = () => {
           genreId: 1,
         },
       });
+
       setMusicDetail(response.data);
     } catch (err) {
       console.log(err);
     }
+  }
+
+  const addMusicToMyList = async (data: FormData) => {
+    try {
+      const musicIdList = data.selectedMusic.map((item) => item.id);
+      const response = await axiosClient.post(`${import.meta.env.VITE_APP_URL}music-list/add`, {
+        musicListId: myListId,
+        selectedMusic: musicIdList,
+        userId: user?.id,
+        musicGenreId: 1,
+      });
+      console.log(response.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  if (!musicDetail) {
+    return;
   }
 
   return (
@@ -41,6 +84,14 @@ const MyListDetail = () => {
         <Header />
         <main className='p-4'>
           <div className='bg-white rounded-lg shadow-md p-6'>
+            <Button onClick={handleOpenModal}>マイリスト編集</Button>
+            <MusicMyListModal
+              isModalOpen={isModalOpen}
+              handleCloseModal={handleCloseModal}
+              onSubmit={addMusicToMyList}
+              defaultMusicList={musicDetail?.musics.map((obj) => obj.musicId)}
+              myListName={musicDetail?.name}
+            />
             <h1 className='text-2xl font-semibold mb-4'>{musicDetail?.name}</h1>
             <ul className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
               {musicDetail?.musics.map((music: RelationMyListType) => (

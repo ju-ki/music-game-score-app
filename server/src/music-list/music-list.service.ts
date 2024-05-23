@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
-import { getMyListDetailType, postMusicListType } from './dto';
+import { addMusicToListType, getMyListDetailType, postMusicListType } from './dto';
 
 @Injectable()
 export class MusicListService {
@@ -62,15 +62,40 @@ export class MusicListService {
     return musicList;
   }
 
-  async addMusicToList(request) {
-    console.log('addMusicToList');
-    await this.prisma.musicMusicList.create({
-      data: {
-        musicId: request.musicId,
-        musicListId: request.musicListId,
-        musicGenreId: request.musicGenreId,
-      },
+  async addMusicToList(request: addMusicToListType) {
+    let genreId = request.musicGenreId;
+    if (typeof genreId !== 'number') {
+      genreId = parseInt(genreId);
+    }
+
+    request.selectedMusic.forEach(async (musicId) => {
+      if (typeof musicId !== 'number') {
+        musicId = parseInt(musicId);
+      }
+      await this.prisma.musicMusicList.upsert({
+        where: {
+          musicId_musicGenreId_musicListId: {
+            musicId: musicId,
+            musicGenreId: genreId,
+            musicListId: request.musicListId,
+          },
+        },
+        update: {},
+        create: {
+          musicId: musicId,
+          musicGenreId: genreId,
+          musicListId: request.musicListId,
+        },
+      });
     });
+
+    const musicList = await this.getMusicFromList({
+      userId: request.userId,
+      myListId: request.musicListId,
+      genreId: request.musicGenreId,
+    });
+
+    return musicList;
   }
 
   async removeMusicFromList(request) {
