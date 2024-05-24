@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MetaMusicService } from 'meta-music/meta-music.service';
 import { PrismaService } from 'prisma/prisma.service';
-import { postScoreType, scoreListParams } from './dto';
+import { deleteScoreParams, postScoreType, scoreListParams } from './dto';
 import { SongsService } from 'songs/songs.service';
 
 @Injectable()
@@ -131,10 +131,10 @@ export class ScoresService {
     return newScore;
   }
 
-  async deleteScore(param) {
+  async deleteScore(param: deleteScoreParams) {
     const deletedScore = await this.prisma.scores.delete({
       where: {
-        id: param.id,
+        id: param.scoreId,
         userId: param.userId,
       },
     });
