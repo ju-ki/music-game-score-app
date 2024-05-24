@@ -57,7 +57,8 @@ const MyListDetail = () => {
         userId: user?.id,
         musicGenreId: 1,
       });
-      console.log(response.data);
+      setMusicDetail(response.data);
+      setIsModalOpen(false);
     } catch (err) {
       console.log(err);
     }
@@ -84,7 +85,6 @@ const MyListDetail = () => {
         <Header />
         <main className='p-4'>
           <div className='bg-white rounded-lg shadow-md p-6'>
-            <Button onClick={handleOpenModal}>マイリスト編集</Button>
             <MusicMyListModal
               isModalOpen={isModalOpen}
               handleCloseModal={handleCloseModal}
@@ -92,7 +92,12 @@ const MyListDetail = () => {
               defaultMusicList={musicDetail?.musics.map((obj) => obj.musicId)}
               myListName={musicDetail?.name}
             />
-            <h1 className='text-2xl font-semibold mb-4'>{musicDetail?.name}</h1>
+            <div className='flex items-center justify-between my-3 '>
+              <h1 className='text-2xl font-semibold mb-4'>{musicDetail?.name}</h1>
+              <Button onClick={handleOpenModal} variant='contained'>
+                マイリスト編集
+              </Button>
+            </div>
             <ul className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
               {musicDetail?.musics.map((music: RelationMyListType) => (
                 <Link

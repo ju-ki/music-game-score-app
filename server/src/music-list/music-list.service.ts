@@ -68,26 +68,38 @@ export class MusicListService {
       genreId = parseInt(genreId);
     }
 
-    request.selectedMusic.forEach(async (musicId) => {
-      if (typeof musicId !== 'number') {
-        musicId = parseInt(musicId);
-      }
-      await this.prisma.musicMusicList.upsert({
-        where: {
-          musicId_musicGenreId_musicListId: {
-            musicId: musicId,
+    const oldMusicList = await this.getMusicFromList({
+      userId: request.userId,
+      genreId: genreId,
+      myListId: request.musicListId,
+    });
+
+    for (const musicId of request.selectedMusic) {
+      const parsedMusicId = typeof musicId !== 'number' ? parseInt(musicId) : musicId;
+      if (!oldMusicList.musics.some((music) => music.musicId === parsedMusicId)) {
+        await this.prisma.musicMusicList.create({
+          data: {
+            musicId: parsedMusicId,
             musicGenreId: genreId,
             musicListId: request.musicListId,
           },
-        },
-        update: {},
-        create: {
-          musicId: musicId,
-          musicGenreId: genreId,
-          musicListId: request.musicListId,
-        },
-      });
-    });
+        });
+      }
+    }
+
+    for (const music of oldMusicList.musics) {
+      if (!request.selectedMusic.includes(music.musicId)) {
+        await this.prisma.musicMusicList.delete({
+          where: {
+            musicId_musicGenreId_musicListId: {
+              musicId: music.musicId,
+              musicGenreId: genreId,
+              musicListId: request.musicListId,
+            },
+          },
+        });
+      }
+    }
 
     const musicList = await this.getMusicFromList({
       userId: request.userId,
