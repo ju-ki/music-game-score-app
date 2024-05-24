@@ -8,7 +8,7 @@ export class MusicListService {
   async getMusicList(param) {
     let genreId = param.genreId;
     if (typeof genreId !== 'number') {
-      genreId = parseInt(genreId);
+      genreId = Number.parseInt(genreId);
     }
     const myMusicLists = await this.prisma.musicList.findMany({
       where: {
@@ -30,7 +30,7 @@ export class MusicListService {
   async createMusicList(request: postMusicListType) {
     let genreId = request.genreId;
     if (typeof genreId !== 'number') {
-      genreId = parseInt(genreId);
+      genreId = Number.parseInt(genreId);
     }
     const newMusicList = await this.prisma.musicList.create({
       data: {
@@ -43,7 +43,7 @@ export class MusicListService {
     await this.prisma.musicMusicList.createMany({
       data: request.selectedMusic.map((musicId) => {
         if (typeof musicId !== 'number') {
-          musicId = parseInt(musicId);
+          musicId = Number.parseInt(musicId);
         }
         return {
           musicId: musicId,
@@ -62,10 +62,10 @@ export class MusicListService {
     return musicList;
   }
 
-  async addMusicToList(request: addMusicToListType) {
+  async updateMusicList(request: addMusicToListType) {
     let genreId = request.musicGenreId;
     if (typeof genreId !== 'number') {
-      genreId = parseInt(genreId);
+      genreId = Number.parseInt(genreId);
     }
 
     const oldMusicList = await this.getMusicFromList({
@@ -75,7 +75,7 @@ export class MusicListService {
     });
 
     for (const musicId of request.selectedMusic) {
-      const parsedMusicId = typeof musicId !== 'number' ? parseInt(musicId) : musicId;
+      const parsedMusicId = typeof musicId !== 'number' ? Number.parseInt(musicId) : musicId;
       if (!oldMusicList.musics.some((music) => music.musicId === parsedMusicId)) {
         await this.prisma.musicMusicList.create({
           data: {
@@ -114,11 +114,11 @@ export class MusicListService {
     let musicId: number = request.musicId;
     let musicGenreId: number = request.musicGenreId;
     if (typeof musicId !== 'number') {
-      musicId = parseInt(musicId);
+      musicId = Number.parseInt(musicId);
     }
 
     if (typeof musicGenreId !== 'number') {
-      musicGenreId = parseInt(musicGenreId);
+      musicGenreId = Number.parseInt(musicGenreId);
     }
     await this.prisma.musicMusicList.delete({
       where: {
@@ -135,7 +135,7 @@ export class MusicListService {
   async getMusicFromList(request: getMyListDetailType) {
     let genreId = request.genreId;
     if (typeof genreId !== 'number') {
-      genreId = parseInt(genreId);
+      genreId = Number.parseInt(genreId);
     }
 
     const music = await this.prisma.musicList.findFirst({

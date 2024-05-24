@@ -30,7 +30,7 @@ const MyListDetail = () => {
     if (myListId) {
       getMyListDetail();
     }
-  }, [myListId, user]);
+  }, [myListId]);
 
   async function getMyListDetail() {
     try {

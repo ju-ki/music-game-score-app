@@ -18,7 +18,7 @@ export class MusicListController {
 
   @Post('/add')
   addMusicToList(@Body() request: addMusicToListType) {
-    return this.musicListService.addMusicToList(request);
+    return this.musicListService.updateMusicList(request);
   }
 
   @Delete()
