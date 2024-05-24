@@ -1,27 +1,13 @@
 import Sidebar from '../common/Sidebar';
 import Header from '../common/Header';
-import {
-  Box,
-  Button,
-  Divider,
-  FormControlLabel,
-  FormGroup,
-  IconButton,
-  Modal,
-  Switch,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { fetchMusicList } from '../hooks/useMusicQuery';
-import { Fragment, useEffect, useState } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@mui/material';
+import { useEffect, useState } from 'react';
 import axiosClient from '../../utils/axios';
 import { useUserStore } from '../store/userStore';
 import { Link } from 'react-router-dom';
-import { MusicType, MyListType, SelectedMusicType } from '../../types/score';
-import { Close } from '@mui/icons-material';
+import { MyListType } from '../../types/score';
+import MusicMyListModal from '../modal';
+import { z } from 'zod';
 
 const MyList = () => {
   const schema = z.object({
@@ -35,44 +21,11 @@ const MyList = () => {
       .nonempty({ message: '一つ以上の曲を選択してください' }),
   });
   type FormData = z.infer<typeof schema>;
-  const {
-    register,
-    handleSubmit,
-    watch,
-    control,
-    formState: { errors },
-  } = useForm<FormData>({
-    defaultValues: {
-      myListName: '',
-      selectedMusic: [],
-    },
-    resolver: zodResolver(schema),
-  });
-
-  const { append, remove } = useFieldArray({
-    control,
-    name: 'selectedMusic',
-  });
   const { user } = useUserStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [musicList, setMusicList] = useState<MyListType[]>([]);
-  const [allMusicList, setAllMusicList] = useState<MusicType[]>([]);
-  const [filteredMusicList, setFilteredMusicList] = useState<MusicType[]>([]);
 
-  const getAllMusic = async () => {
-    try {
-      const response = await fetchMusicList(0, false);
-
-      setAllMusicList(response.items);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const selectedMusicList: SelectedMusicType[] = watch('selectedMusic');
   useEffect(() => {
-    getAllMusic();
     getMusicList();
   }, []);
 
@@ -90,19 +43,6 @@ const MyList = () => {
       console.log(err);
     }
   };
-
-  useEffect(() => {
-    if (searchQuery) {
-      setFilteredMusicList(
-        allMusicList.filter((musicData: MusicType) => {
-          const matchName = musicData.name.toLowerCase().includes(searchQuery);
-          return matchName;
-        }),
-      );
-    } else {
-      setFilteredMusicList(allMusicList);
-    }
-  }, [searchQuery, allMusicList]);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -138,7 +78,14 @@ const MyList = () => {
         <main className='p-4'>
           <h1>マイリスト</h1>
           <Button onClick={handleOpenModal}>マイリスト作成</Button>
-          <Modal open={isModalOpen} onClose={handleCloseModal}>
+          <MusicMyListModal
+            isModalOpen={isModalOpen}
+            handleCloseModal={handleCloseModal}
+            onSubmit={onSubmit}
+            defaultMusicList={[]}
+            myListName=''
+          />
+          {/* <Modal open={isModalOpen} onClose={handleCloseModal}>
             <Box
               sx={{
                 position: 'absolute',
@@ -177,7 +124,7 @@ const MyList = () => {
                   曲を選択してください
                 </Typography>
                 {/* 選択中の曲を表示する */}
-                {selectedMusicList.length > 0 && (
+          {/* {selectedMusicList.length > 0 && (
                   <div>
                     <Typography variant='h6' gutterBottom>
                       選択中の曲
@@ -263,7 +210,7 @@ const MyList = () => {
                 </Button>
               </form>
             </Box>
-          </Modal>
+          </Modal> */}
 
           <div className='bg-gray-100 p-4 rounded-lg'>
             <h2 className='text-xl font-semibold mb-4'>マイリスト一覧</h2>
