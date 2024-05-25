@@ -9,23 +9,24 @@ import axiosClient from '../../../utils/axios';
 import { useUserStore } from '../../store/userStore';
 import { useParams } from 'react-router-dom';
 import { MetaMusicType, MusicType } from '../../../types/score';
-import { Button, Checkbox, FormControlLabel, FormGroup } from '@mui/material';
+import { Autocomplete, Button, Checkbox, FormControlLabel, FormGroup, TextField } from '@mui/material';
 
 const RegisterMusicScore = () => {
   const { user } = useUserStore();
   const { musicId, musicDifficulty } = useParams();
+  const [selectedMusic, setSelectedMusic] = useState<MusicType | null>(null);
   const [registerConsecutively, setRegisterConsecutively] = useState<boolean>(true);
 
   const schema = z
     .object({
-      musicId: z.number().min(1, '曲を選択してください'),
+      musicId: z.number({ message: '曲を選択してください' }).min(1, '曲を選択してください'),
       musicDifficulty: z.string().nonempty(),
       perfectCount: z.number({ message: 'Perfectは数値を入力してください' }).min(0, '無効な数値です'),
       greatCount: z.number({ message: 'Greatは数値を入力してください' }).min(0, '無効な数値です'),
       goodCount: z.number({ message: 'Goodは数値を入力してください' }).min(0, '無効な数値です'),
       badCount: z.number({ message: 'Badは数値を入力してください' }).min(0, '無効な数値です'),
       missCount: z.number({ message: 'Missは数値を入力してください' }).min(0, '無効な数値です'),
-      totalNoteCount: z.number({ message: '存在しない難易度です' }),
+      totalNoteCount: z.number({ message: '曲を選択するか、難易度を変更してください' }),
     })
     .refine(
       (data) =>
@@ -52,6 +53,7 @@ const RegisterMusicScore = () => {
   const getAllMusic = async () => {
     try {
       const response = await fetchMusicList(0, false);
+
       setMusicList(response.items);
 
       if (musicId && response.items.find((item: MusicType) => item.id === parseInt(musicId))) {
@@ -69,7 +71,7 @@ const RegisterMusicScore = () => {
     getAllMusic();
   }, []);
 
-  const [musicList, setMusicList] = useState([]);
+  const [musicList, setMusicList] = useState<MusicType[]>([]);
 
   const [difficultyList] = useState(['easy', 'normal', 'hard', 'expert', 'master', 'append']);
 
@@ -77,7 +79,6 @@ const RegisterMusicScore = () => {
 
   useEffect(() => {
     if (musicId) {
-      console.log(musicId);
       setValue('musicId', parseInt(musicId));
     }
   }, [musicList, musicId, setValue]);
@@ -162,6 +163,19 @@ const RegisterMusicScore = () => {
     }
   };
 
+  const handleMusicChange = (event: React.SyntheticEvent, newValue: MusicType | null) => {
+    setSelectedMusic(newValue);
+    setValue('musicId', newValue ? newValue.id : 0);
+  };
+
+  useEffect(() => {
+    const defaultMusic = musicList.find((music) => music.id === Number.parseInt(musicId || '')) || null;
+    setSelectedMusic(defaultMusic);
+    if (defaultMusic) {
+      setValue('musicId', defaultMusic.id);
+    }
+  }, [musicId, musicList, setValue]);
+
   const onSubmit = async (values: FormData) => {
     console.log(values);
     try {
@@ -194,19 +208,19 @@ const RegisterMusicScore = () => {
         <main className='p-4'>
           <h1 className='text-2xl font-bold mb-4'>スコア登録</h1>
           <form onSubmit={handleSubmit(onSubmit)} className='p-4 bg-white shadow-md rounded-md'>
-            <select
-              {...register('musicId', { required: true, valueAsNumber: true })}
-              className='mb-4 p-2 rounded border border-gray-300 w-full'
-            >
-              <option key={0} value={0}>
-                曲を選択してください
-              </option>
-              {musicList.map((music: MusicType) => (
-                <option key={music.id} value={music.id}>
-                  {music.name}
-                </option>
-              ))}
-            </select>
+            <div>
+              <Autocomplete
+                disablePortal
+                id='search-music-autocomplete'
+                options={musicList}
+                value={selectedMusic}
+                getOptionLabel={(option: MusicType) => option.name}
+                renderInput={(params) => <TextField {...params} label='楽曲検索' />}
+                onChange={handleMusicChange}
+                className='mb-4'
+              />
+              <input type='hidden' {...register('musicId', { required: true, valueAsNumber: true })} />
+            </div>
             {errors.musicId && <span className='text-red-500 mb-2 block'>{errors.musicId.message}</span>}
             <select
               {...register('musicDifficulty', { required: true })}
