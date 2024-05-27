@@ -5,6 +5,7 @@ import { useUserStore } from '../../store/userStore';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ScoreType } from '../../../types/score';
+import { Button } from '@mui/material';
 
 const ScoresList = () => {
   const { user } = useUserStore();
@@ -25,6 +26,30 @@ const ScoresList = () => {
       console.log(err);
     }
   }
+
+  const onClickCSVDownload = async () => {
+    try {
+      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}scores/csv`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        params: {
+          userId: user?.id,
+          genreId: 1,
+        },
+      });
+      console.log(response);
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'スコア一覧.csv');
+      document.body.appendChild(link);
+      link.click();
+    } catch (err) {
+      console.log(err);
+    }
+  };
   return (
     <div className='flex h-screen'>
       <div className='flex-initial w-1/5'>
@@ -34,7 +59,12 @@ const ScoresList = () => {
       <div className='flex-auto w-4/5'>
         <Header />
         <main className='p-4'>
-          <h1>スコア一覧</h1>
+          <div className='my-2 flex justify-between'>
+            <div className='text-xl my-2'>スコア一覧</div>
+            <Button variant='contained' onClick={onClickCSVDownload}>
+              CSVダウンロード
+            </Button>
+          </div>
           {scoreList.length ? (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
               {scoreList.map((score: ScoreType) => (
