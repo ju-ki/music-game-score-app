@@ -2,23 +2,24 @@ import { useEffect, useState } from 'react';
 import Header from '../../common/Header';
 import Sidebar from '../../common/Sidebar';
 import { useForm } from 'react-hook-form';
-import { fetchMusicList } from '../../hooks/useMusicQuery';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axiosClient from '../../../utils/axios';
 import { useUserStore } from '../../store/userStore';
-import { useParams } from 'react-router-dom';
-import { MetaMusicType, MusicType } from '../../../types/score';
-import { Autocomplete, Button, Checkbox, FormControlLabel, FormGroup, TextField } from '@mui/material';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ScoreType } from '../../../types/score';
+import { Button } from '@mui/material';
 
-const RegisterMusicScore = () => {
+const EditMusicScore = () => {
   const { user } = useUserStore();
-  const { musicId, musicDifficulty } = useParams();
-  const [selectedMusic, setSelectedMusic] = useState<MusicType | null>(null);
-  const [registerConsecutively, setRegisterConsecutively] = useState<boolean>(true);
+  const { scoreId } = useParams();
+  const [musicName, setMusicName] = useState('');
+  const [score, setScore] = useState<ScoreType | null>(null);
+  const navigate = useNavigate();
 
   const schema = z
     .object({
+      scoreId: z.string({ message: '無効なスコアIDです' }).nonempty({ message: '無効なスコアIDです' }),
       musicId: z.number({ message: '曲を選択してください' }).min(1, '曲を選択してください'),
       musicDifficulty: z.string().nonempty(),
       perfectCount: z.number({ message: 'Perfectは数値を入力してください' }).min(0, '無効な数値です'),
@@ -44,59 +45,45 @@ const RegisterMusicScore = () => {
     watch,
     setValue,
     getValues,
-    reset,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
-  const getAllMusic = async () => {
-    try {
-      const response = await fetchMusicList(0, false);
-
-      setMusicList(response.items);
-
-      if (musicId && response.items.find((item: MusicType) => item.id === parseInt(musicId))) {
-        setValue('musicId', parseInt(musicId));
+  const getScoreDetail = async () => {
+    if (scoreId) {
+      try {
+        const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}scores/detail/`, {
+          params: {
+            userId: user?.id,
+            scoreId: scoreId,
+          },
+        });
+        setScore(response.data);
+      } catch (err) {
+        console.log(err);
       }
-      if (musicDifficulty) {
-        setValue('musicDifficulty', musicDifficulty);
-      }
-    } catch (err) {
-      console.log(err);
     }
   };
 
   useEffect(() => {
-    getAllMusic();
-  }, []);
-
-  const [musicList, setMusicList] = useState<MusicType[]>([]);
-
-  const [difficultyList] = useState(['easy', 'normal', 'hard', 'expert', 'master', 'append']);
-
-  const watchMusic = watch(['musicId', 'musicDifficulty']);
+    getScoreDetail();
+  }, [scoreId]);
 
   useEffect(() => {
-    if (musicId) {
-      setValue('musicId', parseInt(musicId));
+    if (score) {
+      setValue('perfectCount', score.perfectCount);
+      setValue('greatCount', score.greatCount);
+      setValue('goodCount', score.goodCount);
+      setValue('badCount', score.badCount);
+      setValue('missCount', score.missCount);
+      setValue('totalNoteCount', score.totalNoteCount);
+      setValue('musicId', score.musicId);
+      setMusicName(score.music.name);
+      setValue('musicDifficulty', score.musicDifficulty);
+      setValue('scoreId', score.id);
     }
-  }, [musicList, musicId, setValue]);
-
-  useEffect(() => {
-    if (watchMusic[0] && watchMusic[1]) {
-      const musicId = watchMusic[0];
-      const musicDifficulty = watchMusic[1];
-      const data = musicList
-        .flatMap((music: MusicType) => music.metaMusic as unknown as MetaMusicType[])
-        .filter((meta: MetaMusicType) => musicId == meta.musicId && musicDifficulty == meta.musicDifficulty);
-      if (data[0]) {
-        setValue('totalNoteCount', data[0].totalNoteCount);
-      } else {
-        setValue('totalNoteCount', NaN);
-      }
-    }
-  }, [watchMusic, musicList, setValue]);
+  }, [score]);
 
   const watchedScores = getValues(['perfectCount', 'greatCount', 'goodCount', 'badCount', 'missCount']);
   const watchedPerfectCount = watch('perfectCount');
@@ -163,19 +150,6 @@ const RegisterMusicScore = () => {
     }
   };
 
-  const handleMusicChange = (event: React.SyntheticEvent, newValue: MusicType | null) => {
-    setSelectedMusic(newValue);
-    setValue('musicId', newValue ? newValue.id : 0);
-  };
-
-  useEffect(() => {
-    const defaultMusic = musicList.find((music) => music.id === Number.parseInt(musicId || '')) || null;
-    setSelectedMusic(defaultMusic);
-    if (defaultMusic) {
-      setValue('musicId', defaultMusic.id);
-    }
-  }, [musicId, musicList, setValue]);
-
   const onSubmit = async (values: FormData) => {
     console.log(values);
     try {
@@ -184,15 +158,7 @@ const RegisterMusicScore = () => {
         genreId: 1,
         userId: user?.id,
       });
-      reset({
-        musicId: registerConsecutively ? values.musicId : 0,
-        totalNoteCount: registerConsecutively ? values.totalNoteCount : NaN,
-        perfectCount: NaN,
-        greatCount: NaN,
-        goodCount: NaN,
-        badCount: NaN,
-        missCount: NaN,
-      });
+      navigate(`/score/${values.musicId}/${values.musicDifficulty}`);
     } catch (err) {
       console.log(err);
     }
@@ -206,31 +172,26 @@ const RegisterMusicScore = () => {
       <div className='flex-auto w-4/5'>
         <Header />
         <main className='p-4'>
-          <h1 className='text-2xl font-bold mb-4'>スコア登録</h1>
+          <h1 className='text-2xl font-bold mb-4'>スコア編集</h1>
           <form onSubmit={handleSubmit(onSubmit)} className='p-4 bg-white shadow-md rounded-md'>
             <div>
-              <Autocomplete
-                disablePortal
-                id='search-music-autocomplete'
-                options={musicList}
-                value={selectedMusic}
-                getOptionLabel={(option: MusicType) => option.name}
-                renderInput={(params) => <TextField {...params} label='楽曲検索' />}
-                onChange={handleMusicChange}
-                className='mb-4'
+              {errors.scoreId && <span className='text-red-500 mb-2 block'>{errors.scoreId.message}</span>}
+              <input
+                value={musicName}
+                type='text'
+                placeholder='楽曲名'
+                disabled
+                className='mb-4 p-2 rounded border border-gray-300 w-full'
               />
-              <input type='hidden' {...register('musicId', { required: true, valueAsNumber: true })} />
             </div>
+            <input type='hidden' {...register('musicId', { required: true, valueAsNumber: true })} />
             {errors.musicId && <span className='text-red-500 mb-2 block'>{errors.musicId.message}</span>}
             <select
               {...register('musicDifficulty', { required: true })}
               className='mb-4 p-2 rounded border border-gray-300 w-full'
+              disabled
             >
-              {difficultyList.map((difficulty) => (
-                <option key={difficulty} value={difficulty}>
-                  {difficulty}
-                </option>
-              ))}
+              <option>{score?.musicDifficulty}</option>
             </select>
             {errors.totalNoteCount && <span className='text-red-500 mb-2 block'>{errors.totalNoteCount.message}</span>}
             <input
@@ -286,19 +247,8 @@ const RegisterMusicScore = () => {
             {errors.missCount && <span className='text-red-500 mb-2 block'>{errors.missCount.message}</span>}
             <div className='flex items-center'>
               <Button variant='contained' type='submit'>
-                スコアを登録する
+                スコアを編集する
               </Button>
-              <FormGroup className='mx-5'>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={registerConsecutively}
-                      onChange={() => setRegisterConsecutively((prev) => !prev)}
-                    />
-                  }
-                  label='同じ曲を連続で登録する'
-                />
-              </FormGroup>
             </div>
           </form>
         </main>
@@ -307,4 +257,4 @@ const RegisterMusicScore = () => {
   );
 };
 
-export default RegisterMusicScore;
+export default EditMusicScore;

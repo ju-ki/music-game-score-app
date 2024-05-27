@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
-import { addMusicToListType, getMyListDetailType, postMusicListType } from './dto';
+import { DeleteMyListType, addMusicToListType, getMyListDetailType, postMusicListType } from './dto';
 
 @Injectable()
 export class MusicListService {
@@ -110,26 +110,20 @@ export class MusicListService {
     return musicList;
   }
 
-  async removeMusicFromList(request) {
-    let musicId: number = request.musicId;
-    let musicGenreId: number = request.musicGenreId;
-    if (typeof musicId !== 'number') {
-      musicId = Number.parseInt(musicId);
-    }
-
+  async removeMyMusicList(request: DeleteMyListType) {
+    let musicGenreId: number = request.genreId;
     if (typeof musicGenreId !== 'number') {
       musicGenreId = Number.parseInt(musicGenreId);
     }
-    await this.prisma.musicMusicList.delete({
+    const deletedMusicList = await this.prisma.musicList.delete({
       where: {
-        musicId_musicGenreId_musicListId: {
-          musicId: musicId,
-          musicGenreId: musicGenreId,
-          musicListId: request.musicListId,
-        },
+        id: request.musicListId,
+        userId: request.userId,
+        genreId: musicGenreId,
       },
     });
-    return request;
+
+    return deletedMusicList;
   }
 
   async getMusicFromList(request: getMyListDetailType) {

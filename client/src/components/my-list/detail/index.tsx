@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Header from '../../common/Header';
 import Sidebar from '../../common/Sidebar';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import axiosClient from '../../../utils/axios';
 import { useUserStore } from '../../store/userStore';
 import { MyListType, RelationMyListType } from '../../../types/score';
@@ -25,6 +25,7 @@ const MyListDetail = () => {
   const { user } = useUserStore();
   const [musicDetail, setMusicDetail] = useState<MyListType>();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (myListId) {
@@ -72,6 +73,26 @@ const MyListDetail = () => {
     setIsModalOpen(false);
   };
 
+  const deleteMyMusicList = async () => {
+    if (confirm('マイリストを削除します。\n削除後はデータの復元は行えません。\nよろしいですか?')) {
+      try {
+        const response = await axiosClient.delete(`${import.meta.env.VITE_APP_URL}music-list`, {
+          params: {
+            musicListId: myListId,
+            userId: user?.id,
+            genreId: 1,
+          },
+        });
+        console.log(response);
+        alert('マイリストの削除に成功しました');
+        navigate('/my-list');
+      } catch (err) {
+        alert('マイリストの削除に失敗しました');
+        console.log(err);
+      }
+    }
+  };
+
   if (!musicDetail) {
     return;
   }
@@ -94,9 +115,14 @@ const MyListDetail = () => {
             />
             <div className='flex items-center justify-between my-3 '>
               <h1 className='text-2xl font-semibold mb-4'>{musicDetail?.name}</h1>
-              <Button onClick={handleOpenModal} variant='contained'>
-                マイリスト編集
-              </Button>
+              <div className='space-x-3'>
+                <Button onClick={handleOpenModal} variant='contained'>
+                  マイリスト編集
+                </Button>
+                <Button onClick={() => deleteMyMusicList()} variant='contained' color='error'>
+                  マイリスト削除
+                </Button>
+              </div>
             </div>
             <ul className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
               {musicDetail?.musics.map((music: RelationMyListType) => (

@@ -53,3 +53,9 @@ export class detailMyListType {
   userId: string;
   musics: RelationMyListType[];
 }
+
+export class DeleteMyListType {
+  userId: string;
+  musicListId: string;
+  genreId: number;
+}

@@ -3,6 +3,10 @@ import { MetaMusicService } from 'meta-music/meta-music.service';
 import { PrismaService } from 'prisma/prisma.service';
 import { deleteScoreParams, postScoreType, scoreListParams } from './dto';
 import { SongsService } from 'songs/songs.service';
+import { createObjectCsvWriter } from 'csv-writer';
+import { Response } from 'express';
+import { join } from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class ScoresService {
@@ -85,11 +89,12 @@ export class ScoresService {
   async getDetailScore(param) {
     const detailScore = await this.prisma.scores.findUnique({
       where: {
-        id: param.id,
+        id: param.scoreId,
         userId: param.userId,
       },
       include: {
         metaMusic: true,
+        music: true,
       },
     });
 
@@ -97,11 +102,10 @@ export class ScoresService {
   }
 
   async postNewScore(post: postScoreType) {
-    console.log(post);
     const metaMusic = await this.metaMusicService.getMetaMusic(post.musicId, post.genreId, post.musicDifficulty);
     const newScore = await this.prisma.scores.upsert({
       where: {
-        id: post.id || '',
+        id: post.scoreId || '',
         userId: post.userId,
       },
       update: {
@@ -140,5 +144,68 @@ export class ScoresService {
     });
 
     return deletedScore;
+  }
+
+  async downloadCsv(param, res: Response) {
+    let genreId: number = param.genreId;
+    if (typeof genreId !== 'number') {
+      genreId = parseInt(genreId);
+    }
+
+    const scoreList = await this.prisma.scores.findMany({
+      where: {
+        userId: param.userId,
+        genreId: genreId,
+      },
+      include: {
+        music: {
+          include: {
+            metaMusic: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    const records = scoreList.map((score) => ({
+      name: score.music.name,
+      difficulty: score.musicDifficulty,
+      perfectCount: score.perfectCount,
+      greatCount: score.greatCount,
+      goodCount: score.goodCount,
+      badCount: score.badCount,
+      missCount: score.missCount,
+      createdAt: new Date(score.createdAt).toLocaleDateString('sv-SE'),
+    }));
+
+    const csvWriter = createObjectCsvWriter({
+      path: join(__dirname, 'score.csv'),
+      header: [
+        { id: 'name', title: 'Name' },
+        { id: 'difficulty', title: '難易度' },
+        { id: 'perfectCount', title: 'Perfect' },
+        { id: 'greatCount', title: 'Great' },
+        { id: 'goodCount', title: 'Good' },
+        { id: 'badCount', title: 'Bad' },
+        { id: 'missCount', title: 'Miss' },
+        { id: 'createdAt', title: '登録日' },
+      ],
+      encoding: 'utf8',
+    });
+
+    await csvWriter.writeRecords(records);
+
+    const filePath = join(__dirname, 'score.csv');
+    res.download(filePath, 'score.csv', (err) => {
+      if (err) {
+        console.error('Error downloading the file', err);
+      }
+      fs.unlink(filePath, (unlinkErr) => {
+        if (unlinkErr) {
+          console.error('Error deleting the file', unlinkErr);
+        }
+      });
+    });
   }
 }

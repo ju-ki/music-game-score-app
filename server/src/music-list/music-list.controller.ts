@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import { MusicListService } from './music-list.service';
-import { addMusicToListType, postMusicListType } from './dto';
+import { DeleteMyListType, addMusicToListType, postMusicListType } from './dto';
 
 @Controller('music-list')
 export class MusicListController {
@@ -22,8 +22,8 @@ export class MusicListController {
   }
 
   @Delete()
-  removeMusicFromList(@Query() param) {
-    return this.musicListService.removeMusicFromList(param);
+  removeMyMusicList(@Query() param: DeleteMyListType) {
+    return this.musicListService.removeMyMusicList(param);
   }
 
   @Get('/getMyList')

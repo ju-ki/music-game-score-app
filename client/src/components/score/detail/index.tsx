@@ -3,9 +3,9 @@ import Sidebar from '../../common/Sidebar';
 import Header from '../../common/Header';
 import axiosClient from '../../../utils/axios';
 import { useUserStore } from '../../store/userStore';
-import { NavLink, useParams } from 'react-router-dom';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { Box, Button, Card, CardContent, Grid, Typography } from '@mui/material';
-import { Delete, EmojiEmotions, EmojiEventsTwoTone, InsertEmoticon, Whatshot } from '@mui/icons-material';
+import { Delete, Edit, EmojiEmotions, EmojiEventsTwoTone, InsertEmoticon, Whatshot } from '@mui/icons-material';
 import { ScoreType } from '../../../types/score';
 
 const MusicScoreList = () => {
@@ -13,6 +13,7 @@ const MusicScoreList = () => {
   const { user } = useUserStore();
   const [music, setMusic] = useState('');
   const [scoreList, setScoreList] = useState([]);
+  const navigate = useNavigate();
   useEffect(() => {
     getScoreList();
   }, []);
@@ -32,6 +33,10 @@ const MusicScoreList = () => {
       console.log(err);
     }
   }
+
+  const EditScore = async (scoreId: string) => {
+    navigate(`/edit-score/${scoreId}`);
+  };
 
   const DeleteScore = async (scoreId: string) => {
     if (confirm('削除してもよろしいですか?')) {
@@ -86,7 +91,10 @@ const MusicScoreList = () => {
                               Full Combo!
                             </Typography>
                           </div>
-                          <Delete color='error' onClick={() => DeleteScore(score.id)} />
+                          <div className='space-x-2'>
+                            <Edit onClick={() => EditScore(score.id)} />
+                            <Delete color='error' onClick={() => DeleteScore(score.id)} />
+                          </div>
                         </Box>
                         <Typography variant='body2' component='div' mb={1}>
                           Total Note Count: {score.totalNoteCount}
