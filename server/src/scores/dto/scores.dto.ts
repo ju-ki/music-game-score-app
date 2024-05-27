@@ -1,5 +1,5 @@
 export class postScoreType {
-  id?: string;
+  scoreId?: string;
   musicId: number;
   genreId: number;
   musicDifficulty: string;
