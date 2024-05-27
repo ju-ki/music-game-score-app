@@ -89,11 +89,12 @@ export class ScoresService {
   async getDetailScore(param) {
     const detailScore = await this.prisma.scores.findUnique({
       where: {
-        id: param.id,
+        id: param.scoreId,
         userId: param.userId,
       },
       include: {
         metaMusic: true,
+        music: true,
       },
     });
 
@@ -101,11 +102,10 @@ export class ScoresService {
   }
 
   async postNewScore(post: postScoreType) {
-    console.log(post);
     const metaMusic = await this.metaMusicService.getMetaMusic(post.musicId, post.genreId, post.musicDifficulty);
     const newScore = await this.prisma.scores.upsert({
       where: {
-        id: post.id || '',
+        id: post.scoreId || '',
         userId: post.userId,
       },
       update: {
