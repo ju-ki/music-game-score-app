@@ -193,7 +193,7 @@ export class ScoresService {
         { id: 'createdAt', title: '登録日' },
       ],
       encoding: 'utf8',
-    });
+    }) as CsvWriter<any>;
 
     await csvWriter.writeRecords(records);
 
