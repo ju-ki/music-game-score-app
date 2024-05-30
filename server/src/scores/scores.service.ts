@@ -3,7 +3,8 @@ import { MetaMusicService } from 'meta-music/meta-music.service';
 import { PrismaService } from 'prisma/prisma.service';
 import { ScoreRecord, deleteScoreParams, postScoreType, scoreListParams } from './dto';
 import { SongsService } from 'songs/songs.service';
-import { createObjectCsvWriter, CsvWriter } from 'csv-writer';
+import { createObjectCsvWriter } from 'csv-writer';
+import { type ObjectCsvWriterParams } from 'csv-writer/src/lib/csv-writer-factory';
 import { Response } from 'express';
 import { join } from 'path';
 import * as fs from 'fs';
@@ -179,7 +180,7 @@ export class ScoresService {
       createdAt: new Date(score.createdAt).toLocaleDateString('sv-SE'),
     }));
 
-    const csvWriter: CsvWriter<ScoreRecord> = createObjectCsvWriter({
+    const csvWriter = createObjectCsvWriter({
       path: join(__dirname, 'score.csv'),
       header: [
         { id: 'name', title: 'Name' },
@@ -192,7 +193,7 @@ export class ScoresService {
         { id: 'createdAt', title: '登録日' },
       ],
       encoding: 'utf8',
-    }) as CsvWriter<any>;
+    } as ObjectCsvWriterParams);
 
     await csvWriter.writeRecords(records);
 
