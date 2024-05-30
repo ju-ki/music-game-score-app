@@ -4,7 +4,7 @@ import { PrismaService } from 'prisma/prisma.service';
 import { ScoreRecord, deleteScoreParams, postScoreType, scoreListParams } from './dto';
 import { SongsService } from 'songs/songs.service';
 import { createObjectCsvWriter } from 'csv-writer';
-import { CsvWriter } from 'csv-writer/src/lib/csv-writer';
+import { type CsvWriter } from 'csv-writer/src/lib/csv-writer';
 import { Response } from 'express';
 import { join } from 'path';
 import * as fs from 'fs';
