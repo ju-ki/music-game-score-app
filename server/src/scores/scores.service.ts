@@ -7,6 +7,7 @@ import { createObjectCsvWriter } from 'csv-writer';
 import { Response } from 'express';
 import { join } from 'path';
 import * as fs from 'fs';
+import { CsvWriter } from 'csv-writer/src/lib/csv-writer';
 
 @Injectable()
 export class ScoresService {
@@ -192,7 +193,7 @@ export class ScoresService {
         { id: 'createdAt', title: '登録日' },
       ],
       encoding: 'utf8',
-    });
+    }) as CsvWriter<ScoreRecord>;
 
     await csvWriter.writeRecords(records);
 
