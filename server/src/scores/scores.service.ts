@@ -169,7 +169,7 @@ export class ScoresService {
         createdAt: 'desc',
       },
     });
-    const records = scoreList.map((score) => ({
+    const records: ScoreRecord[] = scoreList.map((score) => ({
       name: score.music.name,
       difficulty: score.musicDifficulty,
       perfectCount: score.perfectCount,
