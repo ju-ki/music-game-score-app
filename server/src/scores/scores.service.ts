@@ -4,7 +4,6 @@ import { PrismaService } from 'prisma/prisma.service';
 import { ScoreRecord, deleteScoreParams, postScoreType, scoreListParams } from './dto';
 import { SongsService } from 'songs/songs.service';
 import { createObjectCsvWriter } from 'csv-writer';
-import { type ObjectCsvWriterParams } from 'csv-writer/src/lib/csv-writer-factory';
 import { Response } from 'express';
 import { join } from 'path';
 import * as fs from 'fs';
@@ -193,7 +192,7 @@ export class ScoresService {
         { id: 'createdAt', title: '登録日' },
       ],
       encoding: 'utf8',
-    } as ObjectCsvWriterParams);
+    });
 
     await csvWriter.writeRecords(records);
 
