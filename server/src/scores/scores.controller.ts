@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import { ScoresService } from './scores.service';
 import { deleteScoreParams, postScoreType, scoreListParams } from './dto';
-import { Response } from 'express';
+// import { Response } from 'express';
 
 @Controller('scores')
 export class ScoresController {
@@ -36,8 +36,8 @@ export class ScoresController {
   }
 
   //csvダウンロード
-  @Get('/csv')
-  downloadCsv(@Query() param, @Res() res: Response) {
-    return this.scoresService.downloadCsv(param, res);
-  }
+  // @Get('/csv')
+  // downloadCsv(@Query() param, @Res() res: Response) {
+  //   // return this.scoresService.downloadCsv(param, res);
+  // }
 }

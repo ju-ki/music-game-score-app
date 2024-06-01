@@ -38,7 +38,6 @@ const ScoresList = () => {
           genreId: 1,
         },
       });
-      console.log(response);
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -61,9 +60,10 @@ const ScoresList = () => {
         <main className='p-4'>
           <div className='my-2 flex justify-between'>
             <div className='text-xl my-2'>スコア一覧</div>
-            <Button variant='contained' onClick={onClickCSVDownload}>
+            {/* CSVWriterのエラーが消えないので一時的に削除 */}
+            {/* <Button variant='contained' onClick={onClickCSVDownload}>
               CSVダウンロード
-            </Button>
+            </Button> */}
           </div>
           {scoreList.length ? (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>

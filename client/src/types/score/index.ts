@@ -72,3 +72,8 @@ export type UpdateUserAuthorityData = {
     authority: string;
   }[];
 };
+
+export type BestScoreType = {
+  today: ScoreType;
+  week: ScoreType;
+};
