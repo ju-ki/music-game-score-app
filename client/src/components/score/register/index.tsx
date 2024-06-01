@@ -163,7 +163,7 @@ const RegisterMusicScore = () => {
     }
   };
 
-  const handleMusicChange = (event: React.SyntheticEvent, newValue: MusicType | null) => {
+  const handleMusicChange = (_: React.SyntheticEvent, newValue: MusicType | null) => {
     setSelectedMusic(newValue);
     setValue('musicId', newValue ? newValue.id : 0);
   };
@@ -177,7 +177,6 @@ const RegisterMusicScore = () => {
   }, [musicId, musicList, setValue]);
 
   const onSubmit = async (values: FormData) => {
-    console.log(values);
     try {
       await axiosClient.post(`${import.meta.env.VITE_APP_URL}scores`, {
         ...values,
