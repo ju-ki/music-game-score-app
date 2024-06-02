@@ -17,6 +17,7 @@ export class scoreListParams {
   genreId: number;
   musicId: number;
   musicDifficulty: string;
+  sortId: number;
 }
 
 export class deleteScoreParams {

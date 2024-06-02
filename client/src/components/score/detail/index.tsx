@@ -4,7 +4,18 @@ import Header from '../../common/Header';
 import axiosClient from '../../../utils/axios';
 import { useUserStore } from '../../store/userStore';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
-import { Box, Button, Card, CardContent, Grid, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  FormControl,
+  Grid,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Typography,
+} from '@mui/material';
 import { Delete, Edit, EmojiEmotions, EmojiEventsTwoTone, InsertEmoticon, Whatshot } from '@mui/icons-material';
 import { BestScoreType, ScoreType } from '../../../types/score';
 import { Divider } from '@mui/joy';
@@ -46,6 +57,7 @@ const MusicScoreList = () => {
   const [music, setMusic] = useState('');
   const [scoreList, setScoreList] = useState<ScoreType[]>([]);
   const [bestScore, setBestScore] = useState<BestScoreType>();
+  const [sortId, setSortId] = useState<number>(0);
   const [countPlayCount, setPlayCount] = useState<number>(0);
   const [countFullComb, setCountFullComb] = useState<number>(0);
   const [countAllPerfectCount, setCountAllPerfectCount] = useState<number>(0);
@@ -53,7 +65,7 @@ const MusicScoreList = () => {
   const navigate = useNavigate();
   useEffect(() => {
     getScoreList();
-  }, []);
+  }, [sortId]);
   async function getScoreList() {
     try {
       const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}scores/detailList`, {
@@ -62,10 +74,13 @@ const MusicScoreList = () => {
           genreId: 1,
           musicId: musicId,
           musicDifficulty: musicDifficulty,
+          sortId: sortId,
         },
       });
-      console.log(response.data);
 
+      setScoreList(response.data.scoreList);
+      setBestScore(response.data.bestScore);
+      CountFullCombOrAllPerfectCount(response.data.scoreList);
       setMusic(response.data.music.name);
       setScoreList(response.data.scoreList);
       setBestScore(response.data.bestScore);
@@ -113,6 +128,10 @@ const MusicScoreList = () => {
       }
     }
   };
+
+  const handleChangeSortId = (event: SelectChangeEvent<number>) => {
+    setSortId(event.target.value as number);
+  };
   return (
     <div className='flex h-screen'>
       <div className='flex-initial w-1/5'>
@@ -123,9 +142,23 @@ const MusicScoreList = () => {
         <Header />
         <main className='p-4'>
           <div className='flex items-center justify-between my-10'>
-            <h1 className='text-2xl'>
-              {music}({musicDifficulty})<span className='mx-3'>スコア一覧</span>
-            </h1>
+            <div className='flex items-center space-x-5'>
+              <div className='text-2xl'>
+                {music}({musicDifficulty})<span className='mx-3'>スコア一覧</span>
+              </div>
+              <FormControl>
+                <Select
+                  labelId='score-sort-label'
+                  id='score-sort-id'
+                  value={sortId}
+                  type='number'
+                  onChange={handleChangeSortId}
+                >
+                  <MenuItem value={0}>ミス数順</MenuItem>
+                  <MenuItem value={1}>失点順</MenuItem>
+                </Select>
+              </FormControl>
+            </div>
             <div className='px-5'>
               <NavLink to={`/register-music-score/${musicId}/${musicDifficulty}`} style={{ display: 'block' }}>
                 <Button color='primary' variant='contained'>
@@ -154,7 +187,7 @@ const MusicScoreList = () => {
                       <Box display='flex' alignItems='center'>
                         <div>
                           <Typography variant='h6' component='h2' align='center'>
-                            フルコンボカウント
+                            FullCombカウント
                           </Typography>
                           <Typography variant='h4' component='div' align='center' fontWeight='bold'>
                             {countFullComb}
@@ -165,7 +198,7 @@ const MusicScoreList = () => {
                       <Box display='flex' alignItems='center'>
                         <div>
                           <Typography variant='h6' component='h2' align='center'>
-                            All Perfectカウント
+                            APカウント
                           </Typography>
                           <Typography variant='h4' component='div' align='center' fontWeight='bold'>
                             {countAllPerfectCount}
@@ -197,7 +230,7 @@ const MusicScoreList = () => {
                           </>
                         ) : (
                           <Typography variant='body2' align='center'>
-                            本日のベストスコアはまだ登録されていません。
+                            登録されていません
                           </Typography>
                         )}
                       </Box>
@@ -226,7 +259,7 @@ const MusicScoreList = () => {
                           </>
                         ) : (
                           <Typography variant='body2' align='center'>
-                            今週のベストスコアはまだ登録されていません。
+                            登録されていません
                           </Typography>
                         )}
                       </Box>
