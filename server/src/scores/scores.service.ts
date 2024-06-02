@@ -3,6 +3,7 @@ import { MetaMusicService } from 'meta-music/meta-music.service';
 import { PrismaService } from 'prisma/prisma.service';
 import { deleteScoreParams, postScoreType, scoreListParams } from './dto';
 import { SongsService } from 'songs/songs.service';
+import { Scores } from '@prisma/client';
 // import { createObjectCsvWriter } from 'csv-writer';
 // import { Response } from 'express';
 // import { join } from 'path';
@@ -55,30 +56,38 @@ export class ScoresService {
       musicId = parseInt(musicId);
     }
 
-    const scoreList = await this.prisma.scores.findMany({
-      where: {
-        userId: searchParams.userId,
-        genreId: genreId,
-        musicId: musicId,
-        metaMusic: {
-          musicDifficulty: searchParams.musicDifficulty,
-        },
-      },
-      orderBy: [
-        {
-          missCount: 'asc',
-        },
-        {
-          badCount: 'asc',
-        },
-        {
-          goodCount: 'asc',
-        },
-        {
-          greatCount: 'asc',
-        },
-      ],
-    });
+    let sortId: number = searchParams.sortId;
+    if (typeof sortId !== 'number') {
+      sortId = parseInt(sortId);
+    }
+
+    const scoreList = await this.prisma.$queryRaw<Scores[]>`
+      SELECT
+        *
+      FROM
+        "public"."Scores"
+      LEFT JOIN
+        "public"."Music" ON "public"."Scores"."musicId" = "public"."Music"."id"
+      WHERE
+      "public"."Scores"."userId"= ${searchParams.userId}
+      AND
+      "public"."Scores"."musicId" = ${musicId}
+      AND
+      "public"."Scores"."genreId" = ${genreId}
+      AND
+      "public"."Scores"."musicDifficulty" = ${searchParams.musicDifficulty}
+      ORDER BY
+        CASE
+          WHEN ${sortId} = 1 THEN "public"."Scores"."missCount" * 3 + "public"."Scores"."badCount" * 3 + "public"."Scores"."goodCount" * 2 + "public"."Scores"."greatCount"
+          ELSE 0
+        END,
+        CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
+        CASE WHEN ${sortId} = 0 THEN "public"."Scores"."goodCount" END,
+        CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
+        CASE WHEN ${sortId} = 0 THEN "public"."Scores"."greatCount" END,
+        CASE WHEN ${sortId} = 0 THEN "public"."Scores"."perfectCount" END,
+      "public"."Scores"."id"
+    `;
 
     const musicInfo = await this.songService.getDetailMusic(genreId, musicId);
 
@@ -162,89 +171,83 @@ export class ScoresService {
       musicId = parseInt(musicId);
     }
 
+    let sortId: number = param.sortId;
+    if (typeof sortId !== 'number') {
+      sortId = parseInt(sortId);
+    }
+
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
 
-    const todayBestScore = await this.prisma.scores.findFirst({
-      where: {
-        userId: param.userId,
-        musicId: musicId,
-        genreId: genreId,
-        musicDifficulty: param.musicDifficulty,
-        createdAt: {
-          gte: startOfDay,
-          lt: endOfDay,
-        },
-      },
-      include: {
-        music: {
-          include: {
-            metaMusic: true,
-          },
-        },
-      },
-      orderBy: [
-        {
-          perfectCount: 'desc',
-        },
-        {
-          greatCount: 'desc',
-        },
-        {
-          goodCount: 'desc',
-        },
-        {
-          badCount: 'desc',
-        },
-        {
-          missCount: 'desc',
-        },
-      ],
-    });
+    const todayBestScore = await this.prisma.$queryRaw<Scores[]>`
+      SELECT
+        *
+      FROM
+        "public"."Scores"
+      INNER JOIN
+        "public"."Music" ON "public"."Scores"."musicId" = "public"."Music"."id"
+      WHERE
+      "public"."Scores"."userId"= ${param.userId}
+      AND
+      "public"."Scores"."musicId" = ${musicId}
+      AND
+      "public"."Scores"."genreId" = ${genreId}
+      AND
+      "public"."Scores"."musicDifficulty" = ${param.musicDifficulty}
+      AND
+      "public"."Scores"."createdAt" BETWEEN ${startOfDay} AND ${endOfDay}
+      ORDER BY
+        CASE
+          WHEN ${sortId} = 1 THEN "public"."Scores"."missCount" * 3 + "public"."Scores"."badCount" * 3 + "public"."Scores"."goodCount" * 2 + "public"."Scores"."greatCount"
+          ELSE 0
+        END,
+        CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
+        CASE WHEN ${sortId} = 0 THEN "public"."Scores"."goodCount" END,
+        CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
+        CASE WHEN ${sortId} = 0 THEN "public"."Scores"."greatCount" END,
+        CASE WHEN ${sortId} = 0 THEN "public"."Scores"."perfectCount" END,
+      "public"."Scores"."id"
+        LIMIT 1
+    `;
 
     const weekStartOfDay = new Date();
-    weekStartOfDay.setHours(-7, 0, 0, 0);
-    const weeklyBestScore = await this.prisma.scores.findFirst({
-      where: {
-        userId: param.userId,
-        musicId: musicId,
-        genreId: genreId,
-        musicDifficulty: param.musicDifficulty,
-        createdAt: {
-          gte: weekStartOfDay,
-          lt: endOfDay,
-        },
-      },
-      include: {
-        music: {
-          include: {
-            metaMusic: true,
-          },
-        },
-      },
-      orderBy: [
-        {
-          perfectCount: 'desc',
-        },
-        {
-          greatCount: 'desc',
-        },
-        {
-          goodCount: 'desc',
-        },
-        {
-          badCount: 'desc',
-        },
-        {
-          missCount: 'desc',
-        },
-      ],
-    });
+    weekStartOfDay.setDate(weekStartOfDay.getDate() - 7);
+    weekStartOfDay.setHours(0, 0, 0, 0);
+    const weeklyBestScore = await this.prisma.$queryRaw<Scores[]>`
+      SELECT
+        *
+      FROM
+        "public"."Scores"
+      INNER JOIN
+        "public"."Music" ON "public"."Scores"."musicId" = "public"."Music"."id"
+      WHERE
+      "public"."Scores"."userId"= ${param.userId}
+      AND
+      "public"."Scores"."musicId" = ${musicId}
+      AND
+      "public"."Scores"."genreId" = ${genreId}
+      AND
+      "public"."Scores"."musicDifficulty" = ${param.musicDifficulty}
+      AND
+      "public"."Scores"."createdAt" BETWEEN ${weekStartOfDay} AND ${endOfDay}
+      ORDER BY
+        CASE
+          WHEN ${sortId} = 1 THEN "public"."Scores"."missCount" * 3 + "public"."Scores"."badCount" * 3 + "public"."Scores"."goodCount" * 2 + "public"."Scores"."greatCount"
+          ELSE 0
+        END,
+        CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
+        CASE WHEN ${sortId} = 0 THEN "public"."Scores"."goodCount" END,
+        CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
+        CASE WHEN ${sortId} = 0 THEN "public"."Scores"."greatCount" END,
+        CASE WHEN ${sortId} = 0 THEN "public"."Scores"."perfectCount" END,
+      "public"."Scores"."id"
+      LIMIT 1
+    `;
 
-    return { today: todayBestScore, week: weeklyBestScore };
+    return { today: todayBestScore.length ? todayBestScore[0] : null, week: weeklyBestScore[0] };
   }
 
   // async downloadCsv(param, res: Response) {
