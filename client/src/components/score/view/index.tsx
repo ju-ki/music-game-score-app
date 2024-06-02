@@ -5,7 +5,7 @@ import { useUserStore } from '../../store/userStore';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ScoreType } from '../../../types/score';
-import { Button } from '@mui/material';
+// import { Button } from '@mui/material';
 
 const ScoresList = () => {
   const { user } = useUserStore();
@@ -27,28 +27,28 @@ const ScoresList = () => {
     }
   }
 
-  const onClickCSVDownload = async () => {
-    try {
-      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}scores/csv`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        params: {
-          userId: user?.id,
-          genreId: 1,
-        },
-      });
+  // const onClickCSVDownload = async () => {
+  //   try {
+  //     const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}scores/csv`, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       params: {
+  //         userId: user?.id,
+  //         genreId: 1,
+  //       },
+  //     });
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'スコア一覧.csv');
-      document.body.appendChild(link);
-      link.click();
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  //     const url = window.URL.createObjectURL(new Blob([response.data]));
+  //     const link = document.createElement('a');
+  //     link.href = url;
+  //     link.setAttribute('download', 'スコア一覧.csv');
+  //     document.body.appendChild(link);
+  //     link.click();
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
   return (
     <div className='flex h-screen'>
       <div className='flex-initial w-1/5'>
