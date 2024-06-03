@@ -23,7 +23,7 @@ import axiosClient from '../../../utils/axios';
 const AdminMusic = () => {
   const [musicList, setMusicList] = useState<MusicType[]>([]);
   const [unitList, setUnitList] = useState<UnitType[]>([]);
-  const [newSongs, setNewSongs] = useState<{ title: string }[]>([]);
+  const [newSongs, setNewSongs] = useState<{ title: string; id: number }[]>([]);
   const [open, setOpen] = useState(false);
   useEffect(() => {
     getMusic();
@@ -80,8 +80,8 @@ const AdminMusic = () => {
           <Dialog open={open} onClose={handleClose}>
             <DialogTitle>新しい曲が追加されました</DialogTitle>
             <DialogContent>
-              {newSongs.map((song, index) => (
-                <Typography key={index}>{song.title}</Typography>
+              {newSongs.map((song) => (
+                <Typography key={song.id}>{song.title}</Typography>
               ))}
             </DialogContent>
             <DialogActions>

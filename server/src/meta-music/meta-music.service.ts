@@ -1,7 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import axios from 'axios';
 import { PrismaService } from 'prisma/prisma.service';
 import { map } from 'rxjs';
 
@@ -12,41 +11,6 @@ export class MetaMusicService {
     private config: ConfigService,
     private prisma: PrismaService,
   ) {}
-
-  async fetchMusicDifficulties(musicIdList: number[]) {
-    const response = await axios.get(this.config.get('META_MUSIC_URL'));
-    const newMusicMetaList = response.data.filter((music) => musicIdList.includes(music.musicId));
-    console.log(newMusicMetaList);
-    newMusicMetaList.forEach(async (music) => {
-      await this.prisma.metaMusic.create({
-        data: {
-          id: music.id.toString(),
-          genreId: 1,
-          musicId: music.musicId as number,
-          playLevel: music.playLevel.toString(),
-          totalNoteCount: music.totalNoteCount as number,
-          musicDifficulty: music.musicDifficulty as string,
-        },
-      });
-    });
-  }
-
-  async fetchMusicTag(musicIdList: number[]) {
-    const response = await axios.get(this.config.get('MUSIC_TAG_URL'));
-    const newMusicTagList = response.data.filter((music) => musicIdList.includes(music.musicId));
-    console.log(newMusicTagList);
-    newMusicTagList.forEach(async (music) => {
-      await this.prisma.musicTag.create({
-        data: {
-          id: music.id,
-          genreId: 1,
-          musicId: music.musicId as number,
-          tagName: music.musicTag,
-          tagId: music.seq,
-        },
-      });
-    });
-  }
 
   async fetchUnitProfile() {
     this.httpService
