@@ -2,6 +2,10 @@ import { NavLink } from 'react-router-dom';
 import Header from '../../common/Header';
 import {
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Paper,
   Table,
   TableBody,
@@ -19,6 +23,8 @@ import axiosClient from '../../../utils/axios';
 const AdminMusic = () => {
   const [musicList, setMusicList] = useState<MusicType[]>([]);
   const [unitList, setUnitList] = useState<UnitType[]>([]);
+  const [newSongs, setNewSongs] = useState<{ title: string }[]>([]);
+  const [open, setOpen] = useState(false);
   useEffect(() => {
     getMusic();
   }, []);
@@ -37,11 +43,20 @@ const AdminMusic = () => {
     try {
       const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}songs`);
       console.log(response.data);
-      setMusicList(response.data.items);
+      setMusicList(response.data.allMusic.items);
+      const newSongs = response.data.newMusic; // ここで新しく取得した曲を設定
+      setNewSongs(newSongs);
+      setOpen(true);
     } catch (err) {
+      alert('失敗しました.');
       console.log(err);
     }
   };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   return (
     <>
       <div className='flex flex-col min-h-screen'>
@@ -62,6 +77,19 @@ const AdminMusic = () => {
               楽曲の更新を行う
             </Button>
           </div>
+          <Dialog open={open} onClose={handleClose}>
+            <DialogTitle>新しい曲が追加されました</DialogTitle>
+            <DialogContent>
+              {newSongs.map((song, index) => (
+                <Typography key={index}>{song.title}</Typography>
+              ))}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClose} color='primary'>
+                閉じる
+              </Button>
+            </DialogActions>
+          </Dialog>
 
           <form>
             <TableContainer component={Paper}>

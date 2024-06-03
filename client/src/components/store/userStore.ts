@@ -5,6 +5,7 @@ type User = {
   name: string;
   email: string;
   imageUrl: string;
+  authority: string;
 };
 
 type UserStore = {
