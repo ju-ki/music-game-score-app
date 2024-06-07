@@ -1,10 +1,10 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { map } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
 import { MetaMusicService } from 'meta-music/meta-music.service';
 import { searchWords } from './dto';
+import axios from 'axios';
 
 @Injectable({})
 export class SongsService {
@@ -17,37 +17,69 @@ export class SongsService {
   //これを定期的に実行できるようにした(DBが更新されたらみたいな感じ)
   async fetchAllSongs() {
     try {
-      this.httpService
-        .get(this.config.get('MUSIC_URL'))
-        .pipe(map((response) => response.data))
-        .subscribe(async (songs) => {
-          await Promise.all(
-            songs.map(async (song) => {
-              await this.prisma.music.upsert({
-                where: {
-                  id_genreId: {
-                    id: song.id,
-                    genreId: 1,
-                  },
-                },
-                update: {},
-                create: {
-                  id: song.id,
-                  name: song.title,
-                  assetBundleName: song.assetbundleName,
-                  genreId: 1,
-                  releasedAt: new Date(song.releasedAt),
-                },
-              });
-            }),
-          );
-          this.metaMusicService.fetchMusicDifficulties();
-          this.metaMusicService.fetchMusicTag();
-          this.metaMusicService.fetchUnitProfile();
-        });
-
+      const response = await axios.get(this.config.get('MUSIC_URL'));
       const musicList = await this.searchMusic({ genreId: 1, isInfinityScroll: 'false', page: 0, musicTag: 0 });
-      return musicList;
+      const currentMusicIdSet = new Set(musicList.items.map((value) => value.id));
+
+      const newMusic = response.data.filter((music) => !currentMusicIdSet.has(music.id));
+
+      //新規楽曲がある場合のみ追加処理を行う
+      if (newMusic.length) {
+        await this.prisma.$transaction(async (prisma) => {
+          for (const music of newMusic) {
+            await prisma.music.create({
+              data: {
+                id: music.id,
+                name: music.title,
+                assetBundleName: music.assetbundleName,
+                genreId: 1,
+                releasedAt: new Date(music.releasedAt),
+              },
+            });
+          }
+
+          // MusicDifficultiesの追加
+          const responseDifficulties = await axios.get(this.config.get('META_MUSIC_URL'));
+          const newMusicMetaList = responseDifficulties.data.filter((music) =>
+            newMusic.some((newMeta) => newMeta.id === music.musicId),
+          );
+          for (const music of newMusicMetaList) {
+            await prisma.metaMusic.create({
+              data: {
+                id: music.id.toString(),
+                genreId: 1,
+                musicId: music.musicId as number,
+                playLevel: music.playLevel.toString(),
+                totalNoteCount: music.totalNoteCount as number,
+                musicDifficulty: music.musicDifficulty as string,
+              },
+            });
+          }
+
+          // MusicTagの追加
+          const responseTags = await axios.get(this.config.get('MUSIC_TAG_URL'));
+          const newMusicTagList = responseTags.data.filter((music) =>
+            newMusic.some((newTag) => newTag.id === music.musicId),
+          );
+          for (const music of newMusicTagList) {
+            await prisma.musicTag.create({
+              data: {
+                id: music.id,
+                genreId: 1,
+                musicId: music.musicId as number,
+                tagName: music.musicTag,
+                tagId: music.seq,
+              },
+            });
+          }
+        });
+      }
+
+      const allMusicList = await this.searchMusic({ genreId: 1, isInfinityScroll: 'false', page: 0, musicTag: 0 });
+      return {
+        newMusic: newMusic,
+        allMusic: allMusicList,
+      };
     } catch (err) {
       console.log(err);
     }
@@ -57,8 +89,8 @@ export class SongsService {
     const music = await this.prisma.music.findUnique({
       where: {
         id_genreId: {
-          id: parseInt(musicId),
-          genreId: parseInt(genreId),
+          id: Number.parseInt(musicId),
+          genreId: Number.parseInt(genreId),
         },
       },
       include: {
@@ -73,11 +105,11 @@ export class SongsService {
   async searchMusic(query: searchWords) {
     let tagId: number = query.musicTag;
     if (typeof tagId !== 'number') {
-      tagId = parseInt(tagId);
+      tagId = Number.parseInt(tagId);
     }
     let page = query.page;
     if (typeof page !== 'number') {
-      page = parseInt(page);
+      page = Number.parseInt(page);
     }
 
     const isInfinityScroll = query.isInfinityScroll.toLowerCase() !== 'false';
@@ -119,7 +151,7 @@ export class SongsService {
     });
 
     searchedMusicList.forEach((music) => {
-      music.metaMusic.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+      music.metaMusic.sort((a, b) => Number.parseInt(a.id) - Number.parseInt(b.id));
     });
 
     const totalCount = await this.prisma.music.count({
