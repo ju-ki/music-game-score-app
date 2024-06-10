@@ -11,6 +11,11 @@ export class SongsController {
     return this.songsService.fetchAllSongs();
   }
 
+  @Get('/yumesute')
+  findYumesuteSongs() {
+    return this.songsService.fetchYumesuteSongs();
+  }
+
   @Get('/detail')
   getDetailMusic(@Query() query) {
     return this.songsService.getDetailMusic(query.genreId, query.musicId);
