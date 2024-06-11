@@ -5,11 +5,13 @@ import { useUserStore } from '../../store/userStore';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ScoreType } from '../../../types/score';
+import { useGenre } from '../../store/useGenre';
 // import { Button } from '@mui/material';
 
 const ScoresList = () => {
   const { user } = useUserStore();
   const [scoreList, setScoreList] = useState([]);
+  const { currentGenre } = useGenre();
   useEffect(() => {
     getScoreList();
   }, []);
@@ -18,7 +20,7 @@ const ScoresList = () => {
       const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}scores/list`, {
         params: {
           userId: user?.id,
-          genreId: 1,
+          genreId: currentGenre || 1,
         },
       });
       setScoreList(response.data);

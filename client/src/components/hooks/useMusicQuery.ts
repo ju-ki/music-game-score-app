@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import axiosClient from '../../utils/axios';
+import { useGenre } from '../store/useGenre';
 
 /**
  *
@@ -7,23 +8,26 @@ import axiosClient from '../../utils/axios';
  * @param isInfinityScroll 無限スクロールの実装するか(falseの場合は全権取得)
  * @returns 楽曲リスト
  */
-export const fetchMusicList = async (page: number, isInfinityScroll: boolean) => {
+export const fetchMusicList = async (page: number, isInfinityScroll: boolean, currentGenre: number) => {
   const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}songs/search`, {
     params: {
       musicTag: 0,
-      genreId: 1,
+      genreId: currentGenre || 1,
       page: page,
       isInfinityScroll: isInfinityScroll,
     },
   });
 
+  console.log(response.data);
+
   return response.data;
 };
 
 export const useMusicQuery = () => {
+  const { currentGenre } = useGenre();
   return useInfiniteQuery({
     queryKey: ['musicList'],
-    queryFn: ({ pageParam = 1 }) => fetchMusicList(pageParam, true),
+    queryFn: ({ pageParam = 1 }) => fetchMusicList(pageParam, true, currentGenre),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => {
       return lastPage.nextPage ? lastPage.nextPage : undefined;

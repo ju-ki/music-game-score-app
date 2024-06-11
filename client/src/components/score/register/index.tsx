@@ -10,12 +10,14 @@ import { useUserStore } from '../../store/userStore';
 import { useParams } from 'react-router-dom';
 import { MetaMusicType, MusicType } from '../../../types/score';
 import { Autocomplete, Button, Checkbox, FormControlLabel, FormGroup, TextField } from '@mui/material';
+import { useGenre } from '../../store/useGenre';
 
 const RegisterMusicScore = () => {
   const { user } = useUserStore();
   const { musicId, musicDifficulty } = useParams();
   const [selectedMusic, setSelectedMusic] = useState<MusicType | null>(null);
   const [registerConsecutively, setRegisterConsecutively] = useState<boolean>(true);
+  const { currentGenre } = useGenre();
 
   const schema = z
     .object({
@@ -52,7 +54,7 @@ const RegisterMusicScore = () => {
 
   const getAllMusic = async () => {
     try {
-      const response = await fetchMusicList(0, false);
+      const response = await fetchMusicList(0, false, currentGenre);
 
       setMusicList(response.items);
 
@@ -73,7 +75,11 @@ const RegisterMusicScore = () => {
 
   const [musicList, setMusicList] = useState<MusicType[]>([]);
 
-  const [difficultyList] = useState(['easy', 'normal', 'hard', 'expert', 'master', 'append']);
+  const [difficultyList] = useState(
+    currentGenre == 1
+      ? ['easy', 'normal', 'hard', 'expert', 'master', 'append']
+      : ['easy', 'normal', 'extra', 'stella', 'olivier'],
+  );
 
   const watchMusic = watch(['musicId', 'musicDifficulty']);
 
@@ -180,7 +186,7 @@ const RegisterMusicScore = () => {
     try {
       await axiosClient.post(`${import.meta.env.VITE_APP_URL}scores`, {
         ...values,
-        genreId: 1,
+        genreId: currentGenre || 1,
         userId: user?.id,
       });
       reset({

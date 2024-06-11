@@ -232,11 +232,6 @@ export class SongsService {
             playLevel: query.playLevel,
           },
         },
-        musicTag: {
-          some: {
-            tagId: tagId,
-          },
-        },
       },
       include: {
         metaMusic: true,
