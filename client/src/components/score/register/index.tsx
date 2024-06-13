@@ -18,11 +18,17 @@ const RegisterMusicScore = () => {
   const [selectedMusic, setSelectedMusic] = useState<MusicType | null>(null);
   const [registerConsecutively, setRegisterConsecutively] = useState<boolean>(true);
   const { currentGenre } = useGenre();
+  const [difficultyList, setDifficultyList] = useState<string[]>([]);
+  const [musicList, setMusicList] = useState<MusicType[]>([]);
 
   const schema = z
     .object({
       musicId: z.number({ message: '曲を選択してください' }).min(1, '曲を選択してください'),
       musicDifficulty: z.string().nonempty(),
+      perfectPlusCount:
+        currentGenre === 2
+          ? z.number({ message: 'PerfectPlusは数値を入力してください' }).min(0, '無効な数値です')
+          : z.number().optional(),
       perfectCount: z.number({ message: 'Perfectは数値を入力してください' }).min(0, '無効な数値です'),
       greatCount: z.number({ message: 'Greatは数値を入力してください' }).min(0, '無効な数値です'),
       goodCount: z.number({ message: 'Goodは数値を入力してください' }).min(0, '無効な数値です'),
@@ -31,8 +37,24 @@ const RegisterMusicScore = () => {
       totalNoteCount: z.number({ message: '曲を選択するか、難易度を変更してください' }),
     })
     .refine(
-      (data) =>
-        data.totalNoteCount === data.perfectCount + data.greatCount + data.goodCount + data.badCount + data.missCount,
+      (data) => {
+        if (currentGenre === 2 && data.perfectPlusCount) {
+          return (
+            data.totalNoteCount ===
+            data.perfectPlusCount +
+              data.perfectCount +
+              data.greatCount +
+              data.goodCount +
+              data.badCount +
+              data.missCount
+          );
+        } else {
+          return (
+            data.totalNoteCount ===
+            data.perfectCount + data.greatCount + data.goodCount + data.badCount + data.missCount
+          );
+        }
+      },
       {
         message: '総ノーツ数と数が合っていません',
         path: ['totalNoteCount'],
@@ -71,15 +93,16 @@ const RegisterMusicScore = () => {
 
   useEffect(() => {
     getAllMusic();
-  }, []);
+    setMusicDifficulty();
+  }, [currentGenre]);
 
-  const [musicList, setMusicList] = useState<MusicType[]>([]);
-
-  const [difficultyList] = useState(
-    currentGenre == 1
-      ? ['easy', 'normal', 'hard', 'expert', 'master', 'append']
-      : ['easy', 'normal', 'extra', 'stella', 'olivier'],
-  );
+  const setMusicDifficulty = () => {
+    if (currentGenre === 1) {
+      setDifficultyList(['easy', 'normal', 'hard', 'expert', 'master', 'append']);
+    } else if (currentGenre === 2) {
+      setDifficultyList(['easy', 'normal', 'hard', 'extra', 'stella', 'olivier']);
+    }
+  };
 
   const watchMusic = watch(['musicId', 'musicDifficulty']);
 
@@ -105,6 +128,15 @@ const RegisterMusicScore = () => {
   }, [watchMusic, musicList, setValue]);
 
   const watchedScores = getValues(['perfectCount', 'greatCount', 'goodCount', 'badCount', 'missCount']);
+  const watchedScores2 = getValues([
+    'perfectPlusCount',
+    'perfectCount',
+    'greatCount',
+    'goodCount',
+    'badCount',
+    'missCount',
+  ]);
+  const watchedPerfectPlusCount = watch('perfectPlusCount');
   const watchedPerfectCount = watch('perfectCount');
   const watchedGreatCount = watch('greatCount');
   const watchedGoodCount = watch('goodCount');
@@ -114,58 +146,120 @@ const RegisterMusicScore = () => {
 
   //テキストフィールドからフォーカスが外れた際にスコア補完機能が働く
   const onBlurScoreCompletion = () => {
-    const filledFields = Object.values([
-      watchedPerfectCount,
-      watchedGreatCount,
-      watchedGoodCount,
-      watchedBadCount,
-      watchedMissCount,
-    ]).filter((val) => isNaN(val)).length;
-    const count = watchedScores.reduce((accumulator, currentValue) => {
-      const numericValue = Number(currentValue);
-      return accumulator + (isNaN(numericValue) ? 0 : numericValue);
-    }, 0);
+    if (currentGenre === 1) {
+      const filledFields = Object.values([
+        watchedPerfectCount,
+        watchedGreatCount,
+        watchedGoodCount,
+        watchedBadCount,
+        watchedMissCount,
+      ]).filter((val) => isNaN(val)).length;
+      const count = watchedScores.reduce((accumulator, currentValue) => {
+        const numericValue = Number(currentValue);
+        return accumulator + (isNaN(numericValue) ? 0 : numericValue);
+      }, 0);
 
-    //TODO:: やり直しする際に不便
-    const remainNoteCount = watchedTotalNoteCount - count;
-    if (filledFields == 1) {
-      watchedScores.forEach((score, idx) => {
-        if (isNaN(score) && idx == 0) {
-          setValue('perfectCount', remainNoteCount);
-        }
-        if (isNaN(score) && idx == 1) {
-          setValue('greatCount', remainNoteCount);
-        }
-        if (isNaN(score) && idx == 2) {
-          setValue('goodCount', remainNoteCount);
-        }
-        if (isNaN(score) && idx == 3) {
-          setValue('badCount', remainNoteCount);
-        }
-        if (isNaN(score) && idx == 4) {
-          setValue('missCount', remainNoteCount);
-        }
-      });
-    }
-    //フルコンボまたはAP用のスコア補完機能
-    else if (remainNoteCount === 0) {
-      watchedScores.forEach((score, idx) => {
-        if (isNaN(score) && idx == 0) {
-          setValue('perfectCount', 0);
-        }
-        if (isNaN(score) && idx == 1) {
-          setValue('greatCount', 0);
-        }
-        if (isNaN(score) && idx == 2) {
-          setValue('goodCount', 0);
-        }
-        if (isNaN(score) && idx == 3) {
-          setValue('badCount', 0);
-        }
-        if (isNaN(score) && idx == 4) {
-          setValue('missCount', 0);
-        }
-      });
+      const remainNoteCount = watchedTotalNoteCount - count;
+      if (filledFields == 1) {
+        watchedScores.forEach((score, idx) => {
+          if (Number.isNaN(score) && idx == 0) {
+            setValue('perfectCount', remainNoteCount);
+          }
+          if (Number.isNaN(score) && idx == 1) {
+            setValue('greatCount', remainNoteCount);
+          }
+          if (Number.isNaN(score) && idx == 2) {
+            setValue('goodCount', remainNoteCount);
+          }
+          if (Number.isNaN(score) && idx == 3) {
+            setValue('badCount', remainNoteCount);
+          }
+          if (Number.isNaN(score) && idx == 4) {
+            setValue('missCount', remainNoteCount);
+          }
+        });
+      }
+      //フルコンボまたはAP用のスコア補完機能
+      else if (remainNoteCount === 0) {
+        watchedScores.forEach((score, idx) => {
+          if (Number.isNaN(score) && idx == 0) {
+            setValue('perfectCount', 0);
+          }
+          if (Number.isNaN(score) && idx == 1) {
+            setValue('greatCount', 0);
+          }
+          if (Number.isNaN(score) && idx == 2) {
+            setValue('goodCount', 0);
+          }
+          if (Number.isNaN(score) && idx == 3) {
+            setValue('badCount', 0);
+          }
+          if (Number.isNaN(score) && idx == 4) {
+            setValue('missCount', 0);
+          }
+        });
+      }
+    } else if (currentGenre === 2) {
+      const filledFields = Object.values([
+        watchedPerfectPlusCount,
+        watchedPerfectCount,
+        watchedGreatCount,
+        watchedGoodCount,
+        watchedBadCount,
+        watchedMissCount,
+      ]).filter((val) => Number.isNaN(val)).length;
+      const count = watchedScores2.reduce((accumulator, currentValue) => {
+        const numericValue = Number(currentValue);
+        return (accumulator ?? 0) + (Number.isNaN(numericValue) ? 0 : numericValue);
+      }, 0);
+
+      const remainNoteCount = watchedTotalNoteCount - (count ?? 0);
+
+      if (filledFields == 1) {
+        watchedScores2.forEach((score, idx) => {
+          if (Number.isNaN(score) && idx == 0) {
+            setValue('perfectPlusCount', remainNoteCount);
+          }
+          if (Number.isNaN(score) && idx == 1) {
+            setValue('perfectCount', remainNoteCount);
+          }
+          if (Number.isNaN(score) && idx == 2) {
+            setValue('greatCount', remainNoteCount);
+          }
+          if (Number.isNaN(score) && idx == 3) {
+            setValue('goodCount', remainNoteCount);
+          }
+          if (Number.isNaN(score) && idx == 4) {
+            setValue('badCount', remainNoteCount);
+          }
+          if (Number.isNaN(score) && idx == 5) {
+            setValue('missCount', remainNoteCount);
+          }
+        });
+      }
+      //フルコンボまたはAP用のスコア補完機能
+      else if (remainNoteCount === 0) {
+        watchedScores2.forEach((score, idx) => {
+          if (Number.isNaN(score) && idx == 0) {
+            setValue('perfectPlusCount', 0);
+          }
+          if (Number.isNaN(score) && idx == 1) {
+            setValue('perfectCount', 0);
+          }
+          if (Number.isNaN(score) && idx == 2) {
+            setValue('greatCount', 0);
+          }
+          if (Number.isNaN(score) && idx == 3) {
+            setValue('goodCount', 0);
+          }
+          if (Number.isNaN(score) && idx == 4) {
+            setValue('badCount', 0);
+          }
+          if (Number.isNaN(score) && idx == 5) {
+            setValue('missCount', 0);
+          }
+        });
+      }
     }
   };
 
@@ -192,6 +286,7 @@ const RegisterMusicScore = () => {
       reset({
         musicId: registerConsecutively ? values.musicId : 0,
         totalNoteCount: registerConsecutively ? values.totalNoteCount : NaN,
+        perfectPlusCount: NaN,
         perfectCount: NaN,
         greatCount: NaN,
         goodCount: NaN,
@@ -244,6 +339,21 @@ const RegisterMusicScore = () => {
               disabled
               className='mb-4 p-2 rounded border border-gray-300 w-full'
             />
+            {currentGenre === 2 && (
+              <>
+                <input
+                  {...register('perfectPlusCount', { required: true, valueAsNumber: true })}
+                  type='number'
+                  placeholder='PerfectPlus'
+                  min={0}
+                  onBlur={onBlurScoreCompletion}
+                  className='mb-4 p-2 rounded border border-gray-300 w-full'
+                />
+                {errors.perfectPlusCount && (
+                  <span className='text-red-500 mb-2 block'>{errors.perfectPlusCount.message}</span>
+                )}
+              </>
+            )}
             <input
               {...register('perfectCount', { required: true, valueAsNumber: true })}
               type='number'

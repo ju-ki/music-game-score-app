@@ -135,6 +135,7 @@ export class ScoresService {
         musicId: post.musicId,
         genreId: post.genreId,
         totalNoteCount: metaMusic.totalNoteCount,
+        perfectPlusCount: post.perfectPlusCount,
         perfectCount: post.perfectCount,
         greatCount: post.greatCount,
         goodCount: post.goodCount,

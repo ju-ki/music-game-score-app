@@ -14,7 +14,7 @@ const ScoresList = () => {
   const { currentGenre } = useGenre();
   useEffect(() => {
     getScoreList();
-  }, []);
+  }, [currentGenre]);
   async function getScoreList() {
     try {
       const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}scores/list`, {
@@ -86,11 +86,20 @@ const ScoresList = () => {
                         day: '2-digit',
                       })}
                     </p>
+
                     <div className='flex flex-col'>
                       <div className='flex justify-between mb-1'>
                         <span className='font-semibold'>TotalNoteCount</span>
                         <span>{score.totalNoteCount}</span>
                       </div>
+                      {currentGenre === 2 && (
+                        <>
+                          <div className='flex justify-between mb-1'>
+                            <span className='font-semibold'>PerfectPlus:</span>
+                            <span>{score.perfectPlusCount || 0}</span>
+                          </div>
+                        </>
+                      )}
                       <div className='flex justify-between mb-1'>
                         <span className='font-semibold'>Perfect:</span>
                         <span>{score.perfectCount}</span>
