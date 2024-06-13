@@ -1,5 +1,6 @@
 export type ScoreType = {
   totalNoteCount: number;
+  perfectPlusCount?: number;
   perfectCount: number;
   greatCount: number;
   goodCount: number;
