@@ -162,19 +162,19 @@ const RegisterMusicScore = () => {
       const remainNoteCount = watchedTotalNoteCount - count;
       if (filledFields == 1) {
         watchedScores.forEach((score, idx) => {
-          if (isNaN(score) && idx == 0) {
+          if (Number.isNaN(score) && idx == 0) {
             setValue('perfectCount', remainNoteCount);
           }
-          if (isNaN(score) && idx == 1) {
+          if (Number.isNaN(score) && idx == 1) {
             setValue('greatCount', remainNoteCount);
           }
-          if (isNaN(score) && idx == 2) {
+          if (Number.isNaN(score) && idx == 2) {
             setValue('goodCount', remainNoteCount);
           }
-          if (isNaN(score) && idx == 3) {
+          if (Number.isNaN(score) && idx == 3) {
             setValue('badCount', remainNoteCount);
           }
-          if (isNaN(score) && idx == 4) {
+          if (Number.isNaN(score) && idx == 4) {
             setValue('missCount', remainNoteCount);
           }
         });
@@ -182,20 +182,19 @@ const RegisterMusicScore = () => {
       //フルコンボまたはAP用のスコア補完機能
       else if (remainNoteCount === 0) {
         watchedScores.forEach((score, idx) => {
-          console.log(score);
-          if (isNaN(score) && idx == 0) {
+          if (Number.isNaN(score) && idx == 0) {
             setValue('perfectCount', 0);
           }
-          if (isNaN(score) && idx == 1) {
+          if (Number.isNaN(score) && idx == 1) {
             setValue('greatCount', 0);
           }
-          if (isNaN(score) && idx == 2) {
+          if (Number.isNaN(score) && idx == 2) {
             setValue('goodCount', 0);
           }
-          if (isNaN(score) && idx == 3) {
+          if (Number.isNaN(score) && idx == 3) {
             setValue('badCount', 0);
           }
-          if (isNaN(score) && idx == 4) {
+          if (Number.isNaN(score) && idx == 4) {
             setValue('missCount', 0);
           }
         });
@@ -208,32 +207,32 @@ const RegisterMusicScore = () => {
         watchedGoodCount,
         watchedBadCount,
         watchedMissCount,
-      ]).filter((val) => isNaN(val)).length;
+      ]).filter((val) => Number.isNaN(val)).length;
       const count = watchedScores2.reduce((accumulator, currentValue) => {
         const numericValue = Number(currentValue);
-        return accumulator + (isNaN(numericValue) ? 0 : numericValue);
+        return (accumulator ?? 0) + (Number.isNaN(numericValue) ? 0 : numericValue);
       }, 0);
 
-      const remainNoteCount = watchedTotalNoteCount - count;
+      const remainNoteCount = watchedTotalNoteCount - (count ?? 0);
 
       if (filledFields == 1) {
         watchedScores2.forEach((score, idx) => {
-          if (isNaN(score ?? 0) && idx == 0) {
+          if (Number.isNaN(score) && idx == 0) {
             setValue('perfectPlusCount', remainNoteCount);
           }
-          if (isNaN(score ?? 0) && idx == 1) {
+          if (Number.isNaN(score) && idx == 1) {
             setValue('perfectCount', remainNoteCount);
           }
-          if (isNaN(score ?? 0) && idx == 2) {
+          if (Number.isNaN(score) && idx == 2) {
             setValue('greatCount', remainNoteCount);
           }
-          if (isNaN(score ?? 0) && idx == 3) {
+          if (Number.isNaN(score) && idx == 3) {
             setValue('goodCount', remainNoteCount);
           }
-          if (isNaN(score ?? 0) && idx == 4) {
+          if (Number.isNaN(score) && idx == 4) {
             setValue('badCount', remainNoteCount);
           }
-          if (isNaN(score ?? 0) && idx == 5) {
+          if (Number.isNaN(score) && idx == 5) {
             setValue('missCount', remainNoteCount);
           }
         });
@@ -241,22 +240,22 @@ const RegisterMusicScore = () => {
       //フルコンボまたはAP用のスコア補完機能
       else if (remainNoteCount === 0) {
         watchedScores2.forEach((score, idx) => {
-          if (isNaN(score ?? 0) && idx == 0) {
+          if (Number.isNaN(score) && idx == 0) {
             setValue('perfectPlusCount', 0);
           }
-          if (isNaN(score ?? 0) && idx == 1) {
+          if (Number.isNaN(score) && idx == 1) {
             setValue('perfectCount', 0);
           }
-          if (isNaN(score ?? 0) && idx == 2) {
+          if (Number.isNaN(score) && idx == 2) {
             setValue('greatCount', 0);
           }
-          if (isNaN(score ?? 0) && idx == 3) {
+          if (Number.isNaN(score) && idx == 3) {
             setValue('goodCount', 0);
           }
-          if (isNaN(score ?? 0) && idx == 4) {
+          if (Number.isNaN(score) && idx == 4) {
             setValue('badCount', 0);
           }
-          if (isNaN(score ?? 0) && idx == 5) {
+          if (Number.isNaN(score) && idx == 5) {
             setValue('missCount', 0);
           }
         });
