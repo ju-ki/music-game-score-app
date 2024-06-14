@@ -13,14 +13,23 @@ type GenreStore = {
 };
 
 const saveGenreToLocalStorage = (genreId: number | null) => {
-  if (genreId) {
-    localStorage.setItem('genre', JSON.stringify(genreId));
+  try {
+    if (genreId) {
+      localStorage.setItem('genre', JSON.stringify(genreId));
+    }
+  } catch (err) {
+    console.error(err);
   }
 };
 
 const loadGenreFromLocalStorage = () => {
-  const genre = localStorage.getItem('genre');
-  return genre ? JSON.parse(genre) : null;
+  try {
+    const genre = localStorage.getItem('genre');
+    return genre ? JSON.parse(genre) : null;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 };
 
 export const useGenre = create<GenreStore>((set) => ({
