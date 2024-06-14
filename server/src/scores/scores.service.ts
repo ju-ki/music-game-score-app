@@ -67,7 +67,11 @@ export class ScoresService {
       FROM
         "public"."Scores"
       LEFT JOIN
-        "public"."Music" ON "public"."Scores"."musicId" = "public"."Music"."id"
+        "public"."Music"
+      ON
+        "public"."Scores"."musicId" = "public"."Music"."id"
+      AND
+        "public"."Music"."genreId" = ${genreId}
       WHERE
       "public"."Scores"."userId"= ${searchParams.userId}
       AND
