@@ -19,6 +19,7 @@ import {
 import { Delete, Edit, EmojiEmotions, EmojiEventsTwoTone, InsertEmoticon, Whatshot } from '@mui/icons-material';
 import { BestScoreType, ScoreType } from '../../../types/score';
 import { Divider } from '@mui/joy';
+import { useGenre } from '../../store/useGenre';
 
 const MusicScoreList = () => {
   const commonCardStyle = {
@@ -61,17 +62,18 @@ const MusicScoreList = () => {
   const [countPlayCount, setPlayCount] = useState<number>(0);
   const [countFullComb, setCountFullComb] = useState<number>(0);
   const [countAllPerfectCount, setCountAllPerfectCount] = useState<number>(0);
+  const { currentGenre } = useGenre();
 
   const navigate = useNavigate();
   useEffect(() => {
     getScoreList();
-  }, [sortId]);
+  }, [sortId, currentGenre]);
   async function getScoreList() {
     try {
       const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}scores/detailList`, {
         params: {
           userId: user?.id,
-          genreId: 1,
+          genreId: currentGenre || 1,
           musicId: musicId,
           musicDifficulty: musicDifficulty,
           sortId: sortId,
