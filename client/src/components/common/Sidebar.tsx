@@ -11,7 +11,7 @@ import {
   SelectChangeEvent,
   Typography,
 } from '@mui/material';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation, useParams } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
 import SettingsIcon from '@mui/icons-material/Settings';
 import useFetchGenres from '../hooks/useFetchGenres';
@@ -21,6 +21,8 @@ const Sidebar = () => {
   useFetchGenres();
   const { user, isLoggedIn } = useUserStore();
   const { genres, currentGenre, setCurrentGenre } = useGenre();
+  const location = useLocation();
+  const params = useParams();
 
   const handleChange = (event: SelectChangeEvent<number>) => {
     setCurrentGenre(event.target.value as number);
@@ -94,6 +96,7 @@ const Sidebar = () => {
               value={genres.find((genre) => genre.id == currentGenre)?.id || 1}
               onChange={handleChange}
               label='Genre'
+              disabled={!!(location.pathname.split('/')[1] === 'my-list' && params.myListId)}
             >
               {genres.map((genre) => (
                 <MenuItem key={genre.id} value={genre.id}>

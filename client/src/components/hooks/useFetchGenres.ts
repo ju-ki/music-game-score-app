@@ -9,8 +9,6 @@ const useFetchGenres = () => {
     const fetchGenres = async () => {
       try {
         const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}meta-music/genre`);
-        console.log(response.data);
-
         setGenres(response.data);
       } catch (err) {
         console.log('Error fetching genres:', err);
