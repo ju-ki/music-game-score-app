@@ -96,7 +96,7 @@ const Sidebar = () => {
               value={genres.find((genre) => genre.id == currentGenre)?.id || 1}
               onChange={handleChange}
               label='Genre'
-              disabled={location.pathname.split('/')[1] === 'my-list' && params.myListId ? true : false}
+              disabled={!!(location.pathname.split('/')[1] === 'my-list' && params.myListId)}
             >
               {genres.map((genre) => (
                 <MenuItem key={genre.id} value={genre.id}>
