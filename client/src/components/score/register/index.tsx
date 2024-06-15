@@ -100,7 +100,7 @@ const RegisterMusicScore = () => {
     if (currentGenre === 1) {
       setDifficultyList(['easy', 'normal', 'hard', 'expert', 'master', 'append']);
     } else if (currentGenre === 2) {
-      setDifficultyList(['easy', 'normal', 'hard', 'extra', 'stella', 'olivier']);
+      setDifficultyList(['normal', 'hard', 'extra', 'stella', 'olivier']);
     }
   };
 

@@ -6,7 +6,12 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
+  SelectChangeEvent,
   Table,
   TableBody,
   TableCell,
@@ -19,19 +24,23 @@ import { fetchMusicList } from '../../hooks/useMusicQuery';
 import { useEffect, useState } from 'react';
 import { MusicType, UnitType } from '../../../types/score';
 import axiosClient from '../../../utils/axios';
+import { useGenre } from '../../store/useGenre';
+import useFetchGenres from '../../hooks/useFetchGenres';
 
 const AdminMusic = () => {
+  useFetchGenres();
   const [musicList, setMusicList] = useState<MusicType[]>([]);
   const [unitList, setUnitList] = useState<UnitType[]>([]);
   const [newSongs, setNewSongs] = useState<{ title: string; id: number }[]>([]);
   const [open, setOpen] = useState(false);
+  const { currentGenre, genres, setCurrentGenre } = useGenre();
   useEffect(() => {
     getMusic();
-  }, []);
+  }, [currentGenre]);
 
   const getMusic = async () => {
     try {
-      const response = await fetchMusicList(0, false);
+      const response = await fetchMusicList(0, false, currentGenre);
       setMusicList(response.items);
       setUnitList(response.unitProfile);
     } catch (err) {
@@ -42,7 +51,6 @@ const AdminMusic = () => {
   const updateMusic = async () => {
     try {
       const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}songs`);
-      console.log(response.data);
       setMusicList(response.data.allMusic.items);
       const newSongs = response.data.newMusic; // ここで新しく取得した曲を設定
       setNewSongs(newSongs);
@@ -55,6 +63,11 @@ const AdminMusic = () => {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleChange = (event: SelectChangeEvent<number>) => {
+    const genreId = event.target.value as number;
+    setCurrentGenre(genreId);
   };
 
   return (
@@ -76,6 +89,22 @@ const AdminMusic = () => {
             <Button variant='contained' onClick={updateMusic}>
               楽曲の更新を行う
             </Button>
+
+            <FormControl variant='outlined' className='px-3'>
+              <InputLabel id='genre-select-label'>Genre</InputLabel>
+              <Select
+                labelId='genre-select-label'
+                value={genres.find((genre) => genre.id == currentGenre)?.id || 1}
+                onChange={handleChange}
+                label='Genre'
+              >
+                {genres.map((genre) => (
+                  <MenuItem key={genre.id} value={genre.id}>
+                    {genre.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </div>
           <Dialog open={open} onClose={handleClose}>
             <DialogTitle>新しい曲が追加されました</DialogTitle>
