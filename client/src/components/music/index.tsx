@@ -4,12 +4,14 @@ import Sidebar from '../common/Sidebar';
 import { useMusicQuery } from '../hooks/useMusicQuery';
 import { Link } from 'react-router-dom';
 import { MetaMusicType, MusicType, TagType, UnitType } from '../../types/score';
+import { useGenre } from '../store/useGenre';
 
 const MusicList = () => {
   const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage, status, error } = useMusicQuery();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterUnit, setFilterUnit] = useState({});
   const [checkedState, setCheckedState] = useState(new Array(8).fill(false));
+  const { currentGenre } = useGenre();
 
   // チェックボックスが変更されたときに呼ばれる関数
   const handleCheckboxChange = (position: number, unitName: string) => {
@@ -121,48 +123,12 @@ const MusicList = () => {
             ))}
           </div> */}
           <h1>楽曲一覧</h1>
-          {searchTerm != '' || Object.keys(filterUnit).length > 0 ? (
+          {currentGenre === 1 ? (
             <>
-              <div className='grid grid-cols-3 gap-4'>
-                {filteredMusicList?.map((group, i) => (
-                  <div key={i} ref={lastMusicElementRef} className='bg-white shadow-md rounded-lg p-4 my-2'>
-                    <p className='text-lg font-semibold'>{group.name}</p>
-                    <div className='my-2 flex justify-around items-center'>
-                      {group?.metaMusic.map((meta: MetaMusicType, index: number) => (
-                        <div key={index} className='flex items-center'>
-                          <Link
-                            to={`/register-music-score/${group.id}/${meta.musicDifficulty}`}
-                            className={`w-6 h-6 flex items-center justify-center rounded-full text-white font-semibold ${
-                              meta.musicDifficulty === 'easy'
-                                ? 'bg-green-500'
-                                : meta.musicDifficulty === 'normal'
-                                  ? 'bg-blue-300'
-                                  : meta.musicDifficulty === 'hard'
-                                    ? 'bg-yellow-500'
-                                    : meta.musicDifficulty === 'expert'
-                                      ? 'bg-red-500'
-                                      : meta.musicDifficulty === 'master'
-                                        ? 'bg-purple-500'
-                                        : meta.musicDifficulty === 'append'
-                                          ? 'bg-pink-500'
-                                          : ''
-                            }`}
-                          >
-                            {meta.playLevel}
-                          </Link>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <>
-              {data.pages.map((music, index) => (
-                <div key={index} className='grid grid-cols-3 gap-4'>
-                  <Fragment key={index}>
-                    {music.items.map((group: MusicType, i: number) => (
+              {searchTerm != '' || Object.keys(filterUnit).length > 0 ? (
+                <>
+                  <div className='grid grid-cols-3 gap-4'>
+                    {filteredMusicList?.map((group, i) => (
                       <div key={i} ref={lastMusicElementRef} className='bg-white shadow-md rounded-lg p-4 my-2'>
                         <p className='text-lg font-semibold'>{group.name}</p>
                         <div className='my-2 flex justify-around items-center'>
@@ -193,10 +159,131 @@ const MusicList = () => {
                         </div>
                       </div>
                     ))}
-                  </Fragment>
-                </div>
-              ))}
-              <div>{isFetching && !isFetchingNextPage ? 'Fetching...' : null}</div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {data.pages.map((music, index) => (
+                    <div key={index} className='grid grid-cols-3 gap-4'>
+                      <Fragment key={index}>
+                        {music.items.map((group: MusicType, i: number) => (
+                          <div key={i} ref={lastMusicElementRef} className='bg-white shadow-md rounded-lg p-4 my-2'>
+                            <p className='text-lg font-semibold'>{group.name}</p>
+                            <div className='my-2 flex justify-around items-center'>
+                              {group?.metaMusic.map((meta: MetaMusicType, index: number) => (
+                                <div key={index} className='flex items-center'>
+                                  <Link
+                                    to={`/register-music-score/${group.id}/${meta.musicDifficulty}`}
+                                    className={`w-6 h-6 flex items-center justify-center rounded-full text-white font-semibold ${
+                                      meta.musicDifficulty === 'easy'
+                                        ? 'bg-green-500'
+                                        : meta.musicDifficulty === 'normal'
+                                          ? 'bg-blue-300'
+                                          : meta.musicDifficulty === 'hard'
+                                            ? 'bg-yellow-500'
+                                            : meta.musicDifficulty === 'expert'
+                                              ? 'bg-red-500'
+                                              : meta.musicDifficulty === 'master'
+                                                ? 'bg-purple-500'
+                                                : meta.musicDifficulty === 'append'
+                                                  ? 'bg-pink-500'
+                                                  : ''
+                                    }`}
+                                  >
+                                    {meta.playLevel}
+                                  </Link>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </Fragment>
+                    </div>
+                  ))}
+                  <div>{isFetching && !isFetchingNextPage ? 'Fetching...' : null}</div>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              {searchTerm != '' || Object.keys(filterUnit).length > 0 ? (
+                <>
+                  <div className='grid grid-cols-3 gap-4'>
+                    {filteredMusicList?.map((group, i) => (
+                      <div key={i} ref={lastMusicElementRef} className='bg-white shadow-md rounded-lg p-4 my-2'>
+                        <p className='text-lg font-semibold'>{group.name}</p>
+                        <div className='my-2 flex justify-around items-center'>
+                          {group?.metaMusic.map((meta: MetaMusicType, index: number) => (
+                            <div key={index} className='flex items-center'>
+                              <Link
+                                to={`/register-music-score/${group.id}/${meta.musicDifficulty}`}
+                                className={`w-6 h-6 flex items-center justify-center rounded-full text-white font-semibold ${
+                                  meta.musicDifficulty === 'easy'
+                                    ? 'bg-green-500'
+                                    : meta.musicDifficulty === 'normal'
+                                      ? 'bg-blue-300'
+                                      : meta.musicDifficulty === 'hard'
+                                        ? 'bg-yellow-500'
+                                        : meta.musicDifficulty === 'extra'
+                                          ? 'bg-red-500'
+                                          : meta.musicDifficulty === 'stella'
+                                            ? 'bg-purple-500'
+                                            : meta.musicDifficulty === 'olivier'
+                                              ? 'bg-slate-900'
+                                              : ''
+                                }`}
+                              >
+                                {meta.playLevel}
+                              </Link>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  {data.pages.map((music, index) => (
+                    <div key={index} className='grid grid-cols-3 gap-4'>
+                      <Fragment key={index}>
+                        {music.items.map((group: MusicType, i: number) => (
+                          <div key={i} ref={lastMusicElementRef} className='bg-white shadow-md rounded-lg p-4 my-2'>
+                            <p className='text-lg font-semibold'>{group.name}</p>
+                            <div className='my-2 flex justify-around items-center'>
+                              {group?.metaMusic.map((meta: MetaMusicType, index: number) => (
+                                <div key={index} className='flex items-center'>
+                                  <Link
+                                    to={`/register-music-score/${group.id}/${meta.musicDifficulty}`}
+                                    className={`w-6 h-6 flex items-center justify-center rounded-full text-white font-semibold ${
+                                      meta.musicDifficulty === 'easy'
+                                        ? 'bg-green-500'
+                                        : meta.musicDifficulty === 'normal'
+                                          ? 'bg-blue-300'
+                                          : meta.musicDifficulty === 'hard'
+                                            ? 'bg-yellow-500'
+                                            : meta.musicDifficulty === 'extra'
+                                              ? 'bg-red-500'
+                                              : meta.musicDifficulty === 'stella'
+                                                ? 'bg-purple-500'
+                                                : meta.musicDifficulty === 'olivier'
+                                                  ? 'bg-slate-900'
+                                                  : ''
+                                    }`}
+                                  >
+                                    {meta.playLevel}
+                                  </Link>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </Fragment>
+                    </div>
+                  ))}
+                  <div>{isFetching && !isFetchingNextPage ? 'Fetching...' : null}</div>
+                </>
+              )}
             </>
           )}
         </main>

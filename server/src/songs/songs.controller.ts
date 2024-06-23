@@ -7,8 +7,12 @@ export class SongsController {
   constructor(private songsService: SongsService) {}
   //定期的に実行するようにする
   @Get()
-  findAllSongs() {
-    return this.songsService.fetchAllSongs();
+  findAllSongs(@Query() params: { genreId: number }) {
+    if (params.genreId == 1) {
+      return this.songsService.fetchAllSongs(params);
+    } else if (params.genreId == 2) {
+      return this.songsService.fetchYumesuteSongs(params);
+    }
   }
 
   @Get('/detail')

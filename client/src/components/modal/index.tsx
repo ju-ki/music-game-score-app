@@ -17,6 +17,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { fetchMusicList } from '../hooks/useMusicQuery';
+import { useGenre } from '../store/useGenre';
 
 const schema = z.object({
   myListName: z.string().min(1, { message: 'マイリスト名は必須です' }),
@@ -45,6 +46,7 @@ const MusicMyListModal = (props: ModalType) => {
   const [allMusicList, setAllMusicList] = useState<MusicType[]>([]);
   const [filteredMusicList, setFilteredMusicList] = useState<MusicType[]>([]);
   const transformedDefaultMusicList = defaultMusicList.map((id) => ({ id }));
+  const { currentGenre } = useGenre();
 
   const {
     register,
@@ -67,7 +69,7 @@ const MusicMyListModal = (props: ModalType) => {
   const selectedMusicList: SelectedMusicType[] = watch('selectedMusic');
   const getAllMusic = async () => {
     try {
-      const response = await fetchMusicList(0, false);
+      const response = await fetchMusicList(0, false, currentGenre);
 
       setAllMusicList(response.items);
     } catch (err) {
