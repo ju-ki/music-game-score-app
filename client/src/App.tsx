@@ -14,6 +14,8 @@ import AdminMusic from './components/admin/musics';
 import EditMusicScore from './components/score/edit';
 import PrivateRoute from './lib/PrivateRoute';
 import AuthRoute from './lib/AuthRoute';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const queryClient = new QueryClient();
 
@@ -21,6 +23,7 @@ function App() {
   return (
     <>
       <QueryClientProvider client={queryClient}>
+        <ToastContainer />
         <Router>
           <Routes>
             <Route element={<PrivateRoute />}>
