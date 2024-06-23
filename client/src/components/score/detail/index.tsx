@@ -10,12 +10,16 @@ import ScoreResultOverview from '../feature/ScoreResultOverview';
 const MusicScoreList = () => {
   const { musicId, musicDifficulty } = useParams();
   const [sortId, setSortId] = useState<number>(0);
-  const { scoreList, musicName, bestScore } = useFetchScoreList(sortId);
+  const { scoreList, musicName, bestScore, isLoading } = useFetchScoreList(sortId);
   const { countPlayCount, countFullCombCount, countAllPerfectCount } = useScoreCount(scoreList);
 
   const handleChangeSortId = (event: SelectChangeEvent<number>) => {
     setSortId(event.target.value as number);
   };
+
+  if (isLoading) {
+    return;
+  }
   return (
     <div className='flex h-screen'>
       <div className='flex-initial w-1/5'>

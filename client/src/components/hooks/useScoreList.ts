@@ -4,6 +4,7 @@ import axiosClient from '../../utils/axios';
 import { useUserStore } from '../store/userStore';
 import { useGenre } from '../store/useGenre';
 import { useParams } from 'react-router-dom';
+import { showToast } from '../common/Toast';
 
 export const useFetchScoreList = (sortId: number) => {
   const { user } = useUserStore();
@@ -35,6 +36,7 @@ export const useFetchScoreList = (sortId: number) => {
       setBestScore(response.data.bestScore);
     } catch (err) {
       console.log(err);
+      showToast('error', 'スコアの取得に失敗しました。');
     } finally {
       setIsLoading(false);
     }

@@ -1,3 +1,4 @@
+import { showToast } from '../../../components/common/Toast';
 import axiosClient from '../../../utils/axios';
 export const deleteScore = async (params: { scoreId: string; userId: string | undefined }) => {
   if (confirm('削除してもよろしいですか?')) {
@@ -8,11 +9,11 @@ export const deleteScore = async (params: { scoreId: string; userId: string | un
           scoreId: params.scoreId,
         },
       });
-      alert('削除に成功しました');
+      showToast('success', 'スコアの削除に成功しました');
     } catch (err) {
       console.log(err);
       //後にエラー文言の出し方を修正する
-      alert('削除に失敗しました');
+      showToast('error', 'スコアの削除に失敗しました');
     }
   }
 };
