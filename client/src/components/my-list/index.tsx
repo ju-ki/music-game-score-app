@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { MyListType } from '../../types/score';
 import MusicMyListModal from '../modal';
 import { z } from 'zod';
+import { useGenre } from '../store/useGenre';
 
 const MyList = () => {
   const schema = z.object({
@@ -24,17 +25,18 @@ const MyList = () => {
   const { user } = useUserStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [musicList, setMusicList] = useState<MyListType[]>([]);
+  const { currentGenre } = useGenre();
 
   useEffect(() => {
     getMusicList();
-  }, []);
+  }, [currentGenre]);
 
   const getMusicList = async () => {
     try {
       const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}music-list`, {
         params: {
           userId: user?.id,
-          genreId: 1,
+          genreId: currentGenre || 1,
         },
       });
 
@@ -58,7 +60,7 @@ const MyList = () => {
       const response = await axiosClient.post(`${import.meta.env.VITE_APP_URL}music-list`, {
         myListName: data.myListName,
         selectedMusic: musicIdList,
-        genreId: 1,
+        genreId: currentGenre || 1,
         userId: user?.id,
       });
       setMusicList((prev) => [...prev, response.data]);
@@ -85,132 +87,6 @@ const MyList = () => {
             defaultMusicList={[]}
             myListName=''
           />
-          {/* <Modal open={isModalOpen} onClose={handleCloseModal}>
-            <Box
-              sx={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                bgcolor: 'background.paper',
-                boxShadow: 24,
-                p: 4,
-                maxHeight: '90vh', // 最大高さを設定
-                overflow: 'auto', // スクロールを有効にする
-                width: '50%',
-              }}
-            >
-              <form onSubmit={handleSubmit(onSubmit)} className='p-4 bg-white shadow-md rounded-md'>
-                <Typography variant='h6' component='h2' mb={2}>
-                  マイリストを作成する
-                </Typography>
-                <TextField
-                  label='マイリスト名'
-                  variant='outlined'
-                  fullWidth
-                  margin='normal'
-                  {...register('myListName')}
-                />
-                {errors.myListName && <span className='text-red-500 mb-2 block'>{errors.myListName.message}</span>}
-                <TextField
-                  label='楽曲を検索'
-                  variant='outlined'
-                  fullWidth
-                  margin='normal'
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <Typography variant='body1' mb={1}>
-                  曲を選択してください
-                </Typography>
-                {/* 選択中の曲を表示する */}
-          {/* {selectedMusicList.length > 0 && (
-                  <div>
-                    <Typography variant='h6' gutterBottom>
-                      選択中の曲
-                    </Typography>
-                    {errors.selectedMusic && (
-                      <span className='text-red-500 mb-2 block'>{errors.selectedMusic.message}</span>
-                    )}
-                    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
-                      {selectedMusicList.map((selectedMusic) => (
-                        <Box
-                          key={selectedMusic.id}
-                          sx={{
-                            border: '1px solid #ccc',
-                            p: 1,
-                            borderRadius: 1,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                          }}
-                        >
-                          <Typography noWrap gutterBottom variant='body2'>
-                            {allMusicList?.find((music) => music.id === selectedMusic.id)?.name}
-                          </Typography>
-                          <IconButton
-                            color='error'
-                            size='small'
-                            onClick={() => {
-                              const musicId = selectedMusic.id;
-                              const index = selectedMusicList.findIndex((field) => field.id === musicId);
-                              if (index !== -1) {
-                                remove(index);
-                              }
-                            }}
-                          >
-                            <Close />
-                          </IconButton>
-                        </Box>
-                      ))}
-                    </Box>
-                  </div>
-                )}
-                <Divider className='py-2' />
-                <Box component='div' sx={{ maxHeight: '40vh', overflow: 'auto' }}>
-                  <FormGroup>
-                    {filteredMusicList?.length ? (
-                      filteredMusicList.map((music: MusicType) => (
-                        <Fragment key={music.id}>
-                          <FormControlLabel
-                            key={music.id}
-                            className='justify-between px-5'
-                            control={
-                              <Switch
-                                checked={selectedMusicList.some((field) => field.id === music.id)}
-                                onChange={(e) => {
-                                  const musicId = music.id;
-                                  if (e.target.checked) {
-                                    append({ id: musicId });
-                                  } else {
-                                    const index = selectedMusicList.findIndex((field) => field.id === musicId);
-                                    if (index !== -1) {
-                                      remove(index);
-                                    }
-                                  }
-                                }}
-                              />
-                            }
-                            label={music.name}
-                            value={music.id}
-                            labelPlacement='start'
-                          />
-                          <Divider />
-                        </Fragment>
-                      ))
-                    ) : (
-                      <Typography gutterBottom align='center' className='py-5'>
-                        検索ワードに一致する曲がありません
-                      </Typography>
-                    )}
-                  </FormGroup>
-                </Box>
-                <Button variant='contained' color='primary' type='submit' fullWidth>
-                  作成する
-                </Button>
-              </form>
-            </Box>
-          </Modal> */}
 
           <div className='bg-gray-100 p-4 rounded-lg'>
             <h2 className='text-xl font-semibold mb-4'>マイリスト一覧</h2>

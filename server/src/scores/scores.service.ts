@@ -63,11 +63,26 @@ export class ScoresService {
 
     const scoreList = await this.prisma.$queryRaw<Scores[]>`
       SELECT
-        *
+        "public"."Scores"."id",
+        "public"."Scores"."musicId",
+        "public"."Scores"."totalNoteCount",
+        "public"."Scores"."perfectPlusCount",
+        "public"."Scores"."perfectCount",
+        "public"."Scores"."greatCount",
+        "public"."Scores"."goodCount",
+        "public"."Scores"."badCount",
+        "public"."Scores"."missCount",
+        "public"."Scores"."musicDifficulty",
+        "public"."Music"."name",
+        "public"."Scores"."createdAt"
       FROM
         "public"."Scores"
       LEFT JOIN
-        "public"."Music" ON "public"."Scores"."musicId" = "public"."Music"."id"
+        "public"."Music"
+      ON
+        "public"."Scores"."musicId" = "public"."Music"."id"
+      AND
+        "public"."Music"."genreId" = ${genreId}
       WHERE
       "public"."Scores"."userId"= ${searchParams.userId}
       AND
@@ -88,7 +103,6 @@ export class ScoresService {
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."perfectCount" END,
       "public"."Scores"."id"
     `;
-
     const musicInfo = await this.songService.getDetailMusic(genreId, musicId);
 
     const bestMusicScore = await this.getBestScore(searchParams);
@@ -135,6 +149,7 @@ export class ScoresService {
         musicId: post.musicId,
         genreId: post.genreId,
         totalNoteCount: metaMusic.totalNoteCount,
+        perfectPlusCount: post.perfectPlusCount,
         perfectCount: post.perfectCount,
         greatCount: post.greatCount,
         goodCount: post.goodCount,

@@ -5,20 +5,22 @@ import { useUserStore } from '../../store/userStore';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ScoreType } from '../../../types/score';
+import { useGenre } from '../../store/useGenre';
 // import { Button } from '@mui/material';
 
 const ScoresList = () => {
   const { user } = useUserStore();
   const [scoreList, setScoreList] = useState([]);
+  const { currentGenre } = useGenre();
   useEffect(() => {
     getScoreList();
-  }, []);
+  }, [currentGenre]);
   async function getScoreList() {
     try {
       const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}scores/list`, {
         params: {
           userId: user?.id,
-          genreId: 1,
+          genreId: currentGenre || 1,
         },
       });
       setScoreList(response.data);
@@ -84,11 +86,20 @@ const ScoresList = () => {
                         day: '2-digit',
                       })}
                     </p>
+
                     <div className='flex flex-col'>
                       <div className='flex justify-between mb-1'>
                         <span className='font-semibold'>TotalNoteCount</span>
                         <span>{score.totalNoteCount}</span>
                       </div>
+                      {currentGenre === 2 && (
+                        <>
+                          <div className='flex justify-between mb-1'>
+                            <span className='font-semibold'>PerfectPlus:</span>
+                            <span>{score.perfectPlusCount || 0}</span>
+                          </div>
+                        </>
+                      )}
                       <div className='flex justify-between mb-1'>
                         <span className='font-semibold'>Perfect:</span>
                         <span>{score.perfectCount}</span>

@@ -14,10 +14,19 @@ export class SongsService {
     private metaMusicService: MetaMusicService,
   ) {}
   //これを定期的に実行できるようにした(DBが更新されたらみたいな感じ)
-  async fetchAllSongs() {
+  async fetchAllSongs(params: { genreId: number }) {
     try {
+      let genreId: number = params.genreId;
+      if (typeof genreId !== 'number') {
+        genreId = parseInt(genreId);
+      }
       const response = await axios.get(this.config.get('MUSIC_URL'));
-      const musicList = await this.searchMusic({ genreId: 1, isInfinityScroll: 'false', page: 0, musicTag: 0 });
+      const musicList = await this.searchMusic({
+        genreId: genreId,
+        isInfinityScroll: 'false',
+        page: 0,
+        musicTag: 0,
+      });
       const currentMusicIdSet = new Set(musicList.items.map((value) => value.id));
 
       const newMusic = response.data.filter((music) => !currentMusicIdSet.has(music.id));
@@ -31,7 +40,7 @@ export class SongsService {
                 id: music.id,
                 name: music.title,
                 assetBundleName: music.assetbundleName,
-                genreId: 1,
+                genreId: genreId,
                 releasedAt: new Date(music.releasedAt),
               },
             });
@@ -46,7 +55,7 @@ export class SongsService {
             await prisma.metaMusic.create({
               data: {
                 id: music.id.toString(),
-                genreId: 1,
+                genreId: genreId,
                 musicId: music.musicId as number,
                 playLevel: music.playLevel.toString(),
                 totalNoteCount: music.totalNoteCount as number,
@@ -64,7 +73,7 @@ export class SongsService {
             await prisma.musicTag.create({
               data: {
                 id: music.id,
-                genreId: 1,
+                genreId: genreId,
                 musicId: music.musicId as number,
                 tagName: music.musicTag,
                 tagId: music.seq,
@@ -74,7 +83,12 @@ export class SongsService {
         });
       }
 
-      const allMusicList = await this.searchMusic({ genreId: 1, isInfinityScroll: 'false', page: 0, musicTag: 0 });
+      const allMusicList = await this.searchMusic({
+        genreId: genreId,
+        isInfinityScroll: 'false',
+        page: 0,
+        musicTag: 0,
+      });
       return {
         newMusic: newMusic,
         allMusic: allMusicList,
@@ -89,53 +103,58 @@ export class SongsService {
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
   };
 
-  async fetchYumesuteSongs() {
+  async fetchYumesuteSongs(params: { genreId: number }) {
+    let genreId: number = params.genreId;
+    if (typeof genreId !== 'number') {
+      genreId = parseInt(genreId);
+    }
     const loadUrl = this.config.get('YUMESUTE_URL');
-    const response = await axios.get(loadUrl, { headers: this.headers });
-    if (response.status === 200) {
-      const $ = cheerio.load(response.data);
-      const songItems = $('div.mu__table.mu__table--filter');
+
+    try {
+      const response = await axios.get(loadUrl, { headers: this.headers });
       const songs = [];
-      const difficulty = ['normal', 'hard', 'extra', 'stella', 'olivier'];
+      if (response.status === 200) {
+        const $ = cheerio.load(response.data);
+        const songItems = $('table').eq(3).find('tbody').children('tr').toArray();
+        const difficulty = ['normal', 'hard', 'extra', 'stella', 'olivier'];
+        let idx = 0;
+        for (const song of songItems) {
+          await this.prisma.$transaction(async (prisma) => {
+            const tds = $(song).find('td');
+            const each = tds.eq(2);
 
-      //TODO:二週目行っている
-      const rows = songItems.find('table tbody tr').toArray();
-
-      for (const [idx, tr] of rows.entries()) {
-        await this.prisma.$transaction(async (prisma) => {
-          const td = $(tr).find('td');
-          const songUrl = td.eq(0).find('a').attr('href');
-
-          try {
-            const detailResponse = await axios.get(songUrl, { headers: this.headers });
-            if (detailResponse.status === 200) {
-              const detail$ = cheerio.load(detailResponse.data);
-              const songDetail = detail$('div.markup.mu').find('div.mu__table').eq(3);
-              const noteDetail = songDetail.find('tbody tr.mu__table--row3 td');
-              const noteCountList = [];
-
-              noteDetail.each((idx, detail) => {
-                const noteCount = $(detail).text() === '-' ? 0 : parseInt($(detail).text().replace(',', ''), 10);
-                noteCountList.push(noteCount);
-              });
-
+            if (tds.length !== 10 && each.find('a').length) {
+              const noteCountList = [0, 0, 0, parseInt(tds.eq(9).text()), parseInt(tds.eq(10).text())];
               const song = {
-                url: songUrl,
-                title: td.eq(1).find('a').text(),
+                releaseAt: tds.eq(15).text(),
+                title: tds.eq(2).text(),
                 note_count: noteCountList,
-                normal: td.eq(2).text(),
-                hard: td.eq(3).text(),
-                extra: td.eq(4).text(),
-                stella: td.eq(5).text(),
-                olivier: td.eq(6).text(),
+                normal: tds.eq(4).text(),
+                hard: tds.eq(5).text(),
+                extra: tds.eq(6).text(),
+                stella: tds.eq(7).text(),
+                olivier: tds.eq(8).text(),
               };
 
-              await prisma.music.create({
-                data: {
-                  id: idx,
-                  name: td.eq(1).find('a').text(),
+              songs.push(song);
+
+              await this.prisma.music.upsert({
+                where: {
+                  id_genreId: {
+                    id: idx,
+                    genreId: genreId,
+                  },
+                },
+                update: {
+                  name: tds.eq(2).text(),
                   assetBundleName: '',
-                  genreId: 2,
+                  releasedAt: new Date(),
+                },
+                create: {
+                  id: idx,
+                  name: tds.eq(2).text(),
+                  assetBundleName: '',
+                  genreId: genreId,
                   releasedAt: new Date(),
                 },
               });
@@ -145,10 +164,19 @@ export class SongsService {
                 if (typeof totalNoteCount !== 'number') {
                   totalNoteCount = parseInt(totalNoteCount);
                 }
-                await prisma.metaMusic.create({
-                  data: {
+                await prisma.metaMusic.upsert({
+                  where: {
                     id: `${idx}-${diff}`,
-                    genreId: 2,
+                  },
+                  update: {
+                    musicId: idx,
+                    playLevel: song[diff],
+                    totalNoteCount: totalNoteCount,
+                    musicDifficulty: diff,
+                  },
+                  create: {
+                    id: `${idx}-${diff}`,
+                    genreId: genreId,
                     musicId: idx,
                     playLevel: song[diff],
                     totalNoteCount: totalNoteCount,
@@ -157,21 +185,25 @@ export class SongsService {
                 });
               }
 
-              songs.push(song);
+              idx++;
             }
-          } catch (err) {
-            console.error('Error loading song detail:', err);
-          }
+          });
+        }
 
-          // 各ループの後にスリープ
-          await this.sleep(3000); // 2秒スリープ
+        const allMusicList = await this.searchMusic({
+          genreId: genreId,
+          isInfinityScroll: 'false',
+          page: 0,
+          musicTag: 0,
         });
-      }
 
-      return songs;
-    } else {
-      console.error(`Failed to retrieve the webpage. Status code: ${response.status}`);
-      return [];
+        return {
+          newMusic: songs,
+          allMusic: allMusicList,
+        };
+      }
+    } catch (err) {
+      console.log(err);
     }
   }
 
@@ -230,11 +262,6 @@ export class SongsService {
           some: {
             musicDifficulty: query.musicDifficulty,
             playLevel: query.playLevel,
-          },
-        },
-        musicTag: {
-          some: {
-            tagId: tagId,
           },
         },
       },

@@ -6,7 +6,12 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
+  SelectChangeEvent,
   Table,
   TableBody,
   TableCell,
@@ -16,45 +21,68 @@ import {
   Typography,
 } from '@mui/material';
 import { fetchMusicList } from '../../hooks/useMusicQuery';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MusicType, UnitType } from '../../../types/score';
 import axiosClient from '../../../utils/axios';
+import { useGenre } from '../../store/useGenre';
+import useFetchGenres from '../../hooks/useFetchGenres';
+import { showToast } from '../../common/Toast';
 
 const AdminMusic = () => {
+  useFetchGenres();
   const [musicList, setMusicList] = useState<MusicType[]>([]);
   const [unitList, setUnitList] = useState<UnitType[]>([]);
   const [newSongs, setNewSongs] = useState<{ title: string; id: number }[]>([]);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState<boolean>(false);
+  const { currentGenre, genres, setCurrentGenre } = useGenre();
   useEffect(() => {
     getMusic();
-  }, []);
+  }, [currentGenre]);
 
   const getMusic = async () => {
     try {
-      const response = await fetchMusicList(0, false);
+      const response = await fetchMusicList(0, false, currentGenre);
       setMusicList(response.items);
       setUnitList(response.unitProfile);
     } catch (err) {
+      showToast('error', '楽曲情報の取得に失敗しました');
       console.log(err);
     }
   };
 
   const updateMusic = async () => {
+    setLoading(true);
     try {
-      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}songs`);
-      console.log(response.data);
+      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}songs`, {
+        params: { genreId: currentGenre },
+      });
       setMusicList(response.data.allMusic.items);
       const newSongs = response.data.newMusic; // ここで新しく取得した曲を設定
       setNewSongs(newSongs);
       setOpen(true);
+      showToast('success', '楽曲情報の更新に成功しました');
     } catch (err) {
-      alert('失敗しました.');
+      showToast('error', '楽曲情報の更新に失敗しました');
       console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOnClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isLoading) {
+      e.preventDefault();
     }
   };
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleChange = (event: SelectChangeEvent<number>) => {
+    const genreId = event.target.value as number;
+    setCurrentGenre(genreId);
   };
 
   return (
@@ -63,19 +91,36 @@ const AdminMusic = () => {
         <Header />
         <div className='flex-grow container mx-auto px-4 py-8'>
           <div className='flex space-x-4 mb-6'>
-            <NavLink to={'/'}>
+            <NavLink to={'/'} onClick={handleOnClick}>
               <Typography variant='h6' component='div' sx={{ flexGrow: 1 }}>
                 トップページへ
               </Typography>
             </NavLink>
-            <NavLink to={'/admin'}>
+            <NavLink to={'/admin'} onClick={handleOnClick}>
               <Typography variant='h6' component='div' sx={{ flexGrow: 1 }}>
                 管理者トップページへ
               </Typography>
             </NavLink>
-            <Button variant='contained' onClick={updateMusic}>
+            <Button variant='contained' onClick={updateMusic} disabled={isLoading}>
               楽曲の更新を行う
             </Button>
+
+            <FormControl variant='outlined' className='px-3'>
+              <InputLabel id='genre-select-label'>Genre</InputLabel>
+              <Select
+                labelId='genre-select-label'
+                value={genres.find((genre) => genre.id == currentGenre)?.id || 1}
+                onChange={handleChange}
+                label='Genre'
+                disabled={isLoading}
+              >
+                {genres.map((genre) => (
+                  <MenuItem key={genre.id} value={genre.id}>
+                    {genre.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </div>
           <Dialog open={open} onClose={handleClose}>
             <DialogTitle>新しい曲が追加されました</DialogTitle>

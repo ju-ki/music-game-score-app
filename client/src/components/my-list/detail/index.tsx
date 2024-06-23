@@ -8,6 +8,7 @@ import { MyListType, RelationMyListType } from '../../../types/score';
 import MusicMyListModal from '../../modal';
 import { Button } from '@mui/material';
 import { z } from 'zod';
+import { useGenre } from '../../store/useGenre';
 
 const MyListDetail = () => {
   const schema = z.object({
@@ -25,6 +26,7 @@ const MyListDetail = () => {
   const { user } = useUserStore();
   const [musicDetail, setMusicDetail] = useState<MyListType>();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { currentGenre } = useGenre();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,7 +41,7 @@ const MyListDetail = () => {
         params: {
           myListId: myListId,
           userId: user?.id,
-          genreId: 1,
+          genreId: currentGenre,
         },
       });
 
@@ -56,7 +58,7 @@ const MyListDetail = () => {
         musicListId: myListId,
         selectedMusic: musicIdList,
         userId: user?.id,
-        musicGenreId: 1,
+        musicGenreId: currentGenre,
       });
       setMusicDetail(response.data);
       setIsModalOpen(false);
@@ -80,7 +82,7 @@ const MyListDetail = () => {
           params: {
             musicListId: myListId,
             userId: user?.id,
-            genreId: 1,
+            genreId: currentGenre,
           },
         });
         console.log(response);

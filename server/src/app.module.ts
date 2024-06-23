@@ -18,6 +18,7 @@ import { AuthService } from './auth/auth.service';
 import { AuthController } from './auth/auth.controller';
 import { JwtService } from '@nestjs/jwt';
 import { UserController } from './user/user.controller';
+import { MetaMusicController } from './meta-music/meta-music.controller';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { UserController } from './user/user.controller';
       isGlobal: true,
     }),
   ],
-  controllers: [AppController, SongsController, ScoresController, MusicListController, AuthController, UserController],
+  controllers: [AppController, SongsController, ScoresController, MusicListController, AuthController, UserController, MetaMusicController],
   providers: [
     AppService,
     SongsService,

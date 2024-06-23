@@ -12,6 +12,12 @@ export class MetaMusicService {
     private prisma: PrismaService,
   ) {}
 
+  async fetchGenre() {
+    const genre = await this.prisma.genre.findMany({});
+
+    return genre;
+  }
+
   async fetchUnitProfile() {
     this.httpService
       .get(this.config.get('MUSIC_UNIT_PROFILE_URL'))
