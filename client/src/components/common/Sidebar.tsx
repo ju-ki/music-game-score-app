@@ -93,7 +93,7 @@ const Sidebar = () => {
             <InputLabel id='genre-select-label'>Genre</InputLabel>
             <Select
               labelId='genre-select-label'
-              value={genres.find((genre) => genre.id == currentGenre)?.id || 1}
+              value={genres.find((genre) => genre.id == currentGenre)?.id || ''}
               onChange={handleChange}
               label='Genre'
               disabled={!!(location.pathname.split('/')[1] === 'my-list' && params.myListId)}

@@ -14,7 +14,7 @@ export const defaultToastOptions: ToastOptions = {
 
 type ToastType = 'success' | 'error' | 'info' | 'warning' | 'default';
 
-const toastIds: { [key in ToastType]?: Id } = {};
+const toastIds: { [key in ToastType]?: Id | undefined } = {};
 
 export const showToast = (type: ToastType, content: ToastContent, options: Partial<ToastOptions> = {}): Id => {
   const optionsToApply = { ...defaultToastOptions, ...options };

@@ -11,7 +11,6 @@ import MyListDetail from './components/my-list/detail';
 import AdminTop from './components/admin/top';
 import AdminUser from './components/admin/users';
 import AdminMusic from './components/admin/musics';
-import EditMusicScore from './components/score/edit';
 import PrivateRoute from './lib/PrivateRoute';
 import AuthRoute from './lib/AuthRoute';
 import { ToastContainer } from 'react-toastify';
@@ -33,7 +32,7 @@ function App() {
               <Route path='/register-music-score/' element={<RegisterMusicScore />} />
               <Route path='/register-music-score/:musicId' element={<RegisterMusicScore />} />
               <Route path='/register-music-score/:musicId/:musicDifficulty' element={<RegisterMusicScore />} />
-              <Route path='/edit-score/:scoreId' element={<EditMusicScore />} />
+              <Route path='/edit-score/:scoreId' element={<RegisterMusicScore />} />
               <Route path='/score/:musicId/:musicDifficulty' element={<MusicScoreList />} />
               <Route path='/my-list/:myListId' element={<MyListDetail />} />
             </Route>
