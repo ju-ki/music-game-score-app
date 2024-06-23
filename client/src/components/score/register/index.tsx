@@ -11,18 +11,43 @@ import { useParams } from 'react-router-dom';
 import { MetaMusicType, MusicType } from '../../../types/score';
 import { Autocomplete, Button, Checkbox, FormControlLabel, FormGroup, TextField } from '@mui/material';
 import { useGenre } from '../../store/useGenre';
+import { useScoreDetail } from '../../../services/score/api';
+import { showToast } from '../../common/Toast';
+import { toast } from 'react-toastify';
 
 const RegisterMusicScore = () => {
   const { user } = useUserStore();
-  const { musicId, musicDifficulty } = useParams();
+  const { musicId, musicDifficulty, scoreId } = useParams();
   const [selectedMusic, setSelectedMusic] = useState<MusicType | null>(null);
   const [registerConsecutively, setRegisterConsecutively] = useState<boolean>(true);
   const { currentGenre } = useGenre();
   const [difficultyList, setDifficultyList] = useState<string[]>([]);
   const [musicList, setMusicList] = useState<MusicType[]>([]);
+  const { scoreDetail } = useScoreDetail({ scoreId: scoreId, userId: user?.id });
+
+  useEffect(() => {
+    if (scoreDetail && scoreDetail.music && musicList.length) {
+      setValue('perfectCount', scoreDetail.perfectCount);
+      setValue('greatCount', scoreDetail.greatCount);
+      setValue('goodCount', scoreDetail.goodCount);
+      setValue('badCount', scoreDetail.badCount);
+      setValue('missCount', scoreDetail.missCount);
+      setValue('totalNoteCount', scoreDetail.totalNoteCount);
+      setValue('musicId', scoreDetail.musicId);
+      setSelectedMusic(scoreDetail.music);
+      setValue('musicDifficulty', scoreDetail.musicDifficulty);
+      setValue('scoreId', scoreDetail.id);
+      currentGenre === 2 && setValue('perfectPlusCount', scoreDetail.perfectPlusCount);
+    }
+
+    if (musicId && musicList.length) {
+      setSelectedMusic(musicList.find((music) => music.id === Number(musicId)) || null);
+    }
+  }, [scoreDetail, musicList]);
 
   const schema = z
     .object({
+      scoreId: z.string().optional(),
       musicId: z.number({ message: '曲を選択してください' }).min(1, '曲を選択してください'),
       musicDifficulty: z.string().nonempty(),
       perfectPlusCount:
@@ -69,25 +94,43 @@ const RegisterMusicScore = () => {
     setValue,
     getValues,
     reset,
+    formState,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
+  useEffect(() => {
+    if (Object.keys(errors).length) {
+      showToast('error', '入力項目に不備があります');
+    }
+  }, [errors]);
+
   const getAllMusic = async () => {
+    let loadingToastId;
+    if (!loadingToastId) {
+      loadingToastId = showToast('info', '楽曲情報を取得中', { autoClose: false, closeOnClick: false });
+    }
     try {
       const response = await fetchMusicList(0, false, currentGenre);
 
       setMusicList(response.items);
-
       if (musicId && response.items.find((item: MusicType) => item.id === parseInt(musicId))) {
         setValue('musicId', parseInt(musicId));
+        const defaultMusic = musicList.find((music) => music.id === Number.parseInt(musicId || '')) || null;
+        setSelectedMusic(defaultMusic);
       }
       if (musicDifficulty) {
         setValue('musicDifficulty', musicDifficulty);
       }
     } catch (err) {
       console.log(err);
+      showToast('error', '楽曲情報の取得に失敗しました。');
+    } finally {
+      if (loadingToastId) {
+        toast.dismiss(loadingToastId);
+        loadingToastId = null;
+      }
     }
   };
 
@@ -105,12 +148,6 @@ const RegisterMusicScore = () => {
   };
 
   const watchMusic = watch(['musicId', 'musicDifficulty']);
-
-  useEffect(() => {
-    if (musicId) {
-      setValue('musicId', parseInt(musicId));
-    }
-  }, [musicList, musicId, setValue]);
 
   useEffect(() => {
     if (watchMusic[0] && watchMusic[1]) {
@@ -268,14 +305,6 @@ const RegisterMusicScore = () => {
     setValue('musicId', newValue ? newValue.id : 0);
   };
 
-  useEffect(() => {
-    const defaultMusic = musicList.find((music) => music.id === Number.parseInt(musicId || '')) || null;
-    setSelectedMusic(defaultMusic);
-    if (defaultMusic) {
-      setValue('musicId', defaultMusic.id);
-    }
-  }, [musicId, musicList, setValue]);
-
   const onSubmit = async (values: FormData) => {
     try {
       await axiosClient.post(`${import.meta.env.VITE_APP_URL}scores`, {
@@ -283,18 +312,22 @@ const RegisterMusicScore = () => {
         genreId: currentGenre || 1,
         userId: user?.id,
       });
-      reset({
-        musicId: registerConsecutively ? values.musicId : 0,
-        totalNoteCount: registerConsecutively ? values.totalNoteCount : NaN,
-        perfectPlusCount: NaN,
-        perfectCount: NaN,
-        greatCount: NaN,
-        goodCount: NaN,
-        badCount: NaN,
-        missCount: NaN,
-      });
+      showToast('success', `スコアの${scoreId != undefined ? '更新' : '登録'}に成功しました。`);
+      if (!scoreId) {
+        reset({
+          musicId: registerConsecutively ? values.musicId : 0,
+          totalNoteCount: registerConsecutively ? values.totalNoteCount : NaN,
+          perfectPlusCount: NaN,
+          perfectCount: NaN,
+          greatCount: NaN,
+          goodCount: NaN,
+          badCount: NaN,
+          missCount: NaN,
+        });
+      }
     } catch (err) {
       console.log(err);
+      showToast('error', `スコアの${scoreId != undefined ? '更新' : '登録'}に失敗しました。`);
     }
   };
 
@@ -308,6 +341,7 @@ const RegisterMusicScore = () => {
         <main className='p-4'>
           <h1 className='text-2xl font-bold mb-4'>スコア登録</h1>
           <form onSubmit={handleSubmit(onSubmit)} className='p-4 bg-white shadow-md rounded-md'>
+            <input type='hidden' value={scoreId} {...register('scoreId', { required: false })} />
             <div>
               <Autocomplete
                 disablePortal
@@ -315,8 +349,10 @@ const RegisterMusicScore = () => {
                 options={musicList}
                 value={selectedMusic}
                 getOptionLabel={(option: MusicType) => option.name}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
                 renderInput={(params) => <TextField {...params} label='楽曲検索' />}
                 onChange={handleMusicChange}
+                disabled={scoreId != undefined}
                 className='mb-4'
               />
               <input type='hidden' {...register('musicId', { required: true, valueAsNumber: true })} />
@@ -325,6 +361,7 @@ const RegisterMusicScore = () => {
             <select
               {...register('musicDifficulty', { required: true })}
               className='mb-4 p-2 rounded border border-gray-300 w-full'
+              disabled={scoreId != undefined}
             >
               {difficultyList.map((difficulty) => (
                 <option key={difficulty} value={difficulty}>
@@ -400,7 +437,7 @@ const RegisterMusicScore = () => {
             />
             {errors.missCount && <span className='text-red-500 mb-2 block'>{errors.missCount.message}</span>}
             <div className='flex items-center'>
-              <Button variant='contained' type='submit'>
+              <Button variant='contained' type='submit' disabled={formState.isSubmitting}>
                 スコアを登録する
               </Button>
               <FormGroup className='mx-5'>
@@ -409,6 +446,7 @@ const RegisterMusicScore = () => {
                     <Checkbox
                       checked={registerConsecutively}
                       onChange={() => setRegisterConsecutively((prev) => !prev)}
+                      disabled={formState.isSubmitting}
                     />
                   }
                   label='同じ曲を連続で登録する'
