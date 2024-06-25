@@ -24,7 +24,7 @@ export const fetchMusicList = async (page: number, isInfinityScroll: boolean, cu
 export const useMusicQuery = () => {
   const { currentGenre } = useGenre();
   return useInfiniteQuery({
-    queryKey: ['musicList'],
+    queryKey: ['musicList', currentGenre],
     queryFn: ({ pageParam = 1 }) => fetchMusicList(pageParam, true, currentGenre),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => {
