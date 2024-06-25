@@ -5,10 +5,11 @@ import { useMusicQuery } from '../hooks/useMusicQuery';
 import { Link } from 'react-router-dom';
 import { MetaMusicType, MusicType, TagType, UnitType } from '../../types/score';
 import { useGenre } from '../store/useGenre';
+import { showToast } from '../common/Toast';
 
 const MusicList = () => {
   const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage, status, error } = useMusicQuery();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterUnit, setFilterUnit] = useState({});
   const [checkedState, setCheckedState] = useState(new Array(8).fill(false));
   const { currentGenre } = useGenre();
@@ -65,7 +66,10 @@ const MusicList = () => {
       return matchName && isMusicIdMatched;
     });
 
-  if (status === 'pending') return <div>Loading...</div>;
+  if (status === 'pending') {
+    showToast('info', '楽曲取得中');
+    return <div>Loading...</div>;
+  }
   if (status === 'error') return <div>Error: {error.message}</div>;
   return (
     <div className='flex h-screen'>
