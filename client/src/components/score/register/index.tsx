@@ -305,6 +305,54 @@ const RegisterMusicScore = () => {
     setValue('musicId', newValue ? newValue.id : 0);
   };
 
+  const onClickFullComb = () => {
+    setValue('goodCount', 0);
+    setValue('badCount', 0);
+    setValue('missCount', 0);
+  };
+
+  const onClickAllPerfect = () => {
+    setValue('perfectCount', watchedTotalNoteCount);
+    setValue('greatCount', 0);
+    setValue('goodCount', 0);
+    setValue('badCount', 0);
+    setValue('missCount', 0);
+  };
+
+  const onClickFillOutZero = () => {
+    const filledFields = Object.values([
+      watchedPerfectPlusCount,
+      watchedPerfectCount,
+      watchedGreatCount,
+      watchedGoodCount,
+      watchedBadCount,
+      watchedMissCount,
+    ]);
+    filledFields.forEach((field, idx: number) => {
+      if (Number.isNaN(field) && idx === 2) {
+        setValue('greatCount', 0);
+      }
+      if (Number.isNaN(field) && idx === 3) {
+        setValue('goodCount', 0);
+      }
+      if (Number.isNaN(field) && idx === 4) {
+        setValue('badCount', 0);
+      }
+      if (Number.isNaN(field) && idx === 5) {
+        setValue('missCount', 0);
+      }
+    });
+  };
+
+  const onClickResetScore = () => {
+    setValue('perfectPlusCount', NaN);
+    setValue('perfectCount', NaN);
+    setValue('greatCount', NaN);
+    setValue('goodCount', NaN);
+    setValue('badCount', NaN);
+    setValue('missCount', NaN);
+  };
+
   const onSubmit = async (values: FormData) => {
     try {
       await axiosClient.post(`${import.meta.env.VITE_APP_URL}scores`, {
@@ -436,9 +484,45 @@ const RegisterMusicScore = () => {
               className='mb-4 p-2 rounded border border-gray-300 w-full'
             />
             {errors.missCount && <span className='text-red-500 mb-2 block'>{errors.missCount.message}</span>}
-            <div className='flex items-center'>
+            <div className='flex items-center gap-x-2'>
               <Button variant='contained' type='submit' disabled={formState.isSubmitting}>
                 スコアを登録する
+              </Button>
+              <Button
+                variant='contained'
+                color='success'
+                type='button'
+                disabled={formState.isSubmitting || selectedMusic == null}
+                onClick={onClickFullComb}
+              >
+                フルコンボ
+              </Button>
+              <Button
+                variant='contained'
+                color='warning'
+                type='button'
+                disabled={formState.isSubmitting || selectedMusic == null}
+                onClick={onClickAllPerfect}
+              >
+                All Perfect
+              </Button>
+              <Button
+                variant='contained'
+                color='secondary'
+                type='button'
+                disabled={formState.isSubmitting || selectedMusic == null}
+                onClick={onClickFillOutZero}
+              >
+                0埋め(Perfectを除く)
+              </Button>
+              <Button
+                variant='contained'
+                color='error'
+                type='button'
+                disabled={formState.isSubmitting || selectedMusic == null}
+                onClick={onClickResetScore}
+              >
+                リセット
               </Button>
               <FormGroup className='mx-5'>
                 <FormControlLabel
