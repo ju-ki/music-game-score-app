@@ -21,7 +21,7 @@ export class AuthController {
     const refreshToken = request.cookies.refresh_token;
 
     if (!accessToken || !refreshToken) {
-      return false;
+      throw new HttpException('Access Token Or Refresh Token Not Found', HttpStatus.BAD_REQUEST);
     }
     const userId = query.userId;
 

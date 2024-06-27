@@ -15,7 +15,6 @@ export class AuthService {
 
   async login({ email, name, imageUrl }) {
     let user = await this.userService.findUser(email);
-    console.log(user);
     if (!user) {
       user = await this.userService.registerUser({ name, imageUrl, email });
     }
@@ -49,8 +48,7 @@ export class AuthService {
         }
       }
     } else {
-      console.log('no user Id');
-      return false;
+      throw new Error('User ID is Not Found');
     }
   }
 
@@ -90,24 +88,25 @@ export class AuthService {
       };
       return response;
     } catch (error) {
-      console.log(error);
-      throw new Error(error.response.data);
-      // throw new Error('Failed to retrieve access token');
+      throw new Error('Failed to retrieve access token:' + error.response.data);
     }
   }
 
   async getRefreshToken(userId: string): Promise<string | null> {
-    const token = await this.prisma.refreshToken.findUnique({
-      where: {
-        userId: userId,
-      },
-    });
+    try {
+      const token = await this.prisma.refreshToken.findUnique({
+        where: {
+          userId: userId,
+        },
+      });
 
-    if (token && new Date() < token.expiresAt) {
-      return token.refreshToken;
+      if (token && new Date() < token.expiresAt) {
+        return token.refreshToken;
+      }
+      return null;
+    } catch (err) {
+      throw new Error('Failed to fetch token from DB:' + err.message);
     }
-
-    return null;
   }
 
   async refreshToken(refreshToken: string, userId: string): Promise<any> {
@@ -128,29 +127,33 @@ export class AuthService {
 
       const newAccessToken = response.data.access_token;
       const newRefreshToken = response.data.refresh_token || refreshToken;
-      const expiresAt = new Date(Date.now() + 3600 * 1000 * 24 * 30);
+      const expiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000);
       // 新しいリフレッシュトークンをストレージに保存する
       await this.saveRefreshToken(userId, newRefreshToken, expiresAt);
 
       return { accessToken: newAccessToken, refreshToken: newRefreshToken };
     } catch (error) {
-      throw new Error('Failed to refresh access token');
+      throw new Error('Failed to fetch refresh access token:' + error.message);
     }
   }
 
   async saveRefreshToken(userId: string, refreshToken: string, expiresAt: Date) {
-    await this.prisma.refreshToken.upsert({
-      where: {
-        userId: userId,
-      },
-      create: {
-        userId: userId,
-        refreshToken: refreshToken,
-        expiresAt: expiresAt,
-      },
-      update: {
-        refreshToken: refreshToken,
-      },
-    });
+    try {
+      await this.prisma.refreshToken.upsert({
+        where: {
+          userId: userId,
+        },
+        create: {
+          userId: userId,
+          refreshToken: refreshToken,
+          expiresAt: expiresAt,
+        },
+        update: {
+          refreshToken: refreshToken,
+        },
+      });
+    } catch (err) {
+      throw new Error('Failed Save Refresh Token:' + err.message);
+    }
   }
 }
