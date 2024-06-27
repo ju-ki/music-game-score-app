@@ -23,7 +23,7 @@ export class AuthService {
     return user;
   }
 
-  async verifyToken(accessToken: string, userId: string): Promise<boolean> {
+  async verifyToken(accessToken: string, refreshToken: string, userId: string): Promise<boolean> {
     if (userId) {
       try {
         const response = await axios.get(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${accessToken}`);
@@ -34,20 +34,23 @@ export class AuthService {
           const refreshToken = await this.getRefreshToken(userId);
           if (refreshToken) {
             const { accessToken: newAccessToken } = await this.refreshToken(refreshToken, userId);
-            return await this.verifyToken(newAccessToken, userId);
+            return await this.verifyToken(newAccessToken, refreshToken, userId);
           } else {
             return false;
           }
         }
       } catch (error) {
-        const refreshToken = await this.getRefreshToken(userId);
+        console.log(error);
         if (refreshToken) {
           const { accessToken: newAccessToken } = await this.refreshToken(refreshToken, userId);
-          return await this.verifyToken(newAccessToken, userId);
+          return await this.verifyToken(newAccessToken, refreshToken, userId);
         } else {
           return false;
         }
       }
+    } else {
+      console.log('no user Id');
+      return false;
     }
   }
 
@@ -77,11 +80,11 @@ export class AuthService {
         imageUrl: userinfo.data.picture,
       });
 
-      const expiresAt = new Date(Date.now() + 3600 * 1000 * 24 * 30);
+      const expiresAt = new Date(Date.now() + 3600 * 1000 * 6);
       await this.saveRefreshToken(user.id, refreshToken, expiresAt);
 
       const response = {
-        ...user,
+        user,
         accessToken,
         refreshToken,
       };
