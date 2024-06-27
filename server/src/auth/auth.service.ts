@@ -39,6 +39,7 @@ export class AuthService {
           }
         }
       } catch (error) {
+        console.log(error);
         if (refreshToken) {
           const { accessToken: newAccessToken } = await this.refreshToken(refreshToken, userId);
           return await this.verifyToken(newAccessToken, refreshToken, userId);
