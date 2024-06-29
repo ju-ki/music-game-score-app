@@ -1,5 +1,5 @@
 import { Button, FormControl, Grid, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
 import ScoreResultOverview from './ScoreResultOverview';
 import ScoreResultCard from './ScoreResultCard';
