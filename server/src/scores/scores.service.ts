@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MetaMusicService } from 'meta-music/meta-music.service';
 import { PrismaService } from 'prisma/prisma.service';
-import { deleteScoreParams, postScoreType, scoreListParams } from './dto';
+import { deleteScoreParams, postScoreType, scoreListParams, scoreParams } from './dto';
 import { SongsService } from 'songs/songs.service';
 import { Scores } from '@prisma/client';
 // import { createObjectCsvWriter } from 'csv-writer';
@@ -96,11 +96,16 @@ export class ScoresService {
           WHEN ${sortId} = 1 THEN "public"."Scores"."missCount" * 3 + "public"."Scores"."badCount" * 3 + "public"."Scores"."goodCount" * 2 + "public"."Scores"."greatCount"
           ELSE 0
         END,
+        CASE
+          WHEN ${sortId} = 1 AND ${genreId} = 2 THEN "public"."Scores"."missCount" * 4 + "public"."Scores"."badCount" * 4 + "public"."Scores"."goodCount" * 3 + "public"."Scores"."greatCount" * 2 + "public"."Scores"."perfectCount"
+          ELSE 0
+        END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."goodCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."greatCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."perfectCount" END,
+        CASE WHEN ${genreId} = 2 THEN "public"."Scores"."perfectPlusCount" END,
       "public"."Scores"."id"
     `;
     const musicInfo = await this.songService.getDetailMusic(genreId, musicId);
@@ -161,7 +166,20 @@ export class ScoresService {
       },
     });
 
-    return newScore;
+    const scoreList = await this.getDetailList({
+      userId: post.userId,
+      genreId: post.genreId,
+      musicId: post.musicId,
+      musicDifficulty: post.musicDifficulty,
+      sortId: post.sortId,
+    });
+    const bestScore = scoreList.scoreList[0] as scoreParams;
+    const isBestScore = newScore.id === scoreList.scoreList[0].id;
+
+    return {
+      newScore: { ...newScore, musicName: bestScore.name },
+      isBestScore,
+    };
   }
 
   async deleteScore(param: deleteScoreParams) {
@@ -219,11 +237,16 @@ export class ScoresService {
           WHEN ${sortId} = 1 THEN "public"."Scores"."missCount" * 3 + "public"."Scores"."badCount" * 3 + "public"."Scores"."goodCount" * 2 + "public"."Scores"."greatCount"
           ELSE 0
         END,
+        CASE
+          WHEN ${sortId} = 1 AND ${genreId} = 2 THEN "public"."Scores"."missCount" * 4 + "public"."Scores"."badCount" * 4 + "public"."Scores"."goodCount" * 3 + "public"."Scores"."greatCount" * 2 + "public"."Scores"."perfectCount"
+          ELSE 0
+        END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."goodCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."greatCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."perfectCount" END,
+        CASE WHEN ${genreId} = 2 THEN "public"."Scores"."perfectPlusCount" END,
       "public"."Scores"."id"
         LIMIT 1
     `;
@@ -253,11 +276,16 @@ export class ScoresService {
           WHEN ${sortId} = 1 THEN "public"."Scores"."missCount" * 3 + "public"."Scores"."badCount" * 3 + "public"."Scores"."goodCount" * 2 + "public"."Scores"."greatCount"
           ELSE 0
         END,
+        CASE
+          WHEN ${sortId} = 1 AND ${genreId} = 2 THEN "public"."Scores"."missCount" * 4 + "public"."Scores"."badCount" * 4 + "public"."Scores"."goodCount" * 3 + "public"."Scores"."greatCount" * 2 + "public"."Scores"."perfectCount"
+          ELSE 0
+        END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."goodCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."greatCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."perfectCount" END,
+        CASE WHEN ${genreId} = 2 THEN "public"."Scores"."perfectPlusCount" END,
       "public"."Scores"."id"
       LIMIT 1
     `;

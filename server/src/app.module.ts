@@ -28,7 +28,15 @@ import { MetaMusicController } from './meta-music/meta-music.controller';
       isGlobal: true,
     }),
   ],
-  controllers: [AppController, SongsController, ScoresController, MusicListController, AuthController, UserController, MetaMusicController],
+  controllers: [
+    AppController,
+    SongsController,
+    ScoresController,
+    MusicListController,
+    AuthController,
+    UserController,
+    MetaMusicController,
+  ],
   providers: [
     AppService,
     SongsService,
