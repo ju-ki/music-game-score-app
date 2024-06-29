@@ -1,6 +1,7 @@
 import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
 import { Divider } from '@mui/joy';
 import { BestScoreType } from '../../../types/score';
+import { useGenre } from '../../store/useGenre';
 
 const ScoreResultOverview = (params: {
   bestScore: BestScoreType | undefined;
@@ -9,6 +10,7 @@ const ScoreResultOverview = (params: {
   countAllPerfectCount: number;
 }) => {
   const { bestScore, countPlayCount, countFullCombCount, countAllPerfectCount } = params;
+  const { currentGenre } = useGenre();
   return (
     <>
       <Box my={4} mx='auto'>
@@ -56,6 +58,11 @@ const ScoreResultOverview = (params: {
                     </Typography>
                     {bestScore?.today ? (
                       <>
+                        {currentGenre === 2 && (
+                          <Typography variant='body2' component='div' mb={1}>
+                            PerfectPlus: {bestScore.today.perfectPlusCount}
+                          </Typography>
+                        )}
                         <Typography variant='body2' component='div' mb={1}>
                           Perfect: {bestScore.today.perfectCount}
                         </Typography>
@@ -85,6 +92,11 @@ const ScoreResultOverview = (params: {
                     </Typography>
                     {bestScore?.week ? (
                       <>
+                        {currentGenre === 2 && (
+                          <Typography variant='body2' component='div' mb={1}>
+                            PerfectPlus: {bestScore.week.perfectPlusCount}
+                          </Typography>
+                        )}
                         <Typography variant='body2' component='div' mb={1}>
                           Perfect: {bestScore.week.perfectCount}
                         </Typography>

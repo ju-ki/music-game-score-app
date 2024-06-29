@@ -96,11 +96,16 @@ export class ScoresService {
           WHEN ${sortId} = 1 THEN "public"."Scores"."missCount" * 3 + "public"."Scores"."badCount" * 3 + "public"."Scores"."goodCount" * 2 + "public"."Scores"."greatCount"
           ELSE 0
         END,
+        CASE
+          WHEN ${sortId} = 1 AND ${genreId} = 2 THEN "public"."Scores"."missCount" * 4 + "public"."Scores"."badCount" * 4 + "public"."Scores"."goodCount" * 3 + "public"."Scores"."greatCount" * 2 + "public"."Scores"."perfectCount"
+          ELSE 0
+        END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."goodCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."greatCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."perfectCount" END,
+        CASE WHEN ${genreId} = 2 THEN "public"."Scores"."perfectPlusCount" END,
       "public"."Scores"."id"
     `;
     const musicInfo = await this.songService.getDetailMusic(genreId, musicId);
@@ -219,11 +224,16 @@ export class ScoresService {
           WHEN ${sortId} = 1 THEN "public"."Scores"."missCount" * 3 + "public"."Scores"."badCount" * 3 + "public"."Scores"."goodCount" * 2 + "public"."Scores"."greatCount"
           ELSE 0
         END,
+        CASE
+          WHEN ${sortId} = 1 AND ${genreId} = 2 THEN "public"."Scores"."missCount" * 4 + "public"."Scores"."badCount" * 4 + "public"."Scores"."goodCount" * 3 + "public"."Scores"."greatCount" * 2 + "public"."Scores"."perfectCount"
+          ELSE 0
+        END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."goodCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."greatCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."perfectCount" END,
+        CASE WHEN ${genreId} = 2 THEN "public"."Scores"."perfectPlusCount" END,
       "public"."Scores"."id"
         LIMIT 1
     `;
@@ -253,11 +263,16 @@ export class ScoresService {
           WHEN ${sortId} = 1 THEN "public"."Scores"."missCount" * 3 + "public"."Scores"."badCount" * 3 + "public"."Scores"."goodCount" * 2 + "public"."Scores"."greatCount"
           ELSE 0
         END,
+        CASE
+          WHEN ${sortId} = 1 AND ${genreId} = 2 THEN "public"."Scores"."missCount" * 4 + "public"."Scores"."badCount" * 4 + "public"."Scores"."goodCount" * 3 + "public"."Scores"."greatCount" * 2 + "public"."Scores"."perfectCount"
+          ELSE 0
+        END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."goodCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."missCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."greatCount" END,
         CASE WHEN ${sortId} = 0 THEN "public"."Scores"."perfectCount" END,
+        CASE WHEN ${genreId} = 2 THEN "public"."Scores"."perfectPlusCount" END,
       "public"."Scores"."id"
       LIMIT 1
     `;
