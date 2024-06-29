@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { ComponentProps, forwardRef, useEffect, useState } from 'react';
 import Header from '../../common/Header';
 import Sidebar from '../../common/Sidebar';
 import { useForm } from 'react-hook-form';
@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import axiosClient from '../../../utils/axios';
 import { useUserStore } from '../../store/userStore';
 import { useParams } from 'react-router-dom';
-import { MetaMusicType, MusicType } from '../../../types/score';
+import { MetaMusicType, MusicType, ScoreType } from '../../../types/score';
 import { Autocomplete, Button, Checkbox, FormControlLabel, FormGroup, TextField } from '@mui/material';
 import { useGenre } from '../../store/useGenre';
 import { useScoreDetail } from '../../../services/score/api';
@@ -353,12 +353,27 @@ const RegisterMusicScore = () => {
     setValue('missCount', NaN);
   };
 
+  const CustomToastWithLink = (newScore: ScoreType) => (
+    <div>
+      <Button>
+        <TwitterIntentTweet
+          className='share-button'
+          text={`ベストスコアを更新しました!\n${newScore?.musicName}(${newScore?.musicDifficulty})\n${newScore?.totalNoteCount}\nPerfectPlusCount:${newScore?.perfectPlusCount}\nPerfectCount:${newScore?.perfectCount}\nGreatCount:${newScore?.greatCount}\nGoodCount:${newScore?.goodCount}\nBadCount:${newScore?.badCount}\nMissCount${newScore?.missCount}`}
+          hashtags={['MyApp']}
+        >
+          Xにシェアする
+        </TwitterIntentTweet>
+      </Button>
+    </div>
+  );
+
   const onSubmit = async (values: FormData) => {
     try {
-      await axiosClient.post(`${import.meta.env.VITE_APP_URL}scores`, {
+      const response = await axiosClient.post(`${import.meta.env.VITE_APP_URL}scores`, {
         ...values,
         genreId: currentGenre || 1,
         userId: user?.id,
+        sortId: 0,
       });
       showToast('success', `スコアの${scoreId != undefined ? '更新' : '登録'}に成功しました。`);
       if (!scoreId) {
@@ -373,11 +388,43 @@ const RegisterMusicScore = () => {
           missCount: NaN,
         });
       }
+      console.log(response.data);
+      const newScore: ScoreType = response.data.newScore as ScoreType;
+      if (response.data.isBestScore) {
+        showToast('success', 'ベストスコア更新しました!');
+        toast.info(<CustomToastWithLink {...newScore} />);
+      }
     } catch (err) {
       console.log(err);
       showToast('error', `スコアの${scoreId != undefined ? '更新' : '登録'}に失敗しました。`);
     }
   };
+
+  type TwitterIntentTweetProps = {
+    text?: string;
+    url?: string;
+    hashtags?: string[];
+    via?: string;
+    related?: string[];
+    in_reply_to?: string;
+  } & Omit<ComponentProps<'a'>, 'href' | 'target' | 'rel'>;
+
+  const TwitterIntentTweet = forwardRef<HTMLAnchorElement, TwitterIntentTweetProps>(
+    ({ text, url, hashtags, via, related, in_reply_to, ...intrinsicProps }, forwardedRef) => {
+      const _url = new URL('https://twitter.com/intent/tweet');
+
+      if (text !== undefined) _url.searchParams.set('text', text);
+      if (url !== undefined) _url.searchParams.set('url', url);
+      if (hashtags !== undefined) _url.searchParams.set('hashtags', hashtags.join(','));
+      if (via !== undefined) _url.searchParams.set('via', via);
+      if (related !== undefined) _url.searchParams.set('related', related.join(','));
+      if (in_reply_to !== undefined) _url.searchParams.set('in_reply_to', in_reply_to);
+
+      return (
+        <a ref={forwardedRef} href={_url.toString()} target='_blank' rel='noopener noreferrer' {...intrinsicProps} />
+      );
+    },
+  );
 
   return (
     <div className='flex h-screen'>

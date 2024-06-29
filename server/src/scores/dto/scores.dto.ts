@@ -10,6 +10,7 @@ export class postScoreType {
   badCount?: number;
   missCount: number;
   userId: string;
+  sortId: number;
 }
 
 export class scoreListParams {
@@ -28,10 +29,25 @@ export class deleteScoreParams {
 export interface ScoreRecord {
   name: string;
   difficulty: string;
+  perfectPlusCount?: number;
   perfectCount: number;
   greatCount: number;
   goodCount: number;
   badCount: number;
   missCount: number;
   createdAt: string;
+}
+
+export class scoreParams {
+  id: string;
+  musicId: number;
+  totalNoteCount: number;
+  perfectPlusCount?: number;
+  perfectCount: number;
+  greatCount: number;
+  goodCount: number;
+  badCount: number;
+  missCount: number;
+  musicDifficulty: string;
+  name?: string;
 }

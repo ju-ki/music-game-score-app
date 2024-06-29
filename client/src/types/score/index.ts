@@ -11,6 +11,7 @@ export type ScoreType = {
   musicId: number;
   id: string;
   music: MusicType;
+  musicName?: string;
 };
 
 export type MusicType = {
