@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MetaMusicService } from 'meta-music/meta-music.service';
 import { PrismaService } from 'prisma/prisma.service';
-import { deleteScoreParams, postScoreType, scoreListParams } from './dto';
+import { deleteScoreParams, postScoreType, scoreListParams, scoreParams } from './dto';
 import { SongsService } from 'songs/songs.service';
 import { Scores } from '@prisma/client';
 // import { createObjectCsvWriter } from 'csv-writer';
@@ -166,7 +166,20 @@ export class ScoresService {
       },
     });
 
-    return newScore;
+    const scoreList = await this.getDetailList({
+      userId: post.userId,
+      genreId: post.genreId,
+      musicId: post.musicId,
+      musicDifficulty: post.musicDifficulty,
+      sortId: post.sortId,
+    });
+    const bestScore = scoreList.scoreList[0] as scoreParams;
+    const isBestScore = newScore.id === scoreList.scoreList[0].id;
+
+    return {
+      newScore: { ...newScore, musicName: bestScore.name },
+      isBestScore,
+    };
   }
 
   async deleteScore(param: deleteScoreParams) {
