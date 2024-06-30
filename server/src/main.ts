@@ -6,19 +6,13 @@ import * as cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.use((req, res, next) => {
-    console.log('Request received:', req.method, req.url);
-    console.log('Setting CORS headers for:', process.env.TOP_PAGE);
-    res.header('Access-Control-Allow-Origin', process.env.TOP_PAGE);
-    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    if (req.method === 'OPTIONS') {
-      res.sendStatus(200);
-    } else {
-      next();
-    }
+  app.enableCors({
+    origin: process.env.TOP_PAGE,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+    credentials: true,
   });
+
   app.use(cookieParser());
   await app.listen(3000);
 }
