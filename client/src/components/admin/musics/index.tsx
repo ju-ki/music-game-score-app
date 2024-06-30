@@ -54,7 +54,7 @@ const AdminMusic = () => {
   const updateMusic = async () => {
     setLoading(true);
     try {
-      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}songs`, {
+      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}/songs`, {
         params: { genreId: currentGenre },
       });
       setMusicList(response.data.allMusic.items);

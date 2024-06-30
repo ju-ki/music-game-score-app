@@ -5,7 +5,7 @@ import { ScoreType } from '../../../types/score';
 export const deleteScore = async (params: { scoreId: string; userId: string | undefined }) => {
   if (confirm('削除してもよろしいですか?')) {
     try {
-      await axiosClient.delete(`${import.meta.env.VITE_APP_URL}scores`, {
+      await axiosClient.delete(`${import.meta.env.VITE_APP_URL}/scores`, {
         params: {
           userId: params.userId,
           scoreId: params.scoreId,
@@ -29,7 +29,7 @@ export const useScoreDetail = (params: { scoreId: string | undefined; userId: st
   async function fetchScoreDetail() {
     if (params.scoreId && params.userId) {
       try {
-        const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}scores/detail/`, {
+        const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}/scores/detail/`, {
           params: {
             userId: params.userId,
             scoreId: params.scoreId,

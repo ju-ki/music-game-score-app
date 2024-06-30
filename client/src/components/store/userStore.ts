@@ -58,7 +58,7 @@ const saveRefreshAccessToken = (refreshToken: string | null) => {
 const handleGoogleLoginSuccess = async (response: Omit<CodeResponse, 'error' | 'error_description' | 'error_uri'>) => {
   try {
     const { data } = await axiosClient.post(
-      `${import.meta.env.VITE_APP_URL}auth/google/login`,
+      `${import.meta.env.VITE_APP_URL}/auth/google/login`,
       {
         code: response.code,
       },
@@ -91,7 +91,7 @@ async function checkLoginStatus(): Promise<boolean> {
   const user = useUserStore.getState().user;
 
   try {
-    const isValid = await axiosClient.get(`${import.meta.env.VITE_APP_URL}auth/verify`, {
+    const isValid = await axiosClient.get(`${import.meta.env.VITE_APP_URL}/auth/verify`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
