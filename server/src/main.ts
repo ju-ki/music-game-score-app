@@ -7,6 +7,8 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.use((req, res, next) => {
+    console.log('Request received:', req.method, req.url);
+    console.log('Setting CORS headers for:', process.env.TOP_PAGE);
     res.header('Access-Control-Allow-Origin', process.env.TOP_PAGE);
     res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
