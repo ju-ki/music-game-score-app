@@ -9,7 +9,7 @@ import { useGenre } from '../store/useGenre';
  * @returns 楽曲リスト
  */
 export const fetchMusicList = async (page: number, isInfinityScroll: boolean, currentGenre: number) => {
-  const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}songs/search`, {
+  const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}/songs/search`, {
     params: {
       musicTag: 0,
       genreId: currentGenre || 1,

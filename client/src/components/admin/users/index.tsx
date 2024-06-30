@@ -31,7 +31,7 @@ const AdminUser = () => {
 
   const getUsers = async () => {
     try {
-      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}user/list`);
+      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}/user/list`);
       setUsers(response.data);
     } catch (err) {
       console.log(err);
@@ -40,7 +40,7 @@ const AdminUser = () => {
 
   const onSubmit = async (users: UpdateUserAuthorityData) => {
     try {
-      const response = await axiosClient.patch(`${import.meta.env.VITE_APP_URL}user/change-authority`, {
+      const response = await axiosClient.patch(`${import.meta.env.VITE_APP_URL}/user/change-authority`, {
         ...users,
       });
       setUsers(response.data);

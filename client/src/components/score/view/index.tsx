@@ -17,7 +17,7 @@ const ScoresList = () => {
   }, [currentGenre]);
   async function getScoreList() {
     try {
-      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}scores/list`, {
+      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}/scores/list`, {
         params: {
           userId: user?.id,
           genreId: currentGenre || 1,

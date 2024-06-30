@@ -33,7 +33,7 @@ const MyList = () => {
 
   const getMusicList = async () => {
     try {
-      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}music-list`, {
+      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}/music-list`, {
         params: {
           userId: user?.id,
           genreId: currentGenre || 1,
@@ -57,7 +57,7 @@ const MyList = () => {
   const onSubmit = async (data: FormData) => {
     const musicIdList = data.selectedMusic.map((item) => item.id);
     try {
-      const response = await axiosClient.post(`${import.meta.env.VITE_APP_URL}music-list`, {
+      const response = await axiosClient.post(`${import.meta.env.VITE_APP_URL}/music-list`, {
         myListName: data.myListName,
         selectedMusic: musicIdList,
         genreId: currentGenre || 1,

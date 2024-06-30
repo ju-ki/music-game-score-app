@@ -369,7 +369,7 @@ const RegisterMusicScore = () => {
 
   const onSubmit = async (values: FormData) => {
     try {
-      const response = await axiosClient.post(`${import.meta.env.VITE_APP_URL}scores`, {
+      const response = await axiosClient.post(`${import.meta.env.VITE_APP_URL}/scores`, {
         ...values,
         genreId: currentGenre || 1,
         userId: user?.id,

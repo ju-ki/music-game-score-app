@@ -37,7 +37,7 @@ const MyListDetail = () => {
 
   async function getMyListDetail() {
     try {
-      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}music-list/getMyList`, {
+      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}/music-list/getMyList`, {
         params: {
           myListId: myListId,
           userId: user?.id,
@@ -54,7 +54,7 @@ const MyListDetail = () => {
   const addMusicToMyList = async (data: FormData) => {
     try {
       const musicIdList = data.selectedMusic.map((item) => item.id);
-      const response = await axiosClient.post(`${import.meta.env.VITE_APP_URL}music-list/add`, {
+      const response = await axiosClient.post(`${import.meta.env.VITE_APP_URL}/music-list/add`, {
         musicListId: myListId,
         selectedMusic: musicIdList,
         userId: user?.id,
@@ -78,7 +78,7 @@ const MyListDetail = () => {
   const deleteMyMusicList = async () => {
     if (confirm('マイリストを削除します。\n削除後はデータの復元は行えません。\nよろしいですか?')) {
       try {
-        const response = await axiosClient.delete(`${import.meta.env.VITE_APP_URL}music-list`, {
+        const response = await axiosClient.delete(`${import.meta.env.VITE_APP_URL}/music-list`, {
           params: {
             musicListId: myListId,
             userId: user?.id,

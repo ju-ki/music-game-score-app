@@ -22,7 +22,7 @@ export const useFetchScoreList = (sortId: number) => {
   async function getScoreList() {
     try {
       setIsLoading(true);
-      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}scores/detailList`, {
+      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}/scores/detailList`, {
         params: {
           userId: user?.id,
           genreId: currentGenre || 1,
