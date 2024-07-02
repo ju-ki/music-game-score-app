@@ -13,9 +13,13 @@ export class MetaMusicService {
   ) {}
 
   async fetchGenre() {
-    const genre = await this.prisma.genre.findMany({});
-
-    return genre;
+    try {
+      const genre = await this.prisma.genre.findMany({});
+      return genre;
+    } catch (err) {
+      console.log(err);
+      throw new Error('Failed to fetch Genre:' + err);
+    }
   }
 
   async fetchUnitProfile() {
