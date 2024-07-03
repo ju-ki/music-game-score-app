@@ -106,7 +106,6 @@ async function checkLoginStatus(): Promise<boolean> {
     return isValid.data;
   } catch (error) {
     console.log('Token validation failed:', error);
-    showToast('error', 'ログインに失敗しました');
     return false;
   }
 }
