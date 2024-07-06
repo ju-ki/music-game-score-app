@@ -1,6 +1,6 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Query } from '@nestjs/common';
 import { SongsService } from './songs.service';
-import { searchWords } from './dto';
+import { EditScoreDto, searchWords } from './dto';
 
 @Controller('songs')
 export class SongsController {
@@ -24,5 +24,10 @@ export class SongsController {
   @Get('/search')
   searchMusic(@Query() dto: searchWords) {
     return this.songsService.searchMusic(dto);
+  }
+
+  @Patch()
+  updateEditMusic(@Body() dto: EditScoreDto) {
+    return this.songsService.editMusic(dto);
   }
 }

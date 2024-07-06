@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { MetaMusicService } from 'meta-music/meta-music.service';
-import { searchWords } from './dto';
+import { EditScoreDto, searchWords } from './dto';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 
@@ -279,6 +279,10 @@ export class SongsService {
       music.metaMusic.sort((a, b) => Number.parseInt(a.id) - Number.parseInt(b.id));
     });
 
+    searchedMusicList.forEach((music) => {
+      music.metaMusic.sort((a, b) => a.totalNoteCount - b.totalNoteCount);
+    });
+
     const totalCount = await this.prisma.music.count({
       where: {
         name: {
@@ -311,5 +315,35 @@ export class SongsService {
       items: searchedMusicList,
       nextPage: skipAmount + pageSize > totalCount ? null : page + 1,
     };
+  }
+
+  async editMusic(dto: EditScoreDto) {
+    let genreId = dto.genreId;
+    if (typeof genreId !== 'number') {
+      genreId = Number.parseInt(genreId);
+    }
+    try {
+      const metaMusicList = dto.metaMusic;
+      await this.prisma.$transaction(async (prisma) => {
+        for (const metaMusic of metaMusicList) {
+          await prisma.metaMusic.update({
+            where: {
+              id: metaMusic.id,
+              genreId: genreId,
+            },
+            data: {
+              totalNoteCount: metaMusic.totalNoteCount,
+            },
+          });
+        }
+      });
+
+      const updatedMusicList = await this.searchMusic({ genreId: genreId, isInfinityScroll: 'false' });
+
+      return updatedMusicList;
+    } catch (err) {
+      console.log(err);
+      throw new Error('failed to update music info:' + err);
+    }
   }
 }
