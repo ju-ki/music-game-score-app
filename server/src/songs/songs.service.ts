@@ -35,7 +35,7 @@ export class SongsService {
       if (newMusic.length) {
         await this.prisma.$transaction(async (prisma) => {
           const newMusicMetaList: any[] = [];
-          const newMusicTagList: any[] = [];
+          // const newMusicTagList: any[] = [];
 
           for (const music of newMusic) {
             await prisma.music.create({
@@ -69,22 +69,22 @@ export class SongsService {
           }
 
           // MusicTagの追加
-          const responseTags = await axios.get(this.config.get('MUSIC_TAG_URL'));
-          newMusicTagList.push(
-            ...responseTags.data.filter((music) => newMusic.some((newTag) => newTag.id === music.musicId)),
-          );
+          // const responseTags = await axios.get(this.config.get('MUSIC_TAG_URL'));
+          // newMusicTagList.push(
+          //   ...responseTags.data.filter((music) => newMusic.some((newTag) => newTag.id === music.musicId)),
+          // );
 
-          for (const music of newMusicTagList) {
-            await prisma.musicTag.create({
-              data: {
-                id: music.id,
-                genreId: genreId,
-                musicId: music.musicId as number,
-                tagName: music.musicTag,
-                tagId: music.seq,
-              },
-            });
-          }
+          // for (const music of newMusicTagList) {
+          //   await prisma.musicTag.create({
+          //     data: {
+          //       id: music.id,
+          //       genreId: genreId,
+          //       musicId: music.musicId as number,
+          //       tagName: music.musicTag,
+          //       tagId: music.seq,
+          //     },
+          //   });
+          // }
         });
       }
 
@@ -99,7 +99,7 @@ export class SongsService {
         allMusic: allMusicList,
       };
     } catch (err) {
-      console.log(err);
+      throw new Error(err.message);
     }
   }
 
