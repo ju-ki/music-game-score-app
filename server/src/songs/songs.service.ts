@@ -31,9 +31,12 @@ export class SongsService {
 
       const newMusic = response.data.filter((music) => !currentMusicIdSet.has(music.id));
 
-      //新規楽曲がある場合のみ追加処理を行う
+      // 新規楽曲がある場合のみ追加処理を行う
       if (newMusic.length) {
         await this.prisma.$transaction(async (prisma) => {
+          const newMusicMetaList: any[] = [];
+          const newMusicTagList: any[] = [];
+
           for (const music of newMusic) {
             await prisma.music.create({
               data: {
@@ -48,9 +51,10 @@ export class SongsService {
 
           // MusicDifficultiesの追加
           const responseDifficulties = await axios.get(this.config.get('META_MUSIC_URL'));
-          const newMusicMetaList = responseDifficulties.data.filter((music) =>
-            newMusic.some((newMeta) => newMeta.id === music.musicId),
+          newMusicMetaList.push(
+            ...responseDifficulties.data.filter((music) => newMusic.some((newMeta) => newMeta.id === music.musicId)),
           );
+
           for (const music of newMusicMetaList) {
             await prisma.metaMusic.create({
               data: {
@@ -66,9 +70,10 @@ export class SongsService {
 
           // MusicTagの追加
           const responseTags = await axios.get(this.config.get('MUSIC_TAG_URL'));
-          const newMusicTagList = responseTags.data.filter((music) =>
-            newMusic.some((newTag) => newTag.id === music.musicId),
+          newMusicTagList.push(
+            ...responseTags.data.filter((music) => newMusic.some((newTag) => newTag.id === music.musicId)),
           );
+
           for (const music of newMusicTagList) {
             await prisma.musicTag.create({
               data: {
