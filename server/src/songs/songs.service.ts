@@ -33,60 +33,75 @@ export class SongsService {
 
       // 新規楽曲がある場合のみ追加処理を行う
       if (newMusic.length) {
-        await this.prisma.$transaction(async (prisma) => {
-          const createMusicPromises = newMusic.map((music) => {
-            return prisma.music.create({
-              data: {
-                id: music.id,
-                name: music.title,
-                assetBundleName: music.assetbundleName,
-                genreId: genreId,
-                releasedAt: new Date(music.releasedAt),
-              },
+        // 最初のトランザクション: Musicの追加
+        await this.prisma.$transaction(
+          async (prisma) => {
+            const createMusicPromises = newMusic.map((music) => {
+              return prisma.music.create({
+                data: {
+                  id: music.id,
+                  name: music.title,
+                  assetBundleName: music.assetbundleName,
+                  genreId: genreId,
+                  releasedAt: new Date(music.releasedAt),
+                },
+              });
             });
-          });
 
-          await Promise.all(createMusicPromises);
+            await Promise.all(createMusicPromises);
+          },
+          {
+            maxWait: 30000,
+            timeout: 30000,
+          },
+        );
 
-          // MusicDifficultiesの追加
-          const responseDifficulties = await axios.get(this.config.get('META_MUSIC_URL'));
-          const newMusicMetaList = responseDifficulties.data.filter((music) =>
-            newMusic.some((newMeta) => newMeta.id === music.musicId),
-          );
+        // 2番目のトランザクション: MusicDifficultiesの追加
+        const responseDifficulties = await axios.get(this.config.get('META_MUSIC_URL'));
+        const newMusicMetaList = responseDifficulties.data.filter((music) =>
+          newMusic.some((newMeta) => newMeta.id === music.musicId),
+        );
 
-          const createMetaMusicPromises = newMusicMetaList.map((music) => {
-            return prisma.metaMusic.create({
-              data: {
-                id: music.id.toString(),
-                genreId: genreId,
-                musicId: music.musicId as number,
-                playLevel: music.playLevel.toString(),
-                totalNoteCount: music.totalNoteCount as number,
-                musicDifficulty: music.musicDifficulty as string,
-              },
+        await this.prisma.$transaction(
+          async (prisma) => {
+            const createMetaMusicPromises = newMusicMetaList.map((music) => {
+              return prisma.metaMusic.create({
+                data: {
+                  id: music.id.toString(),
+                  genreId: genreId,
+                  musicId: music.musicId as number,
+                  playLevel: music.playLevel.toString(),
+                  totalNoteCount: music.totalNoteCount as number,
+                  musicDifficulty: music.musicDifficulty as string,
+                },
+              });
             });
-          });
 
-          await Promise.all(createMetaMusicPromises);
+            await Promise.all(createMetaMusicPromises);
+          },
+          {
+            maxWait: 30000,
+            timeout: 30000,
 
-          // MusicTagの追加
-          // const responseTags = await axios.get(this.config.get('MUSIC_TAG_URL'));
-          // newMusicTagList.push(
-          //   ...responseTags.data.filter((music) => newMusic.some((newTag) => newTag.id === music.musicId)),
-          // );
+            // MusicTagの追加
+            // const responseTags = await axios.get(this.config.get('MUSIC_TAG_URL'));
+            // newMusicTagList.push(
+            //   ...responseTags.data.filter((music) => newMusic.some((newTag) => newTag.id === music.musicId)),
+            // );
 
-          // for (const music of newMusicTagList) {
-          //   await prisma.musicTag.create({
-          //     data: {
-          //       id: music.id,
-          //       genreId: genreId,
-          //       musicId: music.musicId as number,
-          //       tagName: music.musicTag,
-          //       tagId: music.seq,
-          //     },
-          //   });
-          // }
-        });
+            // for (const music of newMusicTagList) {
+            //   await prisma.musicTag.create({
+            //     data: {
+            //       id: music.id,
+            //       genreId: genreId,
+            //       musicId: music.musicId as number,
+            //       tagName: music.musicTag,
+            //       tagId: music.seq,
+            //     },
+            //   });
+            // }
+          },
+        );
       }
 
       const allMusicList = await this.searchMusic({
