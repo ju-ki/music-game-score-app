@@ -34,11 +34,8 @@ export class SongsService {
       // 新規楽曲がある場合のみ追加処理を行う
       if (newMusic.length) {
         await this.prisma.$transaction(async (prisma) => {
-          const newMusicMetaList: any[] = [];
-          // const newMusicTagList: any[] = [];
-
-          for (const music of newMusic) {
-            await prisma.music.create({
+          const createMusicPromises = newMusic.map((music) => {
+            return prisma.music.create({
               data: {
                 id: music.id,
                 name: music.title,
@@ -47,16 +44,18 @@ export class SongsService {
                 releasedAt: new Date(music.releasedAt),
               },
             });
-          }
+          });
+
+          await Promise.all(createMusicPromises);
 
           // MusicDifficultiesの追加
           const responseDifficulties = await axios.get(this.config.get('META_MUSIC_URL'));
-          newMusicMetaList.push(
-            ...responseDifficulties.data.filter((music) => newMusic.some((newMeta) => newMeta.id === music.musicId)),
+          const newMusicMetaList = responseDifficulties.data.filter((music) =>
+            newMusic.some((newMeta) => newMeta.id === music.musicId),
           );
 
-          for (const music of newMusicMetaList) {
-            await prisma.metaMusic.create({
+          const createMetaMusicPromises = newMusicMetaList.map((music) => {
+            return prisma.metaMusic.create({
               data: {
                 id: music.id.toString(),
                 genreId: genreId,
@@ -66,7 +65,9 @@ export class SongsService {
                 musicDifficulty: music.musicDifficulty as string,
               },
             });
-          }
+          });
+
+          await Promise.all(createMetaMusicPromises);
 
           // MusicTagの追加
           // const responseTags = await axios.get(this.config.get('MUSIC_TAG_URL'));
