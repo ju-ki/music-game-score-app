@@ -7,3 +7,15 @@ export class searchWords {
   page?: number;
   isInfinityScroll: string;
 }
+
+export class EditScoreDto {
+  genreId: number;
+  metaMusic: MetaMusicDto[];
+}
+
+export class MetaMusicDto {
+  id: string;
+  musicId: number;
+  musicDifficulty: string;
+  totalNoteCount: number;
+}
