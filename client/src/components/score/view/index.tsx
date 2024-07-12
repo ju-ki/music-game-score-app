@@ -14,7 +14,7 @@ const ScoresList = () => {
   const [searchFromDate, setSearchFromDate] = useState<string | undefined>('');
   const [searchToDate, setSearchToDate] = useState<string | undefined>('');
   const [scoreList, setScoreList] = useState<ScoreType[]>([]);
-  const [groupedScores, setGroupedScores] = useState<Record<string, ScoreType[]>>([]);
+  const [groupedScores, setGroupedScores] = useState<Record<string, ScoreType[]> | null>(null);
   const { currentGenre } = useGenre();
   useEffect(() => {
     getScoreList();
@@ -157,69 +157,70 @@ const ScoresList = () => {
               </div>
             </div>
           </div>
-          {Object.entries(groupedScores).map(([date, scores]) => (
-            <div className='my-6' key={date}>
-              <h2 className='text-xl font-semibold my-4'>{new Date(date).toLocaleDateString('sv-SE')}</h2>
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-                {scores.map((score: ScoreType) => (
-                  <Link
-                    key={score.id}
-                    to={`/score/${score.musicId}/${score.musicDifficulty}`}
-                    className='text-lg font-semibold mb-2'
-                  >
-                    <div key={score.id} className='bg-white shadow-md rounded-lg p-4'>
-                      <h2 className='text-lg font-semibold mb-2'>
-                        {score.music.name} ({score.musicDifficulty})
-                      </h2>
-                      <p className='text-gray-600 mb-2'>
-                        {new Date(score.createdAt).toLocaleString(undefined, {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                        })}
-                      </p>
+          {groupedScores &&
+            Object.entries(groupedScores).map(([date, scores]) => (
+              <div className='my-6' key={date}>
+                <h2 className='text-xl font-semibold my-4'>{new Date(date).toLocaleDateString('sv-SE')}</h2>
+                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+                  {scores.map((score: ScoreType) => (
+                    <Link
+                      key={score.id}
+                      to={`/score/${score.musicId}/${score.musicDifficulty}`}
+                      className='text-lg font-semibold mb-2'
+                    >
+                      <div key={score.id} className='bg-white shadow-md rounded-lg p-4'>
+                        <h2 className='text-lg font-semibold mb-2'>
+                          {score.music.name} ({score.musicDifficulty})
+                        </h2>
+                        <p className='text-gray-600 mb-2'>
+                          {new Date(score.createdAt).toLocaleString(undefined, {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                          })}
+                        </p>
 
-                      <div className='flex flex-col'>
-                        <div className='flex justify-between mb-1'>
-                          <span className='font-semibold'>TotalNoteCount</span>
-                          <span>{score.totalNoteCount}</span>
-                        </div>
-                        {currentGenre === 2 && (
-                          <>
-                            <div className='flex justify-between mb-1'>
-                              <span className='font-semibold'>PerfectPlus:</span>
-                              <span>{score.perfectPlusCount || 0}</span>
-                            </div>
-                          </>
-                        )}
-                        <div className='flex justify-between mb-1'>
-                          <span className='font-semibold'>Perfect:</span>
-                          <span>{score.perfectCount}</span>
-                        </div>
-                        <div className='flex justify-between mb-1'>
-                          <span className='font-semibold'>Great:</span>
-                          <span>{score.greatCount}</span>
-                        </div>
-                        <div className='flex justify-between mb-1'>
-                          <span className='font-semibold'>Good:</span>
-                          <span>{score.goodCount}</span>
-                        </div>
-                        <div className='flex justify-between mb-1'>
-                          <span className='font-semibold'>Bad:</span>
-                          <span>{score.badCount}</span>
-                        </div>
-                        <div className='flex justify-between'>
-                          <span className='font-semibold'>Miss:</span>
-                          <span>{score.missCount}</span>
+                        <div className='flex flex-col'>
+                          <div className='flex justify-between mb-1'>
+                            <span className='font-semibold'>TotalNoteCount</span>
+                            <span>{score.totalNoteCount}</span>
+                          </div>
+                          {currentGenre === 2 && (
+                            <>
+                              <div className='flex justify-between mb-1'>
+                                <span className='font-semibold'>PerfectPlus:</span>
+                                <span>{score.perfectPlusCount || 0}</span>
+                              </div>
+                            </>
+                          )}
+                          <div className='flex justify-between mb-1'>
+                            <span className='font-semibold'>Perfect:</span>
+                            <span>{score.perfectCount}</span>
+                          </div>
+                          <div className='flex justify-between mb-1'>
+                            <span className='font-semibold'>Great:</span>
+                            <span>{score.greatCount}</span>
+                          </div>
+                          <div className='flex justify-between mb-1'>
+                            <span className='font-semibold'>Good:</span>
+                            <span>{score.goodCount}</span>
+                          </div>
+                          <div className='flex justify-between mb-1'>
+                            <span className='font-semibold'>Bad:</span>
+                            <span>{score.badCount}</span>
+                          </div>
+                          <div className='flex justify-between'>
+                            <span className='font-semibold'>Miss:</span>
+                            <span>{score.missCount}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  ))}
+                </div>
+                <hr className='my-6' />
               </div>
-              <hr className='my-6' />
-            </div>
-          ))}
+            ))}
         </main>
       </div>
     </div>
