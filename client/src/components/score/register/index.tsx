@@ -101,7 +101,6 @@ const RegisterMusicScore = () => {
   });
 
   useEffect(() => {
-    console.log(errors);
     if (Object.keys(errors).length) {
       showToast('error', '入力項目に不備があります');
     }
