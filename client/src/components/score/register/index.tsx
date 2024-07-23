@@ -37,7 +37,7 @@ const RegisterMusicScore = () => {
       setSelectedMusic(scoreDetail.music);
       setValue('musicDifficulty', scoreDetail.musicDifficulty);
       setValue('scoreId', scoreDetail.id);
-      currentGenre === 2 && setValue('perfectPlusCount', scoreDetail.perfectPlusCount);
+      currentGenre === 2 && setValue('perfectPlusCount', scoreDetail.perfectPlusCount || 0);
     }
 
     if (musicId && musicList.length) {
@@ -52,8 +52,8 @@ const RegisterMusicScore = () => {
       musicDifficulty: z.string().nonempty(),
       perfectPlusCount:
         currentGenre === 2
-          ? z.number({ message: 'PerfectPlusは数値を入力してください' }).min(0, '無効な数値です')
-          : z.number().optional(),
+          ? z.coerce.number({ message: 'PerfectPlusは数値を入力してください' }).min(0, '無効な数値です')
+          : z.any(),
       perfectCount: z.number({ message: 'Perfectは数値を入力してください' }).min(0, '無効な数値です'),
       greatCount: z.number({ message: 'Greatは数値を入力してください' }).min(0, '無効な数値です'),
       goodCount: z.number({ message: 'Goodは数値を入力してください' }).min(0, '無効な数値です'),
@@ -101,6 +101,7 @@ const RegisterMusicScore = () => {
   });
 
   useEffect(() => {
+    console.log(errors);
     if (Object.keys(errors).length) {
       showToast('error', '入力項目に不備があります');
     }
@@ -482,7 +483,9 @@ const RegisterMusicScore = () => {
                   className='mb-4 p-2 rounded border border-gray-300 w-full'
                 />
                 {errors.perfectPlusCount && (
-                  <span className='text-red-500 mb-2 block'>{errors.perfectPlusCount.message}</span>
+                  <span className='text-red-500 mb-2 block'>
+                    {typeof errors.perfectPlusCount?.message === 'string' ? errors.perfectPlusCount.message : ''}
+                  </span>
                 )}
               </>
             )}
