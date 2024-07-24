@@ -41,7 +41,7 @@ export class AuthController {
       res.cookie('refresh_token', refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'lax',
         maxAge: 12 * 60 * 60 * 1000,
         domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : 'localhost',
       });
