@@ -43,7 +43,6 @@ export class AuthController {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 12 * 60 * 60 * 1000,
-        domain: process.env.NODE_ENV === 'production' ? '.onrender.com' : 'localhost',
       });
       res.json({
         user,
