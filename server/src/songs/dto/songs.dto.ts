@@ -19,3 +19,9 @@ export class MetaMusicDto {
   musicDifficulty: string;
   totalNoteCount: number;
 }
+
+export class SongReturnDto {
+  items: Record<string, any>;
+  nextPage: number | null;
+  unitProfile?: Record<string, any>;
+}
