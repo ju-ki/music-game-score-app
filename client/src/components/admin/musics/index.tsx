@@ -219,23 +219,25 @@ const AdminMusic = () => {
                         </TableCell>
                       ))}
                       <TableCell>
-                        {music.musicTag.map((tag) =>
-                          unitList.map((unit: UnitType) => {
-                            const adjustedUnitName =
-                              unit.unitName === 'piapro'
-                                ? 'vocaloid'
-                                : unit.unitName === 'light_sound'
-                                  ? 'light_music_club'
-                                  : unit.unitName;
-                            return (
-                              adjustedUnitName === tag.tagName && (
-                                <div key={unit.seq}>
-                                  {unit.unitProfileName} ({unit.seq})
-                                </div>
-                              )
-                            );
-                          }),
-                        )}
+                        {unitList &&
+                          unitList.length &&
+                          music.musicTag.map((tag) =>
+                            unitList.map((unit: UnitType) => {
+                              const adjustedUnitName =
+                                unit.unitName === 'piapro'
+                                  ? 'vocaloid'
+                                  : unit.unitName === 'light_sound'
+                                    ? 'light_music_club'
+                                    : unit.unitName;
+                              return (
+                                adjustedUnitName === tag.tagName && (
+                                  <div key={unit.seq}>
+                                    {unit.unitProfileName} ({unit.seq})
+                                  </div>
+                                )
+                              );
+                            }),
+                          )}
                       </TableCell>
                     </TableRow>
                   ))}

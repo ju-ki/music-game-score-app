@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { MetaMusicService } from 'meta-music/meta-music.service';
-import { EditScoreDto, searchWords } from './dto';
+import { EditScoreDto, searchWords, SongReturnDto } from './dto';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Music } from '@prisma/client';
 
 @Injectable({})
 export class SongsService {
@@ -12,6 +14,7 @@ export class SongsService {
     private config: ConfigService,
     private prisma: PrismaService,
     private metaMusicService: MetaMusicService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
   //これを定期的に実行できるようにした(DBが更新されたらみたいな感じ)
   async fetchAllSongs(params: { genreId: number }) {
@@ -211,10 +214,6 @@ export class SongsService {
     }
   }
 
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
   async getDetailMusic(genreId, musicId) {
     const music = await this.prisma.music.findUnique({
       where: {
@@ -232,7 +231,7 @@ export class SongsService {
   }
 
   //楽曲の検索
-  async searchMusic(query: searchWords) {
+  async searchMusic(query: searchWords): Promise<SongReturnDto> {
     let tagId: number = query.musicTag;
     if (typeof tagId !== 'number') {
       tagId = Number.parseInt(tagId);
@@ -254,6 +253,17 @@ export class SongsService {
 
     if (isInfinityScroll) {
       skipAmount = query.page * pageSize;
+    }
+    const cacheKey = 'cache-' + genreId;
+    if (!query.title) {
+      const cachedMusic: Music = await this.cacheManager.get(cacheKey);
+      if (cachedMusic) {
+        console.log('キャッシュを利用します');
+        return {
+          items: cachedMusic,
+          nextPage: null,
+        };
+      }
     }
 
     const searchedMusicList = await this.prisma.music.findMany({
@@ -306,6 +316,7 @@ export class SongsService {
         // },
       },
     });
+    await this.cacheManager.set(cacheKey, searchedMusicList, 20000);
 
     if (page === 0) {
       const unitProfile = await this.metaMusicService.getUnitProfile();
