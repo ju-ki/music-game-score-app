@@ -19,6 +19,7 @@ import { AuthController } from './auth/auth.controller';
 import { JwtService } from '@nestjs/jwt';
 import { UserController } from './user/user.controller';
 import { MetaMusicController } from './meta-music/meta-music.controller';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { MetaMusicController } from './meta-music/meta-music.controller';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    CacheModule.register(),
   ],
   controllers: [
     AppController,
