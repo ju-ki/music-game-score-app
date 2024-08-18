@@ -309,14 +309,15 @@ const RegisterMusicScore = () => {
     setValue('goodCount', 0);
     setValue('badCount', 0);
     setValue('missCount', 0);
+    autoFillOutRemainScore();
   };
 
   const onClickAllPerfect = () => {
-    setValue('perfectCount', watchedTotalNoteCount);
     setValue('greatCount', 0);
     setValue('goodCount', 0);
     setValue('badCount', 0);
     setValue('missCount', 0);
+    autoFillOutRemainScore();
   };
 
   const onClickFillOutZero = () => {
@@ -351,6 +352,64 @@ const RegisterMusicScore = () => {
     setValue('goodCount', NaN);
     setValue('badCount', NaN);
     setValue('missCount', NaN);
+  };
+
+  const autoFillOutRemainScore = () => {
+    if (currentGenre === 1) {
+      const filledFields = Object.values([
+        getValues('perfectCount'),
+        getValues('greatCount'),
+        getValues('goodCount'),
+        getValues('badCount'),
+        getValues('missCount'),
+      ]);
+      const count = filledFields.reduce((accumulator, currentValue) => {
+        const numericValue = Number(currentValue);
+        return accumulator + (isNaN(numericValue) ? 0 : numericValue);
+      }, 0);
+
+      const remainNoteCount = getValues('totalNoteCount') - count;
+
+      if (filledFields.filter((val) => isNaN(val)).length === 1)
+        filledFields.forEach((score, idx) => {
+          if (Number.isNaN(score) && idx == 0) {
+            setValue('perfectCount', remainNoteCount);
+          }
+          if (Number.isNaN(score) && idx == 1) {
+            setValue('greatCount', remainNoteCount);
+          }
+        });
+    }
+    if (currentGenre === 2) {
+      const filledFields = Object.values([
+        getValues('perfectPlusCount'),
+        getValues('perfectCount'),
+        getValues('greatCount'),
+        getValues('goodCount'),
+        getValues('badCount'),
+        getValues('missCount'),
+      ]);
+
+      const count = filledFields.reduce((accumulator, currentValue) => {
+        const numericValue = Number(currentValue);
+        return accumulator + (isNaN(numericValue) ? 0 : numericValue);
+      }, 0);
+
+      const remainNoteCount = getValues('totalNoteCount') - count;
+
+      if (filledFields.filter((val) => isNaN(val)).length === 1)
+        filledFields.forEach((score, idx) => {
+          if (Number.isNaN(score) && idx == 0) {
+            setValue('perfectPlusCount', remainNoteCount);
+          }
+          if (Number.isNaN(score) && idx == 1) {
+            setValue('perfectCount', remainNoteCount);
+          }
+          if (Number.isNaN(score) && idx == 2) {
+            setValue('greatCount', remainNoteCount);
+          }
+        });
+    }
   };
 
   const CustomToastWithLink = (newScore: ScoreType) => (
