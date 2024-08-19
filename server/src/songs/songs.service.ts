@@ -254,8 +254,9 @@ export class SongsService {
     if (isInfinityScroll) {
       skipAmount = query.page * pageSize;
     }
+
     const cacheKey = 'cache-' + genreId;
-    if (!query.title) {
+    if (!query.title && !isInfinityScroll) {
       const cachedMusic: Music = await this.cacheManager.get(cacheKey);
       if (cachedMusic) {
         console.log('キャッシュを利用します');
@@ -316,7 +317,10 @@ export class SongsService {
         // },
       },
     });
-    await this.cacheManager.set(cacheKey, searchedMusicList, 20000);
+
+    if (!isInfinityScroll) {
+      await this.cacheManager.set(cacheKey, searchedMusicList, 20000);
+    }
 
     if (page === 0) {
       const unitProfile = await this.metaMusicService.getUnitProfile();
