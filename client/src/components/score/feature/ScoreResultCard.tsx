@@ -42,14 +42,14 @@ const ScoreResultCard = (params: { score: ScoreType; index: number }) => {
                 <>
                   <RainbowStar />
                   <Typography variant='h6' component='div' ml={1}>
-                    All Perfect
+                    All Perfect <span>({new Date(score.createdAt).toLocaleDateString('sv-SE')})</span>
                   </Typography>
                 </>
               ) : isFullComb ? (
                 <>
                   <Whatshot color={'error'} />
                   <Typography variant='h6' component='div' ml={1}>
-                    Full Comb
+                    Full Comb <span>({new Date(score.createdAt).toLocaleDateString('sv-SE')})</span>
                   </Typography>
                 </>
               ) : (
@@ -58,7 +58,7 @@ const ScoreResultCard = (params: { score: ScoreType; index: number }) => {
                   {index === 1 && <EmojiEmotions color='secondary' />}
                   {index === 2 && <InsertEmoticon color='action' />}
                   <Typography variant='h6' component='div' ml={1}>
-                    Rank {index + 1}
+                    Rank {index + 1} <span>({new Date(score.createdAt).toLocaleDateString('sv-SE')})</span>
                   </Typography>
                 </>
               )}
