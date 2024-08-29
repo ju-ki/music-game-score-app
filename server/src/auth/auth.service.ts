@@ -88,7 +88,8 @@ export class AuthService {
       };
       return response;
     } catch (error) {
-      throw new Error('Failed to retrieve access token:' + error.response.data);
+      console.error(error);
+      throw new Error('Failed to retrieve access token:');
     }
   }
 
