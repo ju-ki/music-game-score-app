@@ -14,6 +14,7 @@ import { useGenre } from '../../store/useGenre';
 import { useScoreDetail } from '../../../services/score/api';
 import { showToast } from '../../common/Toast';
 import { toast } from 'react-toastify';
+import { useDifficulty } from '../../store/useDifficulty';
 
 const RegisterMusicScore = () => {
   const { user } = useUserStore();
@@ -21,14 +22,14 @@ const RegisterMusicScore = () => {
   const [selectedMusic, setSelectedMusic] = useState<MusicType | null>(null);
   const [registerConsecutively, setRegisterConsecutively] = useState<boolean>(true);
   const { currentGenre } = useGenre();
+  const { currentDifficulty } = useDifficulty();
   const [difficultyList, setDifficultyList] = useState<string[]>([]);
   const [musicList, setMusicList] = useState<MusicType[]>([]);
   const { scoreDetail } = useScoreDetail({ scoreId: scoreId, userId: user?.id });
 
   useEffect(() => {
+    //スコア情報がある場合
     if (scoreDetail && scoreDetail.music && musicList.length) {
-      console.log(scoreDetail);
-
       setValue('perfectCount', scoreDetail.perfectCount);
       setValue('greatCount', scoreDetail.greatCount);
       setValue('goodCount', scoreDetail.goodCount);
@@ -126,6 +127,10 @@ const RegisterMusicScore = () => {
       }
       if (musicDifficulty) {
         setValue('musicDifficulty', musicDifficulty);
+      }
+
+      if (currentDifficulty) {
+        setValue('musicDifficulty', currentDifficulty.difficulty);
       }
     } catch (err) {
       console.log(err);
