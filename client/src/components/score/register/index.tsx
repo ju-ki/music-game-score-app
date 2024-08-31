@@ -14,6 +14,7 @@ import { useGenre } from '../../store/useGenre';
 import { useScoreDetail } from '../../../services/score/api';
 import { showToast } from '../../common/Toast';
 import { toast } from 'react-toastify';
+import { useDifficulty } from '../../store/useDifficulty';
 
 const RegisterMusicScore = () => {
   const { user } = useUserStore();
@@ -21,11 +22,13 @@ const RegisterMusicScore = () => {
   const [selectedMusic, setSelectedMusic] = useState<MusicType | null>(null);
   const [registerConsecutively, setRegisterConsecutively] = useState<boolean>(true);
   const { currentGenre } = useGenre();
+  const { currentDifficulty } = useDifficulty();
   const [difficultyList, setDifficultyList] = useState<string[]>([]);
   const [musicList, setMusicList] = useState<MusicType[]>([]);
   const { scoreDetail } = useScoreDetail({ scoreId: scoreId, userId: user?.id });
 
   useEffect(() => {
+    //スコア情報がある場合
     if (scoreDetail && scoreDetail.music && musicList.length) {
       setValue('perfectCount', scoreDetail.perfectCount);
       setValue('greatCount', scoreDetail.greatCount);
@@ -37,6 +40,7 @@ const RegisterMusicScore = () => {
       setSelectedMusic(scoreDetail.music);
       setValue('musicDifficulty', scoreDetail.musicDifficulty);
       setValue('scoreId', scoreDetail.id);
+      setValue('date', new Date(scoreDetail.createdAt).toLocaleDateString('sv-SE'));
       currentGenre === 2 && setValue('perfectPlusCount', scoreDetail.perfectPlusCount || 0);
     }
 
@@ -47,6 +51,7 @@ const RegisterMusicScore = () => {
 
   const schema = z
     .object({
+      date: z.string().optional(),
       scoreId: z.string().optional(),
       musicId: z.number({ message: '曲を選択してください' }).min(1, '曲を選択してください'),
       musicDifficulty: z.string().nonempty(),
@@ -122,6 +127,10 @@ const RegisterMusicScore = () => {
       }
       if (musicDifficulty) {
         setValue('musicDifficulty', musicDifficulty);
+      }
+
+      if (currentDifficulty) {
+        setValue('musicDifficulty', currentDifficulty.difficulty);
       }
     } catch (err) {
       console.log(err);
@@ -495,6 +504,12 @@ const RegisterMusicScore = () => {
         <main className='p-4'>
           <h1 className='text-2xl font-bold mb-4'>スコア登録</h1>
           <form onSubmit={handleSubmit(onSubmit)} className='p-4 bg-white shadow-md rounded-md'>
+            <input
+              type='date'
+              {...register('date')}
+              className='mb-4 p-2 rounded border border-gray-300 w-full'
+              defaultValue={new Date().toLocaleDateString('sv-SE')}
+            />
             <input type='hidden' value={scoreId} {...register('scoreId', { required: false })} />
             <div>
               <Autocomplete

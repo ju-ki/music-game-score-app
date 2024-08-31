@@ -136,6 +136,13 @@ export class ScoresService {
 
   async postNewScore(post: postScoreType) {
     const metaMusic = await this.metaMusicService.getMetaMusic(post.musicId, post.genreId, post.musicDifficulty);
+    let date: Date;
+    if (post.date) {
+      date = new Date(post.date);
+    } else {
+      date = new Date();
+    }
+
     const newScore = await this.prisma.scores.upsert({
       where: {
         id: post.scoreId || '',
@@ -149,6 +156,7 @@ export class ScoresService {
         badCount: post.badCount,
         missCount: post.missCount,
         musicDifficulty: post.musicDifficulty,
+        createdAt: date,
       },
       create: {
         musicId: post.musicId,
@@ -163,6 +171,7 @@ export class ScoresService {
         userId: post.userId,
         metaMusicId: metaMusic.id,
         musicDifficulty: post.musicDifficulty,
+        createdAt: date,
       },
     });
 

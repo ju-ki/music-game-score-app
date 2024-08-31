@@ -11,6 +11,7 @@ export class postScoreType {
   missCount: number;
   userId: string;
   sortId: number;
+  date?: Date;
 }
 
 export class scoreListParams {
