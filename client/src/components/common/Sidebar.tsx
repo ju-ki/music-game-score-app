@@ -16,16 +16,32 @@ import { useUserStore } from '../store/userStore';
 import SettingsIcon from '@mui/icons-material/Settings';
 import useFetchGenres from '../hooks/useFetchGenres';
 import { useGenre } from '../store/useGenre';
+import { useDifficulty } from '../store/useDifficulty';
+import useSetDifficulties from '../hooks/useSetDifficulties';
+import { useEffect } from 'react';
 
 const Sidebar = () => {
   useFetchGenres();
+  useSetDifficulties();
   const { user, isLoggedIn } = useUserStore();
   const { genres, currentGenre, setCurrentGenre } = useGenre();
+  const { difficulties, currentDifficulty, setCurrentDifficulty, loadCurrentDifficulty } = useDifficulty();
   const location = useLocation();
   const params = useParams();
 
+  useEffect(() => {
+    loadCurrentDifficulty(currentGenre);
+  }, [currentGenre]);
+
   const handleChange = (event: SelectChangeEvent<number>) => {
     setCurrentGenre(event.target.value as number);
+  };
+
+  const handleChangeDifficulty = (event: SelectChangeEvent<number>) => {
+    const targetDifficulty = difficulties.find((difficulty) => difficulty.id === event.target.value);
+    if (targetDifficulty) {
+      setCurrentDifficulty(targetDifficulty);
+    }
   };
   return (
     <div className='w-64 h-full shadow-md bg-white fixed flex flex-col'>
@@ -89,7 +105,28 @@ const Sidebar = () => {
               </NavLink>
             </List>
           </div>
-          <FormControl variant='outlined' className='px-3'>
+          <FormControl variant='outlined' className=''>
+            <InputLabel id='difficulty-select-label'>難易度</InputLabel>
+            <Select
+              labelId='difficulty-select-label'
+              value={
+                currentDifficulty
+                  ? difficulties.find((difficulty) => difficulty.difficulty === currentDifficulty.difficulty)?.id || ''
+                  : ''
+              }
+              onChange={handleChangeDifficulty}
+              label='難易度'
+              disabled={!!(location.pathname.split('/')[1] === 'my-list' && params.myListId)}
+            >
+              {difficulties.map((difficulty) => (
+                <MenuItem key={difficulty.id} value={difficulty.id}>
+                  {difficulty.difficulty}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <br className='my-4' />
+          <FormControl variant='outlined' className=''>
             <InputLabel id='genre-select-label'>Genre</InputLabel>
             <Select
               labelId='genre-select-label'
