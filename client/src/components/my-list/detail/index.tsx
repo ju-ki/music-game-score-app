@@ -2,70 +2,40 @@ import { useEffect, useState } from 'react';
 import Header from '../../common/Header';
 import Sidebar from '../../common/Sidebar';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import axiosClient from '../../../utils/axios';
-import { useUserStore } from '../../store/userStore';
 import { MyListType, RelationMyListType } from '../../../types/score';
 import MusicMyListModal from '../../modal';
 import { Button } from '@mui/material';
-import { z } from 'zod';
-import { useGenre } from '../../store/useGenre';
+import { useAddMusic, useDeleteMyList, useFetchMyList } from '../../hooks/useMyList';
+import { showToast } from '../../common/Toast';
+import { Id, toast } from 'react-toastify';
 
 const MyListDetail = () => {
-  const schema = z.object({
-    myListName: z.string().min(1, { message: 'マイリスト名は必須です' }),
-    selectedMusic: z
-      .array(
-        z.object({
-          id: z.number(),
-        }),
-      )
-      .nonempty({ message: '一つ以上の曲を選択してください' }),
-  });
-  type FormData = z.infer<typeof schema>;
   const { myListId } = useParams();
-  const { user } = useUserStore();
   const [musicDetail, setMusicDetail] = useState<MyListType>();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { currentGenre } = useGenre();
+  const [toastId, setToastId] = useState<Id | undefined>();
   const navigate = useNavigate();
+  const { myListDetail, isLoading } = useFetchMyList();
+  const { addMusic, updatedMyListDetail } = useAddMusic(setIsModalOpen);
+  const { deleteMyList } = useDeleteMyList();
 
   useEffect(() => {
-    if (myListId) {
-      getMyListDetail();
+    if (isLoading) {
+      setToastId(showToast('info', 'スコア情報取得中', { autoClose: false }));
+      return;
+    } else {
+      toast.dismiss(toastId);
     }
-  }, [myListId]);
+  }, [isLoading]);
 
-  async function getMyListDetail() {
-    try {
-      const response = await axiosClient.get(`${import.meta.env.VITE_APP_URL}/music-list/getMyList`, {
-        params: {
-          myListId: myListId,
-          userId: user?.id,
-          genreId: currentGenre,
-        },
-      });
-
-      setMusicDetail(response.data);
-    } catch (err) {
-      console.log(err);
+  useEffect(() => {
+    if (myListDetail) {
+      setMusicDetail(myListDetail);
     }
-  }
-
-  const addMusicToMyList = async (data: FormData) => {
-    try {
-      const musicIdList = data.selectedMusic.map((item) => item.id);
-      const response = await axiosClient.post(`${import.meta.env.VITE_APP_URL}/music-list/add`, {
-        musicListId: myListId,
-        selectedMusic: musicIdList,
-        userId: user?.id,
-        musicGenreId: currentGenre,
-      });
-      setMusicDetail(response.data);
-      setIsModalOpen(false);
-    } catch (err) {
-      console.log(err);
+    if (updatedMyListDetail) {
+      setMusicDetail(updatedMyListDetail);
     }
-  };
+  }, [myListDetail, updatedMyListDetail]);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -75,25 +45,11 @@ const MyListDetail = () => {
     setIsModalOpen(false);
   };
 
-  const deleteMyMusicList = async () => {
-    if (confirm('マイリストを削除します。\n削除後はデータの復元は行えません。\nよろしいですか?')) {
-      try {
-        const response = await axiosClient.delete(`${import.meta.env.VITE_APP_URL}/music-list`, {
-          params: {
-            musicListId: myListId,
-            userId: user?.id,
-            genreId: currentGenre,
-          },
-        });
-        console.log(response);
-        alert('マイリストの削除に成功しました');
-        navigate('/my-list');
-      } catch (err) {
-        alert('マイリストの削除に失敗しました');
-        console.log(err);
-      }
-    }
-  };
+  if (!myListId) {
+    showToast('error', '無効な操作がされました');
+    navigate('/my-list');
+    return;
+  }
 
   if (!musicDetail) {
     return;
@@ -111,17 +67,17 @@ const MyListDetail = () => {
             <MusicMyListModal
               isModalOpen={isModalOpen}
               handleCloseModal={handleCloseModal}
-              onSubmit={addMusicToMyList}
+              onSubmit={addMusic}
               defaultMusicList={musicDetail?.musics.map((obj) => obj.musicId)}
               myListName={musicDetail?.name}
             />
             <div className='flex items-center justify-between my-3 '>
-              <h1 className='text-2xl font-semibold mb-4'>{musicDetail?.name}</h1>
+              <h1 className='text-2xl font-semibold mb-4'>{myListDetail?.name}</h1>
               <div className='space-x-3'>
                 <Button onClick={handleOpenModal} variant='contained'>
                   マイリスト編集
                 </Button>
-                <Button onClick={() => deleteMyMusicList()} variant='contained' color='error'>
+                <Button onClick={() => deleteMyList()} variant='contained' color='error'>
                   マイリスト削除
                 </Button>
               </div>

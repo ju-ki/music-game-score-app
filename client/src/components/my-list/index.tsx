@@ -6,22 +6,10 @@ import axiosClient from '../../utils/axios';
 import { useUserStore } from '../store/userStore';
 import { Link } from 'react-router-dom';
 import { MyListType } from '../../types/score';
-import MusicMyListModal from '../modal';
-import { z } from 'zod';
+import MusicMyListModal, { FormData } from '../modal';
 import { useGenre } from '../store/useGenre';
 
 const MyList = () => {
-  const schema = z.object({
-    myListName: z.string().min(1, { message: 'マイリスト名は必須です' }),
-    selectedMusic: z
-      .array(
-        z.object({
-          id: z.number(),
-        }),
-      )
-      .nonempty({ message: '一つ以上の曲を選択してください' }),
-  });
-  type FormData = z.infer<typeof schema>;
   const { user } = useUserStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [musicList, setMusicList] = useState<MyListType[]>([]);
