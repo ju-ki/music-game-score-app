@@ -18,6 +18,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { fetchMusicList } from '../hooks/useMusicQuery';
 import { useGenre } from '../store/useGenre';
+import { showToast } from '../common/Toast';
 
 const schema = z.object({
   myListName: z.string().min(1, { message: 'マイリスト名は必須です' }),
@@ -27,9 +28,10 @@ const schema = z.object({
         id: z.number(),
       }),
     )
-    .nonempty({ message: '一つ以上の曲を選択してください' }),
+    .min(1, { message: '一つ以上の曲を選択してください' })
+    .max(10, { message: '一度に登録できる楽曲は10曲までです' }),
 });
-type FormData = z.infer<typeof schema>;
+export type FormData = z.infer<typeof schema>;
 
 type ModalType = {
   isModalOpen: boolean;
@@ -66,6 +68,13 @@ const MusicMyListModal = (props: ModalType) => {
     control,
     name: 'selectedMusic',
   });
+
+  useEffect(() => {
+    if (Object.keys(errors).length) {
+      showToast('error', '入力項目に不備があります');
+    }
+  }, [errors]);
+
   const selectedMusicList: SelectedMusicType[] = watch('selectedMusic');
   const getAllMusic = async () => {
     try {
@@ -76,6 +85,10 @@ const MusicMyListModal = (props: ModalType) => {
       console.log(err);
     }
   };
+
+  useEffect(() => {
+    console.log(errors);
+  }, [errors]);
 
   useEffect(() => {
     getAllMusic();
