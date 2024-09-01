@@ -127,9 +127,7 @@ const RegisterMusicScore = () => {
       }
       if (musicDifficulty) {
         setValue('musicDifficulty', musicDifficulty);
-      }
-
-      if (currentDifficulty) {
+      } else if (currentDifficulty) {
         setValue('musicDifficulty', currentDifficulty.difficulty);
       }
     } catch (err) {
